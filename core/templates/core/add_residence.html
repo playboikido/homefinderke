@@ -1,0 +1,625 @@
+{% extends 'base.html' %}
+
+{% block title %}Add a Residence — HomeFinder Kenya{% endblock %}
+
+{% block content %}
+
+<style>
+  /* ── Google Fonts ─────────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+  /* ── Design Tokens (matches dashboard) ───────────────────────── */
+  :root {
+    --c-primary:     #0F766E;
+    --c-primary-dk:  #0D5E58;
+    --c-secondary:   #14B8A6;
+    --c-accent:      #0369A1;
+    --c-bg:          #F0FDFA;
+    --c-fg:          #134E4A;
+    --c-surface:     #FFFFFF;
+    --c-muted:       #E8F0F3;
+    --c-border:      #99F6E4;
+    --c-text:        #1C4A47;
+    --c-subtle:      #5EAFA8;
+    --c-danger:      #DC2626;
+    --c-danger-bg:   #FEE2E2;
+
+    --font-body:     'Fira Sans', system-ui, sans-serif;
+    --font-mono:     'Fira Code', monospace;
+
+    --r-sm:   6px;
+    --r:      12px;
+    --r-lg:   18px;
+    --r-xl:   24px;
+    --r-full: 9999px;
+
+    --shadow-sm: 0 1px 3px rgba(15,118,110,0.08), 0 1px 2px rgba(15,118,110,0.04);
+    --shadow:    0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
+    --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
+    --ease: cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── Scope ──────────────────────────────────────────────────── */
+  .ar-wrap {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    min-height: 100vh;
+    color: var(--c-text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .ar-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────── */
+  .ar-hero {
+    background: linear-gradient(135deg, var(--c-fg) 0%, var(--c-primary) 60%, var(--c-secondary) 100%);
+    padding: 48px 24px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .ar-hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,184,166,.18), transparent 65%);
+    top: -210px; right: -160px;
+    pointer-events: none;
+  }
+  .ar-hero-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .ar-hero-eyebrow {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--c-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+  }
+  .ar-hero-title {
+    font-family: var(--font-mono);
+    font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .ar-hero-sub {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.9rem;
+    max-width: 460px;
+  }
+
+  /* ── Form Layout ──────────────────────────────────────────────── */
+  .ar-section {
+    margin-top: -28px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .ar-card {
+    background: var(--c-surface);
+    border-radius: var(--r-xl);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(153,246,228,0.4);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .ar-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 28px;
+    border-bottom: 1.5px solid var(--c-border);
+  }
+  .ar-card-num {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--c-primary);
+    color: #FFFFFF;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .ar-card-title {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--c-fg);
+  }
+  .ar-card-body {
+    padding: 24px 28px 28px;
+  }
+
+  /* ── Field groups ─────────────────────────────────────────────── */
+  .ar-field {
+    margin-bottom: 18px;
+  }
+  .ar-field:last-child { margin-bottom: 0; }
+
+  .ar-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .ar-row > .ar-field { margin-bottom: 0; }
+
+  .ar-card-body label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--c-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .ar-card-body input[type="text"],
+  .ar-card-body input[type="number"],
+  .ar-card-body input[type="email"],
+  .ar-card-body input[type="tel"],
+  .ar-card-body input[type="file"],
+  .ar-card-body textarea,
+  .ar-card-body select {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--c-text);
+    background: var(--c-bg);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--r);
+    padding: 11px 14px;
+    transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease);
+    box-sizing: border-box;
+  }
+  .ar-card-body textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  .ar-card-body input:focus,
+  .ar-card-body textarea:focus,
+  .ar-card-body select:focus {
+    outline: none;
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 3px rgba(15,118,110,0.12);
+  }
+  .ar-card-body input[type="file"] {
+    padding: 9px 14px;
+    font-size: 0.84rem;
+    background: var(--c-muted);
+    cursor: pointer;
+  }
+
+  .ar-hint {
+    font-size: 0.78rem;
+    color: var(--c-subtle);
+    margin-top: 5px;
+  }
+
+  /* CheckboxSelectMultiple list styling */
+  .ar-house-type-field ul {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .ar-house-type-field ul li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--c-bg);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--r);
+    cursor: pointer;
+  }
+  .ar-house-type-field ul li label {
+    margin: 0 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    color: var(--c-text) !important;
+    cursor: pointer;
+  }
+  .ar-house-type-field ul li input[type="checkbox"] {
+    margin: 0 !important;
+    accent-color: var(--c-primary);
+  }
+
+  /* ── Toggle / checkbox rows ──────────────────────────────────── */
+  .ar-toggle-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .ar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px;
+    background: var(--c-bg);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--r);
+    transition: border-color 180ms var(--ease), background 180ms var(--ease);
+  }
+  .ar-toggle:has(input:checked) {
+    border-color: var(--c-primary);
+    background: #CCFBF1;
+  }
+  .ar-toggle input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--c-primary);
+    cursor: pointer;
+    flex-shrink: 0;
+    margin: 0;
+  }
+  .ar-toggle label {
+    margin: 0 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    color: var(--c-text) !important;
+    cursor: pointer;
+  }
+
+  /* ── Errors ───────────────────────────────────────────────────── */
+  .ar-error-box {
+    background: var(--c-danger-bg);
+    border: 1.5px solid #FCA5A5;
+    color: var(--c-danger);
+    border-radius: var(--r-lg);
+    padding: 16px 20px;
+    margin: -8px 24px 24px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  .ar-field-error {
+    color: var(--c-danger);
+    font-size: 0.78rem;
+    margin-top: 5px;
+  }
+
+  /* ── Submit bar ───────────────────────────────────────────────── */
+  .ar-submit-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+  .ar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 28px;
+    border-radius: var(--r);
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border: none;
+    cursor: pointer;
+    background: var(--c-primary);
+    color: #FFFFFF;
+    transition: all 200ms var(--ease);
+  }
+  .ar-btn:hover {
+    background: var(--c-primary-dk);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+
+  @media (max-width: 600px) {
+    .ar-card-body { padding: 20px 20px 24px; }
+    .ar-card-head { padding: 18px 20px; }
+    .ar-row, .ar-toggle-grid { grid-template-columns: 1fr; }
+    .ar-hero { padding: 40px 20px 48px; }
+  }
+</style>
+
+<div class="ar-wrap">
+
+  <!-- Hero -->
+  <div class="ar-hero">
+    <div class="ar-hero-inner">
+      <div class="ar-hero-eyebrow">New Listing</div>
+      <h1 class="ar-hero-title">Add a Residence</h1>
+      <p class="ar-hero-sub">Help someone find a home by contributing residence information.</p>
+    </div>
+  </div>
+
+  <div class="ar-inner">
+    <div class="ar-section">
+
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% if form.errors %}
+        <div class="ar-error-box">
+          {{ form.errors }}
+        </div>
+        {% endif %}
+
+        <!-- 1. Basic Information -->
+        <div class="ar-card">
+          <div class="ar-card-head">
+            <div class="ar-card-num">1</div>
+            <div class="ar-card-title">Basic Information</div>
+          </div>
+          <div class="ar-card-body">
+            <div class="ar-field">
+              {{ form.name.label_tag }}
+              {{ form.name }}
+            </div>
+            <div class="ar-field">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                {{ form.description.label_tag }}
+                <button type="button" id="ai-improve-btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--c-primary); color: #fff; border: none; border-radius: 6px; cursor: pointer; display: none; align-items: center; gap: 4px; font-family: var(--font-body); font-weight: 600;">
+                  🧠 AI Improve
+                </button>
+              </div>
+              {{ form.description }}
+              <div id="ai-loading" style="display: none; font-size: 0.85rem; color: var(--c-primary); margin-top: 6px; font-weight: 500;">
+                Polishing description with AI...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Location Information -->
+        <div class="ar-card">
+          <div class="ar-card-head">
+            <div class="ar-card-num">2</div>
+            <div class="ar-card-title">Location Information</div>
+          </div>
+          <div class="ar-card-body">
+            <div class="ar-row" style="margin-bottom:18px;">
+              <div class="ar-field">
+                {{ form.county.label_tag }}
+                {{ form.county }}
+              </div>
+              <div class="ar-field">
+                {{ form.town.label_tag }}
+                {{ form.town }}
+              </div>
+            </div>
+            <div class="ar-field">
+              {{ form.plot_number.label_tag }}
+              {{ form.plot_number }}
+            </div>
+            <div class="ar-field">
+              {{ form.landmark.label_tag }}
+              {{ form.landmark }}
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Nearby Places -->
+        <div class="ar-card">
+          <div class="ar-card-head">
+            <div class="ar-card-num">3</div>
+            <div class="ar-card-title">Nearby Places</div>
+          </div>
+          <div class="ar-card-body">
+            <div class="ar-field">
+              {{ form.nearest_stage.label_tag }}
+              {{ form.nearest_stage }}
+            </div>
+            <div class="ar-row">
+              <div class="ar-field">
+                {{ form.nearby_school.label_tag }}
+                {{ form.nearby_school }}
+              </div>
+              <div class="ar-field">
+                {{ form.nearby_hospital.label_tag }}
+                {{ form.nearby_hospital }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Contact, Rent & Deposit -->
+        <div class="ar-card">
+          <div class="ar-card-head">
+            <div class="ar-card-num">4</div>
+            <div class="ar-card-title">Contact, Rent &amp; Deposit</div>
+          </div>
+          <div class="ar-card-body">
+            <div class="ar-row" style="margin-bottom:18px;">
+              <div class="ar-field" style="grid-column: span 2;">
+                {{ form.phone_number.label_tag }}
+                {{ form.phone_number }}
+                {% if form.phone_number.errors %}
+                  <div class="ar-field-error">{{ form.phone_number.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="ar-row" style="margin-bottom:18px;">
+              <div class="ar-field">
+                {{ form.rent_price.label_tag }}
+                {{ form.rent_price }}
+                {% if form.rent_price.errors %}
+                  <div class="ar-field-error">{{ form.rent_price.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="ar-field">
+                {{ form.deposit_amount.label_tag }}
+                {{ form.deposit_amount }}
+                {% if form.deposit_amount.errors %}
+                  <div class="ar-field-error">{{ form.deposit_amount.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="ar-field ar-house-type-field">
+              <label for="{{ form.house_type.id_for_label }}">House Type</label>
+              {{ form.house_type }}
+              {% if form.house_type.errors %}
+                <div class="ar-field-error">{{ form.house_type.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. GPS Coordinates -->
+        <div class="ar-card">
+          <div class="ar-card-head">
+            <div class="ar-card-num">5</div>
+            <div class="ar-card-title">GPS Coordinates</div>
+          </div>
+          <div class="ar-card-body">
+            <div class="ar-row">
+              <div class="ar-field">
+                {{ form.latitude.label_tag }}
+                {{ form.latitude }}
+              </div>
+              <div class="ar-field">
+                {{ form.longitude.label_tag }}
+                {{ form.longitude }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. Utilities -->
+        <div class="ar-card">
+          <div class="ar-card-head">
+            <div class="ar-card-num">6</div>
+            <div class="ar-card-title">Utilities</div>
+          </div>
+          <div class="ar-card-body">
+            <div class="ar-toggle-grid">
+              <div class="ar-toggle">
+                {{ form.water_available }}
+                {{ form.water_available.label_tag }}
+              </div>
+              <div class="ar-toggle">
+                {{ form.fibre_available }}
+                {{ form.fibre_available.label_tag }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 7. Security -->
+        <div class="ar-card">
+          <div class="ar-card-head">
+            <div class="ar-card-num">7</div>
+            <div class="ar-card-title">Security</div>
+          </div>
+          <div class="ar-card-body">
+            <div class="ar-toggle-grid">
+              <div class="ar-toggle">
+                {{ form.gated_community }}
+                {{ form.gated_community.label_tag }}
+              </div>
+              <div class="ar-toggle">
+                {{ form.cctv_available }}
+                {{ form.cctv_available.label_tag }}
+              </div>
+              <div class="ar-toggle">
+                {{ form.security_guard }}
+                {{ form.security_guard.label_tag }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. Residence Photos -->
+        <div class="ar-card">
+          <div class="ar-card-head">
+            <div class="ar-card-num">8</div>
+            <div class="ar-card-title">Residence Photos</div>
+          </div>
+          <div class="ar-card-body">
+            <div class="ar-field">
+              {{ form.front_image.label_tag }}
+              {{ form.front_image }}
+            </div>
+            <div class="ar-field">
+              {{ form.vacancy_poster.label_tag }}
+              {{ form.vacancy_poster }}
+            </div>
+            <div class="ar-field">
+              <label>Additional Gallery Photos</label>
+              <input type="file" name="gallery_images" multiple>
+              <div class="ar-hint">You can select multiple photos at once.</div>
+            </div>
+
+            {% if form.non_field_errors %}
+              <div class="ar-field-error">{{ form.non_field_errors }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="ar-submit-bar">
+          <button type="submit" class="ar-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+            Submit Residence
+          </button>
+        </div>
+
+      </form>
+
+    </div><!-- /.ar-section -->
+  </div><!-- /.ar-inner -->
+</div><!-- /.ar-wrap -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const aiBtn = document.getElementById('ai-improve-btn');
+    const descField = document.querySelector('textarea[name="description"]');
+    const loadingDiv = document.getElementById('ai-loading');
+
+    if (aiBtn && descField) {
+        aiBtn.addEventListener('click', function() {
+            const currentText = descField.value.trim();
+            if (!currentText) {
+                alert('Please type a draft description first before using AI Improve.');
+                return;
+            }
+
+            aiBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+
+            fetch('{% url "ai_improve_description" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ description: currentText })
+            })
+            .then(res => res.json())
+            .then(data => {
+                aiBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+                if (data.improved_text) {
+                    descField.value = data.improved_text;
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(err => {
+                aiBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+                alert('An error occurred while calling the AI service.');
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

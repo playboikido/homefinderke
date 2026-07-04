@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .social-login-wrapper {
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+    }
+
+    .social-login-card {
+        width: 100%;
+        max-width: 500px;
+        background: #fff;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,.1);
+        text-align: center;
+    }
+
+    .social-login-card h2 {
+        color: #0d6efd;
+        margin-bottom: 20px;
+    }
+
+    .social-login-card p {
+        color: #555;
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+
+    .google-icon {
+        font-size: 60px;
+        margin-bottom: 20px;
+    }
+
+    .continue-btn {
+        width: 100%;
+        background: #0d6efd;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .continue-btn:hover {
+        background: #0b5ed7;
+    }
+
+    .cancel-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #666;
+        text-decoration: none;
+    }
+
+    .cancel-link:hover {
+        color: #0d6efd;
+    }
+
+    /* reCAPTCHA blending */
+    .captcha-wrapper {
+        margin-top: 18px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .g-recaptcha {
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+        transition: border-color 0.2s;
+    }
+
+    .g-recaptcha:focus-within {
+        border-color: #0d6efd;
+    }
+</style>
+
+<div class="social-login-wrapper">
+
+    <div class="social-login-card">
+
+        <div class="google-icon">
+            🔐
+        </div>
+
+        <h2>Continue with Google</h2>
+
+        <p>
+            You are about to sign in to <strong>HomeFinderKE</strong>
+            using your Google account.
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="captcha-wrapper">
+                {{ form.captcha }}
+            </div>
+
+            <button class="continue-btn" type="submit">
+                Continue with Google
+            </button>
+        </form>
+
+        <a href="/" class="cancel-link">
+            Cancel and return home
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

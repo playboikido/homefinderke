@@ -1,0 +1,127 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Account Locked | HomeFinder</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+
+background:linear-gradient(135deg,#0f172a,#1e293b);
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+padding:20px;
+
+}
+
+.card{
+
+width:100%;
+max-width:520px;
+background:white;
+border-radius:18px;
+padding:45px;
+text-align:center;
+box-shadow:0 25px 60px rgba(0,0,0,.35);
+
+}
+
+.icon{
+
+font-size:70px;
+margin-bottom:20px;
+
+}
+
+h1{
+
+color:#dc2626;
+margin-bottom:15px;
+
+}
+
+p{
+
+color:#555;
+font-size:17px;
+line-height:1.7;
+margin-bottom:30px;
+
+}
+
+.btn{
+
+display:inline-block;
+padding:14px 30px;
+background:#2563eb;
+color:white;
+text-decoration:none;
+border-radius:8px;
+font-weight:600;
+transition:.3s;
+
+}
+
+.btn:hover{
+
+background:#1d4ed8;
+
+}
+
+.note{
+
+margin-top:25px;
+font-size:14px;
+color:#888;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="icon">🔒</div>
+
+<h1>Account Temporarily Locked</h1>
+
+<p>
+
+For your security, too many unsuccessful login attempts were detected.
+
+Please wait a few minutes before trying again.
+
+</p>
+
+<a href="{% url 'home' %}" class="btn">
+
+Back to Home
+
+</a>
+
+<div class="note">
+
+You can continue browsing available homes as a guest.
+
+</div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ owner.username }}
+{% endblock %}
+
+{% block content %}
+
+<h1>👤 {{ owner.username }}</h1>
+
+{% if profile.profile_picture %}
+
+    <img
+        src="{{ profile.profile_picture.url }}"
+        alt="{{ owner.username }}"
+        width="150"
+        style="
+            border-radius: 50%;
+            object-fit: cover;
+        "
+    >
+
+{% endif %}
+
+<p>
+    <strong>Phone:</strong>
+
+    {% if profile.phone_number %}
+        {{ profile.phone_number }}
+    {% else %}
+        Not provided
+    {% endif %}
+</p>
+
+<p>
+    <strong>Bio:</strong>
+</p>
+
+<p>
+    {% if profile.bio %}
+        {{ profile.bio }}
+    {% else %}
+        No bio available.
+    {% endif %}
+</p>
+
+<hr>
+
+<h2>
+    🏠 Apartments by {{ owner.username }}
+</h2>
+
+{% for residence in residences %}
+
+    <div
+        style="
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+        "
+    >
+
+        <h3>
+            <a href="{% url 'residence_detail' residence.id %}">
+                {{ residence.name }}
+            </a>
+        </h3>
+
+        <p>
+            {{ residence.town }},
+            {{ residence.county }}
+        </p>
+
+        <p>
+            KSh {{ residence.rent_price }}
+        </p>
+
+    </div>
+
+{% empty %}
+
+    <p>
+        No apartments available.
+    </p>
+
+{% endfor %}
+
+{% endblock %}

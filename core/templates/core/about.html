@@ -1,0 +1,742 @@
+{% extends 'base.html' %}
+
+{% block title %}About — HomeFinder Kenya{% endblock %}
+{% block meta_description %}Learn more about HomeFinder KE - Kenya's premier platform for finding verified rentals, houses, apartments, and connecting with roommates.{% endblock %}
+
+{% block content %}
+
+<style>
+  /* ── Google Fonts ─────────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+  /* ── Design Tokens (matches dashboard) ───────────────────────── */
+  :root {
+    --c-primary:     #0F766E;
+    --c-primary-dk:  #0D5E58;
+    --c-secondary:   #14B8A6;
+    --c-accent:      #0369A1;
+    --c-bg:          #F0FDFA;
+    --c-fg:          #134E4A;
+    --c-surface:     #FFFFFF;
+    --c-muted:       #E8F0F3;
+    --c-border:      #99F6E4;
+    --c-text:        #1C4A47;
+    --c-subtle:      #5EAFA8;
+    --c-danger:      #DC2626;
+
+    --font-body:     'Fira Sans', system-ui, sans-serif;
+    --font-mono:     'Fira Code', monospace;
+
+    --r-sm:   6px;
+    --r:      12px;
+    --r-lg:   18px;
+    --r-xl:   24px;
+    --r-full: 9999px;
+
+    --shadow-sm: 0 1px 3px rgba(15,118,110,0.08), 0 1px 2px rgba(15,118,110,0.04);
+    --shadow:    0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
+    --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
+    --ease: cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── Scope ──────────────────────────────────────────────────── */
+  .ab-wrap {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    min-height: 100vh;
+    color: var(--c-text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .ab-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+  }
+
+  /* ── Hero Banner ──────────────────────────────────────────────── */
+  .ab-hero {
+    background: linear-gradient(135deg, var(--c-fg) 0%, var(--c-primary) 60%, var(--c-secondary) 100%);
+    padding: 56px 24px 64px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  .ab-hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,184,166,.18), transparent 65%);
+    top: -220px; right: -180px;
+    pointer-events: none;
+  }
+  .ab-hero-inner {
+    max-width: 860px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .ab-hero-eyebrow {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--c-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+    font-family: var(--font-mono);
+  }
+  .ab-hero-title {
+    font-family: var(--font-mono);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.15;
+  }
+
+  /* ── Section ──────────────────────────────────────────────────── */
+  .ab-section {
+    margin-top: -32px;
+    position: relative;
+    z-index: 10;
+  }
+  .ab-card {
+    background: var(--c-surface);
+    border-radius: var(--r-xl);
+    padding: 36px 40px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(153,246,228,0.4);
+    margin-bottom: 24px;
+  }
+  .ab-card p {
+    font-size: 0.95rem;
+    line-height: 1.75;
+    color: var(--c-text);
+    margin: 0 0 16px;
+  }
+  .ab-card p:last-child { margin-bottom: 0; }
+
+  .ab-mission {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    text-align: center;
+    padding: 18px 22px;
+    background: var(--c-muted);
+    border: 1.5px dashed var(--c-border);
+    border-radius: var(--r-lg);
+    margin: 20px 0;
+  }
+
+  .ab-section-title {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 18px;
+  }
+  .ab-section-title::before {
+    content: '';
+    width: 4px; height: 18px;
+    background: var(--c-primary);
+    border-radius: 2px;
+    display: block;
+  }
+
+  /* ── Contact Card ─────────────────────────────────────────────── */
+  .ab-contact-card {
+    background: var(--c-surface);
+    border-radius: var(--r-xl);
+    padding: 36px 40px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(153,246,228,0.4);
+  }
+  .ab-contact-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 8px;
+  }
+  .ab-contact-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--r);
+    background: #CCFBF1;
+    color: var(--c-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .ab-contact-icon svg { width: 22px; height: 22px; }
+  .ab-contact-title {
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--c-fg);
+  }
+  .ab-contact-sub {
+    font-size: 0.875rem;
+    color: var(--c-subtle);
+    margin: 0 0 24px;
+    line-height: 1.6;
+  }
+
+  /* ── Form ─────────────────────────────────────────────────────── */
+  .ab-contact-card form p {
+    margin: 0 0 18px;
+  }
+  .ab-contact-card form label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--c-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .ab-contact-card form input[type="text"],
+  .ab-contact-card form input[type="email"],
+  .ab-contact-card form input[type="tel"],
+  .ab-contact-card form textarea,
+  .ab-contact-card form select {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--c-text);
+    background: var(--c-bg);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--r);
+    padding: 11px 14px;
+    transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease);
+    box-sizing: border-box;
+  }
+  .ab-contact-card form textarea {
+    min-height: 130px;
+    resize: vertical;
+  }
+  .ab-contact-card form input:focus,
+  .ab-contact-card form textarea:focus,
+  .ab-contact-card form select:focus {
+    outline: none;
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 3px rgba(15,118,110,0.12);
+  }
+
+  .ab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 26px;
+    border-radius: var(--r);
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border: none;
+    cursor: pointer;
+    background: var(--c-primary);
+    color: #FFFFFF;
+    transition: all 200ms var(--ease);
+  }
+  .ab-btn:hover {
+    background: var(--c-primary-dk);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+
+  /* ── NEW: Nairobi hero background image ──────────────────────── */
+  .ab-hero {
+    position: relative;
+    overflow: hidden;
+  }
+  .ab-hero-photo {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://images.unsplash.com/photo-1586768195-2c9ca2ea1e2c?auto=format&fit=crop&w=1800&q=80');
+    background-size: cover;
+    background-position: center 55%;
+    z-index: 0;
+  }
+  .ab-hero-photo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(13,78,74,0.88) 0%, rgba(15,118,110,0.75) 50%, rgba(3,105,161,0.65) 100%);
+    z-index: 1;
+  }
+  .ab-hero-inner { position: relative; z-index: 2; }
+
+  /* ── NEW: Story section ───────────────────────────────────────── */
+  .ab-story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  .ab-story-block {
+    background: #FFFFFF;
+    border-radius: 20px;
+    padding: 28px 28px 24px;
+    border: 1.5px solid #99F6E4;
+    box-shadow: 0 4px 12px rgba(15,118,110,0.07);
+    transition: all 250ms cubic-bezier(0.4,0,0.2,1);
+  }
+  .ab-story-block:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 0 2px #14B8A6, 0 10px 28px rgba(15,118,110,0.14);
+    border-color: #14B8A6;
+  }
+  .ab-story-icon {
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #CCFBF1, #99F6E4);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    color: #0F766E;
+    flex-shrink: 0;
+    transition: all 250ms;
+  }
+  .ab-story-block:hover .ab-story-icon {
+    background: linear-gradient(135deg, #0F766E, #14B8A6);
+    color: #FFFFFF;
+  }
+  .ab-story-block h3 {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #134E4A;
+    margin-bottom: 10px;
+  }
+  .ab-story-block p {
+    font-size: 0.875rem;
+    color: #5EAFA8;
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* ── NEW: Why Choose section ──────────────────────────────────── */
+  .ab-why-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .ab-why-card {
+    background: #FFFFFF;
+    border-radius: 18px;
+    padding: 26px 22px;
+    text-align: center;
+    border: 1.5px solid #99F6E4;
+    box-shadow: 0 2px 8px rgba(15,118,110,0.06);
+    transition: all 250ms cubic-bezier(0.4,0,0.2,1);
+  }
+  .ab-why-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 0 2px #14B8A6, 0 12px 30px rgba(15,118,110,0.15);
+    border-color: #14B8A6;
+  }
+  .ab-why-icon {
+    width: 56px; height: 56px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #CCFBF1, #99F6E4);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 14px;
+    color: #0F766E;
+    transition: all 250ms;
+  }
+  .ab-why-card:hover .ab-why-icon {
+    background: linear-gradient(135deg, #0F766E, #14B8A6);
+    color: #FFFFFF;
+  }
+  .ab-why-card h4 {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #134E4A;
+    margin-bottom: 8px;
+  }
+  .ab-why-card p {
+    font-size: 0.8rem;
+    color: #5EAFA8;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  /* ── NEW: Stats bar ───────────────────────────────────────────── */
+  .ab-stats-bar {
+    background: linear-gradient(135deg, #134E4A 0%, #0F766E 60%, #14B8A6 100%);
+    border-radius: 20px;
+    padding: 36px 32px;
+    margin-bottom: 24px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    text-align: center;
+  }
+  .ab-stat-num {
+    font-family: 'Fira Code', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .ab-stat-lbl {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.65);
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    font-weight: 600;
+  }
+
+  /* ── NEW: FAQ ─────────────────────────────────────────────────── */
+  .ab-faq-list { margin-bottom: 24px; }
+  .ab-faq-item {
+    background: #FFFFFF;
+    border: 1.5px solid #99F6E4;
+    border-radius: 14px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: all 200ms;
+  }
+  .ab-faq-item:hover { border-color: #14B8A6; }
+  .ab-faq-q {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #134E4A;
+    text-align: left;
+    gap: 12px;
+  }
+  .ab-faq-chevron {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: #CCFBF1;
+    color: #0F766E;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: transform 250ms, background 250ms;
+  }
+  .ab-faq-item.open .ab-faq-chevron {
+    transform: rotate(180deg);
+    background: #0F766E;
+    color: #FFFFFF;
+  }
+  .ab-faq-a {
+    display: none;
+    padding: 0 22px 18px;
+    font-size: 0.86rem;
+    color: #5EAFA8;
+    line-height: 1.7;
+    border-top: 1px solid #E8F8F6;
+    padding-top: 14px;
+  }
+  .ab-faq-item.open .ab-faq-a { display: block; }
+
+  /* ── NEW: Policy buttons row ─────────────────────────────────── */
+  .ab-policy-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .ab-policy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    font-family: 'Fira Code', monospace;
+    text-decoration: none;
+    border: 1.5px solid #99F6E4;
+    background: #FFFFFF;
+    color: #0F766E;
+    box-shadow: 0 2px 8px rgba(15,118,110,0.06);
+    transition: all 200ms cubic-bezier(0.4,0,0.2,1);
+  }
+  .ab-policy-btn:hover {
+    background: #0F766E;
+    color: #FFFFFF;
+    border-color: #0F766E;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15,118,110,0.25);
+  }
+  .ab-policy-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+  /* ── Policy Document Styling Extension ────────────────────────── */
+  .ab-legal-content h3 {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    margin: 20px 0 10px;
+  }
+  .ab-legal-content ul {
+    margin: 0 0 16px 20px;
+    padding: 0;
+  }
+  .ab-legal-content li {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--c-text);
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 700px) {
+    .ab-story-grid { grid-template-columns: 1fr; }
+    .ab-why-grid   { grid-template-columns: 1fr 1fr; }
+    .ab-stats-bar  { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 440px) {
+    .ab-why-grid  { grid-template-columns: 1fr; }
+    .ab-stats-bar { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+
+<div class="ab-wrap">
+
+  <div class="ab-hero">
+    <div class="ab-hero-photo"></div>
+    <div class="ab-hero-photo-overlay"></div>
+    <div class="ab-hero-inner">
+      <div class="ab-hero-eyebrow">About Us</div>
+      <h1 class="ab-hero-title">About HomeFinder KE</h1>
+    </div>
+  </div>
+
+  <div class="ab-inner">
+    <div class="ab-section">
+
+      <div class="ab-card">
+        <p>
+          HomeFinder KE is a community-driven platform that helps Kenyans
+          discover apartments and rental houses across Kenya.
+        </p>
+
+        <div class="ab-mission">
+          Find a Home. Help Someone Find Theirs.
+        </div>
+
+        <p>
+          The platform allows communities to contribute apartment information
+          to help others avoid broker fees and find houses more easily.
+        </p>
+      </div>
+
+      <div class="ab-contact-card" id="contact">
+        <div class="ab-contact-head">
+          <div class="ab-contact-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8V7l-3 2-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-9z"/><path d="M22 8l-10 7L2 8"/></svg>
+          </div>
+          <div class="ab-contact-title">Contact HomeFinder KE</div>
+        </div>
+        <p class="ab-contact-sub">
+          Have a question, suggestion, or need support?
+          Send us a message and we'll respond as soon as possible.
+        </p>
+
+        <form method="POST">
+          {% csrf_token %}
+          {{ form.as_p }}
+
+          <button type="submit" class="ab-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send Message
+          </button>
+        </form>
+      </div>
+
+    </div><div class="ab-section-title" style="margin-top:40px;margin-bottom:20px;">Our Story &amp; Inspiration</div>
+
+    <div class="ab-story-grid">
+      <div class="ab-story-block">
+        <div class="ab-story-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <h3>The Problem We Saw</h3>
+        <p>Finding a house in Kenya — especially in Nairobi — meant endless phone calls, broker fees, and wasted trips. People were spending weeks just to view a single listing, often arriving to find it already taken or misrepresented.</p>
+      </div>
+      <div class="ab-story-block">
+        <div class="ab-story-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h3>The Community Solution</h3>
+        <p>HomeFinder KE was born from the belief that Kenyans can help each other. Property owners list their spaces directly — no middlemen, no inflated broker fees. Tenants browse real listings with real photos and real contacts.</p>
+      </div>
+      <div class="ab-story-block">
+        <div class="ab-story-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <h3>What We Cover</h3>
+        <p>From bedsitters in Eastlands to apartments in Westlands, from Mombasa's coastline to Kisumu's lakeside — our listings span all 47 counties so every Kenyan can find a home that fits their life and budget.</p>
+      </div>
+      <div class="ab-story-block">
+        <div class="ab-story-icon">
+          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h3>Our Commitment</h3>
+        <p>Every listing on HomeFinder KE goes through a review process before it goes live. We verify that listings are genuine, prices are accurate, and contact details work — so you never waste a trip.</p>
+      </div>
+    </div>
+
+    <div class="ab-stats-bar">
+      <div>
+        <div class="ab-stat-num">500+</div>
+        <div class="ab-stat-lbl">Verified Listings</div>
+      </div>
+      <div>
+        <div class="ab-stat-num">47</div>
+        <div class="ab-stat-lbl">Counties Covered</div>
+      </div>
+      <div>
+        <div class="ab-stat-num">2K+</div>
+        <div class="ab-stat-lbl">Happy Tenants</div>
+      </div>
+      <div>
+        <div class="ab-stat-num">100%</div>
+        <div class="ab-stat-lbl">Free to Browse</div>
+      </div>
+    </div>
+
+    <div class="ab-section-title" style="margin-bottom:20px;">Why Choose HomeFinder KE</div>
+
+    <div class="ab-why-grid">
+      <div class="ab-why-card">
+        <div class="ab-why-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <h4>Secure &amp; Verified</h4>
+        <p>Every listing is reviewed before going live. No fake listings, no ghost landlords — just genuine homes.</p>
+      </div>
+      <div class="ab-why-card">
+        <div class="ab-why-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h4>Fast &amp; Easy</h4>
+        <p>Search, filter, and find your next home in minutes. No registration needed just to browse listings.</p>
+      </div>
+      <div class="ab-why-card">
+        <div class="ab-why-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        <h4>Zero Broker Fees</h4>
+        <p>Connect directly with property owners. No middlemen, no inflated fees — just honest listings.</p>
+      </div>
+      <div class="ab-why-card">
+        <div class="ab-why-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <h4>Community Powered</h4>
+        <p>Kenyans helping Kenyans. Our platform grows stronger with every listing shared by the community.</p>
+      </div>
+      <div class="ab-why-card">
+        <div class="ab-why-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        </div>
+        <h4>Works on Any Device</h4>
+        <p>Search from your phone, tablet, or computer. HomeFinder KE is fully responsive across all screens.</p>
+      </div>
+      <div class="ab-why-card">
+        <div class="ab-why-icon">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <h4>All 47 Counties</h4>
+        <p>Whether you're in Nairobi, Mombasa, Kisumu, or Nakuru — we have listings near you.</p>
+      </div>
+    </div>
+
+    <div class="ab-section-title" style="margin-bottom:16px;">Quick Links &amp; Navigation</div>
+    <div class="ab-policy-row">
+      <a href="/residences/" class="ab-policy-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Browse Residences
+      </a>
+      <a href="#contact" class="ab-policy-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.18 6.18l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        Contact Us
+      </a>
+      <a href="#faq" class="ab-policy-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        FAQ
+      </a>
+      <a href="/add-residence/" class="ab-policy-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        List a Property
+      </a>
+      <a href="{% url 'privacy_policy' %}" class="ab-policy-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Privacy Policy
+      </a>
+      <a href="{% url 'terms_of_service' %}" class="ab-policy-btn">
+        <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Terms of Service
+      </a>
+    </div>
+
+    <div class="ab-section-title" id="faq" style="margin-bottom:16px;">Frequently Asked Questions</div>
+    <div class="ab-faq-list">
+
+      <div class="ab-faq-item">
+        <button class="ab-faq-q" onclick="this.closest('.ab-faq-item').classList.toggle('open')">
+          How do I search for a house on HomeFinder KE?
+          <span class="ab-faq-chevron"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="ab-faq-a">Use the search bar on the homepage — type an estate or town name, pick your preferred house type, and click Search. You can also visit the Residences page and use the filters to narrow by county, price range, and amenities.</div>
+      </div>
+
+      <div class="ab-faq-item">
+        <button class="ab-faq-q" onclick="this.closest('.ab-faq-item').classList.toggle('open')">
+          Is HomeFinder KE free to use?
+          <span class="ab-faq-chevron"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="ab-faq-a">Yes — 100% free for tenants. You can browse, search, and contact property owners at no cost whatsoever. Property owners can also list their residences for free. There are no hidden broker fees on this platform.</div>
+      </div>
+
+      <div class="ab-faq-item">
+        <button class="ab-faq-q" onclick="this.closest('.ab-faq-item').classList.toggle('open')">
+          How do I contact a property owner?
+          <span class="ab-faq-chevron"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="ab-faq-a">Open any listing and scroll to the contact section. You'll find the owner's phone number and you can call or message them directly — no middlemen involved. If you have an account you can also send messages through the platform.</div>
+      </div>
+
+      <div class="ab-faq-item">
+        <button class="ab-faq-q" onclick="this.closest('.ab-faq-item').classList.toggle('open')">
+          How do I list my property on HomeFinder KE?
+          <span class="ab-faq-chevron"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="ab-faq-a">Create a free account, then click "Add Listing" in the navigation. Fill in your property details, upload photos, set the rent price, and submit. Our team will review and approve your listing — usually within 24 hours.</div>
+      </div>
+
+      <div class="ab-faq-item">
+        <button class="ab-faq-q" onclick="this.closest('.ab-faq-item').classList.toggle('open')">
+          Are listings verified and trustworthy?
+          <span class="ab-faq-chevron"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="ab-faq-a">Every listing is reviewed by our team before it goes live. Approved listings display a green "Verified" badge. We check that the contact details are valid and the property details are accurate — so you can trust what you see.</div>
+      </div>
+
+      <div class="ab-faq-item">
+        <button class="ab-faq-q" onclick="this.closest('.ab-faq-item').classList.toggle('open')">
+          What counties and areas are covered?
+          <span class="ab-faq-chevron"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="ab-faq-a">We cover all 47 counties in Kenya.</div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

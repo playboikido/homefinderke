@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Login Failed{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:700px; margin:60px auto;">
+
+    <div class="card shadow-lg p-5 text-center"
+         style="
+            border-radius:20px;
+            border:none;
+            background:white;
+        ">
+
+        <div style="font-size:4rem;">⚠️</div>
+
+        <h1 class="mb-3">Google Login Failed</h1>
+
+        <p class="text-muted mb-4">
+            We could not sign you in using your Google account.
+        </p>
+
+        <p>
+            Please try again or use your email and password.
+        </p>
+
+        <div class="mt-4">
+            <a href="{% url 'account_login' %}"
+               class="btn btn-primary me-2">
+                Try Again
+            </a>
+
+            <a href="{% url 'residence_list' %}"
+               class="btn btn-outline-secondary">
+                Browse Homes as Guest
+            </a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Google Login Cancelled | HomeFinder{% endblock %}
+
+{% block account_content %}
+
+<style>
+
+.icon{
+
+width:90px;
+
+height:90px;
+
+margin:auto;
+
+border-radius:50%;
+
+background:#fef3c7;
+
+color:#f59e0b;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:42px;
+
+margin-bottom:25px;
+
+}
+
+.btns{
+
+display:flex;
+
+justify-content:center;
+
+gap:15px;
+
+margin-top:30px;
+
+flex-wrap:wrap;
+
+}
+
+.btn{
+
+padding:14px 28px;
+
+border-radius:10px;
+
+text-decoration:none;
+
+font-weight:600;
+
+transition:.3s;
+
+}
+
+.primary{
+
+background:#2563eb;
+
+color:white;
+
+}
+
+.primary:hover{
+
+background:#1d4ed8;
+
+}
+
+.secondary{
+
+border:2px solid #2563eb;
+
+color:#2563eb;
+
+}
+
+.secondary:hover{
+
+background:#2563eb;
+
+color:white;
+
+}
+
+</style>
+
+<div class="icon">
+⚠
+</div>
+
+<h1 style="text-align:center;">
+Google Sign In Cancelled
+</h1>
+
+<p style="text-align:center;color:#64748b;line-height:1.8;">
+
+Your Google sign-in was cancelled before it could be completed.
+
+No changes have been made to your HomeFinder account.
+
+You may try again or continue browsing properties as a guest.
+
+</p>
+
+<div class="btns">
+
+<a href="{% provider_login_url 'google' %}" class="btn primary">
+
+Try Again
+
+</a>
+
+<a href="{% url 'home' %}" class="btn secondary">
+
+Browse Homes
+
+</a>
+
+</div>
+
+{% endblock %}

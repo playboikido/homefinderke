@@ -1,0 +1,300 @@
+{% extends 'base.html' %}
+
+{% block title %}Submission Successful — HomeFinder KE{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+
+  .ss-wrap {
+    font-family: var(--font-body, 'Fira Sans', sans-serif);
+    background: var(--c-bg, #F0FDFA);
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 24px;
+  }
+
+  .ss-card {
+    background: #FFFFFF;
+    border-radius: 24px;
+    border: 1px solid rgba(153,246,228,0.4);
+    box-shadow: 0 12px 40px rgba(15,118,110,0.12), 0 4px 8px rgba(15,118,110,0.06);
+    max-width: 560px;
+    width: 100%;
+    padding: 56px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle top accent bar */
+  .ss-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #14B8A6, #0F766E, #0369A1);
+  }
+
+  /* Orb glow behind icon */
+  .ss-card::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,184,166,0.08), transparent 65%);
+    top: -80px; right: -80px;
+    pointer-events: none;
+  }
+
+  /* ── Icon circle ── */
+  .ss-icon-wrap {
+    position: relative;
+    z-index: 1;
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #CCFBF1, #DCFCE7);
+    border: 3px solid rgba(153,246,228,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 28px;
+    animation: pop-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+  @keyframes pop-in {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .ss-icon-wrap svg {
+    width: 40px; height: 40px;
+    color: #0F766E;
+    animation: check-draw 0.4s 0.3s ease both;
+  }
+  @keyframes check-draw {
+    from { stroke-dashoffset: 60; opacity: 0; }
+    to   { stroke-dashoffset: 0;  opacity: 1; }
+  }
+
+  /* ── Badge ── */
+  .ss-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(20,184,166,0.1);
+    border: 1px solid rgba(20,184,166,0.3);
+    border-radius: 9999px;
+    padding: 5px 16px;
+    font-family: var(--font-mono, 'Fira Code', monospace);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #0F766E;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .ss-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #14B8A6;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.45; transform: scale(0.65); }
+  }
+
+  /* ── Title ── */
+  .ss-title {
+    font-family: var(--font-display, 'Plus Jakarta Sans', sans-serif);
+    font-size: clamp(1.6rem, 4vw, 2.1rem);
+    font-weight: 900;
+    color: #134E4A;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+    margin-bottom: 14px;
+  }
+
+  /* ── Body text ── */
+  .ss-body {
+    font-size: 0.95rem;
+    color: #5EAFA8;
+    line-height: 1.75;
+    margin-bottom: 36px;
+  }
+  .ss-body strong {
+    color: #1C4A47;
+    font-weight: 600;
+  }
+
+  /* ── What happens next ── */
+  .ss-steps {
+    background: #F0FDFA;
+    border: 1px solid rgba(153,246,228,0.5);
+    border-radius: 16px;
+    padding: 22px 24px;
+    margin-bottom: 36px;
+    text-align: left;
+  }
+  .ss-steps-title {
+    font-family: var(--font-mono, 'Fira Code', monospace);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #5EAFA8;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 14px;
+  }
+  .ss-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(153,246,228,0.3);
+  }
+  .ss-step:last-child { border-bottom: none; padding-bottom: 0; }
+  .ss-step-dot {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #14B8A6, #0F766E);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .ss-step-dot svg { width: 11px; height: 11px; color: #fff; }
+  .ss-step-text {
+    font-size: 0.85rem;
+    color: #1C4A47;
+    line-height: 1.55;
+  }
+  .ss-step-text span {
+    display: block;
+    font-weight: 600;
+    color: #134E4A;
+    margin-bottom: 1px;
+  }
+
+  /* ── Actions ── */
+  .ss-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .ss-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 26px;
+    border-radius: 12px;
+    font-family: var(--font-body, 'Fira Sans', sans-serif);
+    font-size: 0.88rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 200ms cubic-bezier(0.4,0,0.2,1);
+    cursor: pointer;
+    border: none;
+  }
+  .ss-btn-primary {
+    background: linear-gradient(135deg, #0F766E, #0D5E58);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(15,118,110,0.35);
+  }
+  .ss-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(15,118,110,0.42);
+  }
+  .ss-btn-ghost {
+    background: transparent;
+    color: #0F766E;
+    border: 1.5px solid rgba(153,246,228,0.7);
+  }
+  .ss-btn-ghost:hover {
+    background: #F0FDFA;
+    border-color: #0F766E;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 520px) {
+    .ss-card { padding: 40px 24px; }
+    .ss-actions { flex-direction: column; }
+    .ss-btn { justify-content: center; }
+  }
+</style>
+
+<div class="ss-wrap">
+  <div class="ss-card">
+
+    <!-- Icon -->
+    <div class="ss-icon-wrap">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="stroke-dasharray:60;">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+    </div>
+
+    <!-- Badge -->
+    <div class="ss-badge">Submission Received</div>
+
+    <!-- Title -->
+    <h1 class="ss-title">You're helping Kenya<br>find better homes.</h1>
+
+    <!-- Body -->
+    <p class="ss-body">
+      Thank you for contributing to the community.<br>
+      Your listing is <strong>now pending review</strong> by an administrator —
+      we'll get it live as soon as possible.
+    </p>
+
+    <!-- What happens next -->
+    <div class="ss-steps">
+      <p class="ss-steps-title">What happens next</p>
+
+      <div class="ss-step">
+        <div class="ss-step-dot">
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="ss-step-text">
+          <span>Submission logged</span>
+          Our team has received your listing details.
+        </div>
+      </div>
+
+      <div class="ss-step">
+        <div class="ss-step-dot" style="background: linear-gradient(135deg,#D97706,#B45309);">
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2"/></svg>
+        </div>
+        <div class="ss-step-text">
+          <span>Under review</span>
+          An admin will verify your listing for quality and accuracy.
+        </div>
+      </div>
+
+      <div class="ss-step">
+        <div class="ss-step-dot" style="background: linear-gradient(135deg,#0369A1,#075985);">
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        </div>
+        <div class="ss-step-text">
+          <span>Goes live</span>
+          Once approved, your listing will appear to thousands of tenants.
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="ss-actions">
+      <a href="/" class="ss-btn ss-btn-primary">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Return Home
+      </a>
+      <a href="/dashboard/" class="ss-btn ss-btn-ghost">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        My Dashboard
+      </a>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+
+:root{
+--primary:#2563eb;
+--secondary:#1d4ed8;
+--accent:#38bdf8;
+--light:#f8fafc;
+--dark:#0f172a;
+--gray:#64748b;
+}
+
+.account-wrapper{
+
+min-height:85vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:60px 20px;
+
+background:
+linear-gradient(135deg,#eff6ff,#ffffff);
+
+}
+
+.account-card{
+
+width:100%;
+max-width:560px;
+
+background:white;
+
+border-radius:20px;
+
+padding:45px;
+
+box-shadow:0 20px 45px rgba(0,0,0,.08);
+
+border:1px solid rgba(37,99,235,.08);
+
+}
+
+.account-card h1{
+
+font-size:2rem;
+
+margin-bottom:18px;
+
+color:var(--dark);
+
+}
+
+.account-card p{
+
+color:var(--gray);
+
+line-height:1.8;
+
+}
+
+.btn-primary{
+
+display:inline-block;
+
+padding:14px 30px;
+
+background:var(--primary);
+
+color:white;
+
+text-decoration:none;
+
+border-radius:10px;
+
+font-weight:600;
+
+transition:.3s;
+
+}
+
+.btn-primary:hover{
+
+background:var(--secondary);
+
+transform:translateY(-2px);
+
+}
+
+@media(max-width:600px){
+
+.account-card{
+
+padding:28px;
+
+}
+
+.account-card h1{
+
+font-size:1.6rem;
+
+}
+
+}
+
+</style>
+
+<div class="account-wrapper">
+
+<div class="account-card">
+
+{% block account_content %}
+
+{% endblock %}
+
+</div>
+
+</div>
+
+{% endblock %}

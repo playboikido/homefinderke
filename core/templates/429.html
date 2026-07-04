@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}429 - Too Many Requests | HomeFinder{% endblock %}
+
+{% block content %}
+
+<style>
+
+.error-container{
+min-height:80vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:40px;
+}
+
+.error-card{
+max-width:650px;
+background:white;
+padding:50px;
+border-radius:18px;
+box-shadow:0 15px 40px rgba(0,0,0,.08);
+text-align:center;
+}
+
+.error-code{
+font-size:80px;
+font-weight:bold;
+color:#2563eb;
+margin-bottom:10px;
+}
+
+.btn{
+background:#2563eb;
+padding:14px 30px;
+border-radius:10px;
+text-decoration:none;
+color:white;
+display:inline-block;
+margin-top:20px;
+}
+
+.btn:hover{
+background:#1d4ed8;
+}
+
+</style>
+
+<div class="error-container">
+<div class="error-card">
+
+<div class="error-code">
+429
+</div>
+
+<h1>Too Many Requests</h1>
+
+<p>
+You've made too many requests in a short period.
+
+Please wait a few minutes before trying again.
+
+This security measure helps protect HomeFinder and its users.
+</p>
+
+<a href="{% url 'home' %}" class="btn">
+🏠 Return Home
+</a>
+
+</div>
+</div>
+
+{% endblock %}

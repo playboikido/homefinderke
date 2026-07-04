@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Compare Houses — HomeFinder Kenya{% endblock %}
+{% block content %}
+<div style="max-width:1100px; margin:40px auto; padding:0 20px; font-family:'Fira Sans',sans-serif;">
+  <h2 style="color:#134E4A; margin-bottom:24px;">Compare Houses</h2>
+
+  {% if residences %}
+  <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 4px 12px rgba(15,118,110,0.10);">
+      <thead>
+        <tr style="background:#0F766E; color:#fff;">
+          <th style="text-align:left; padding:14px 18px;">Feature</th>
+          {% for r in residences %}
+            <th style="text-align:left; padding:14px 18px;">{{ r.name }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #E8F0F3;">
+          <td style="padding:12px 18px; font-weight:600;">Rent</td>
+          {% for r in residences %}<td style="padding:12px 18px;">KSh {{ r.rent_price }}</td>{% endfor %}
+        </tr>
+        <tr style="border-bottom:1px solid #E8F0F3; background:#F0FDFA;">
+          <td style="padding:12px 18px; font-weight:600;">Deposit</td>
+          {% for r in residences %}<td style="padding:12px 18px;">{% if r.deposit_amount %}KSh {{ r.deposit_amount|floatformat:"0" }}{% else %}N/A{% endif %}</td>{% endfor %}
+        </tr>
+        <tr style="border-bottom:1px solid #E8F0F3;">
+          <td style="padding:12px 18px; font-weight:600;">House Type</td>
+          {% for r in residences %}<td style="padding:12px 18px;">{{ r.get_house_type_display }}</td>{% endfor %}
+        </tr>
+        <tr style="border-bottom:1px solid #E8F0F3;">
+          <td style="padding:12px 18px; font-weight:600;">Amenities</td>
+          {% for r in residences %}
+            <td style="padding:12px 18px;">
+              {% if r.water_available %}💧 Water<br>{% endif %}
+              {% if r.fibre_available %}📶 Fibre<br>{% endif %}
+              {% if r.gated_community %}🚧 Gated<br>{% endif %}
+              {% if r.cctv_available %}📷 CCTV<br>{% endif %}
+              {% if r.security_guard %}🛡️ Guard{% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+        <tr style="border-bottom:1px solid #E8F0F3;">
+          <td style="padding:12px 18px; font-weight:600;">Landmark</td>
+          {% for r in residences %}<td style="padding:12px 18px;">{{ r.landmark|default:"—" }}</td>{% endfor %}
+        </tr>
+        <tr style="border-bottom:1px solid #E8F0F3; background:#F0FDFA;">
+          <td style="padding:12px 18px; font-weight:600;">Nearest Stage</td>
+          {% for r in residences %}<td style="padding:12px 18px;">{{ r.nearest_stage|default:"—" }}</td>{% endfor %}
+        </tr>
+        <tr style="border-bottom:1px solid #E8F0F3;">
+          <td style="padding:12px 18px; font-weight:600;">Nearby School</td>
+          {% for r in residences %}<td style="padding:12px 18px;">{{ r.nearby_school|default:"—" }}</td>{% endfor %}
+        </tr>
+        <tr style="border-bottom:1px solid #E8F0F3; background:#F0FDFA;">
+          <td style="padding:12px 18px; font-weight:600;">Nearby Hospital</td>
+          {% for r in residences %}<td style="padding:12px 18px;">{{ r.nearby_hospital|default:"—" }}</td>{% endfor %}
+        </tr>
+        <tr style="border-bottom:1px solid #E8F0F3; background:#F0FDFA;">
+          <td style="padding:12px 18px; font-weight:600;">Distance</td>
+          {% for r in residences %}
+            <td style="padding:12px 18px;"
+                id="compare-dist-{{ r.id }}"
+                data-lat="{{ r.latitude|default_if_none:'' }}"
+                data-lng="{{ r.longitude|default_if_none:'' }}">
+              {% if r.latitude and r.longitude %}Calculating...{% else %}Location not available{% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+        <tr>
+          <td style="padding:12px 18px; font-weight:600;">Reviews</td>
+          {% for r in residences %}<td style="padding:12px 18px;">⭐ {{ r.average_rating }} ({{ r.reviews.count }})</td>{% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p>No houses selected. Go to <a href="{% url 'my_favorites' %}">My Favorites</a> and pick up to 3 to compare.</p>
+  {% endif %}
+</div>
+<script>
+  function haversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) ** 2 +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+      const userLat = position.coords.latitude;
+      const userLng = position.coords.longitude;
+
+      document.querySelectorAll('[id^="compare-dist-"]').forEach(cell => {
+        const lat = parseFloat(cell.dataset.lat);
+        const lng = parseFloat(cell.dataset.lng);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const dist = haversine(userLat, userLng, lat, lng);
+          cell.textContent = `📍 ${dist.toFixed(1)} km away`;
+        }
+      });
+    }, () => {
+      document.querySelectorAll('[id^="compare-dist-"]').forEach(cell => {
+        if (cell.textContent.trim() === 'Calculating...') {
+          cell.textContent = 'Location disabled';
+        }
+      });
+    });
+  }
+</script>
+{% endblock %}

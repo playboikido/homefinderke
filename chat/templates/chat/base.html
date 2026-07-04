@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="background: #F0FDFA; min-height: calc(100vh - 70px); padding-top: 70px; display: flex; flex-direction: column; box-sizing: border-box;">
+    
+    {% block chat_workspace %}
+    {% endblock chat_workspace %}
+
+</div>
+
+<script>
+    console.log("Chat system sub-base architecture initialized successfully.");
+</script>
+{% endblock content %}

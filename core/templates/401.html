@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}401 - Unauthorized | HomeFinder{% endblock %}
+
+{% block content %}
+
+<style>
+
+.error-container{
+min-height:80vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:40px;
+}
+
+.error-card{
+max-width:650px;
+background:white;
+padding:50px;
+border-radius:18px;
+box-shadow:0 15px 40px rgba(0,0,0,.08);
+text-align:center;
+}
+
+.error-code{
+font-size:80px;
+color:#dc2626;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+.btn{
+background:#2563eb;
+padding:14px 30px;
+color:white;
+text-decoration:none;
+border-radius:10px;
+display:inline-block;
+margin-top:20px;
+}
+
+.btn:hover{
+background:#1d4ed8;
+}
+
+</style>
+
+<div class="error-container">
+<div class="error-card">
+
+<div class="error-code">
+401
+</div>
+
+<h1>Unauthorized</h1>
+
+<p>
+You must sign in to continue using this feature.
+</p>
+
+<a href="{% url 'account_login' %}" class="btn">
+Sign In
+</a>
+
+</div>
+</div>
+
+{% endblock %}

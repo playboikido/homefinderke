@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Register
+{% endblock %}
+
+{% block content %}
+
+<h2>Create Account</h2>
+
+<p>
+Join HomeFinder KE and help others find homes.
+</p>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Register
+    </button>
+
+</form>
+
+{% endblock %}

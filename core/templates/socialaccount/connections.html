@@ -1,0 +1,122 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Connected Accounts | HomeFinder{% endblock %}
+
+{% block account_content %}
+
+<style>
+
+.icon{
+width:90px;
+height:90px;
+margin:auto;
+border-radius:50%;
+background:#dbeafe;
+color:#2563eb;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:42px;
+margin-bottom:25px;
+}
+
+.connection-box{
+
+padding:20px;
+
+border:1px solid #dbeafe;
+
+border-radius:12px;
+
+margin:20px 0;
+
+background:#f8fafc;
+
+}
+
+.connection-box strong{
+
+color:#0f172a;
+
+}
+
+.btn{
+
+display:inline-block;
+
+padding:12px 24px;
+
+margin-top:20px;
+
+background:#2563eb;
+
+color:white;
+
+text-decoration:none;
+
+border-radius:10px;
+
+font-weight:600;
+
+}
+
+.btn:hover{
+
+background:#1d4ed8;
+
+}
+
+</style>
+
+<div class="icon">
+🔗
+</div>
+
+<h1 style="text-align:center;">
+Connected Accounts
+</h1>
+
+<p style="text-align:center;color:#64748b;">
+
+Manage your connected social accounts below.
+
+</p>
+
+{% if form.accounts %}
+
+{% for base_account in form.accounts %}
+
+<div class="connection-box">
+
+<strong>
+
+{{ base_account }}
+
+</strong>
+
+</div>
+
+{% endfor %}
+
+{% else %}
+
+<div class="connection-box">
+
+No social accounts are currently connected.
+
+</div>
+
+{% endif %}
+
+<div style="text-align:center;">
+
+<a href="{% url 'account_login' %}" class="btn">
+
+Back to Login
+
+</a>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,948 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard — HomeFinder Kenya{% endblock %}
+
+{% block content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+  :root {
+    --c-primary:     #0F766E;
+    --c-primary-dk:  #0D5E58;
+    --c-secondary:   #14B8A6;
+    --c-accent:      #0369A1;
+    --c-bg:          #F0FDFA;
+    --c-fg:          #134E4A;
+    --c-surface:     #FFFFFF;
+    --c-muted:       #E8F0F3;
+    --c-border:      #99F6E4;
+    --c-text:        #1C4A47;
+    --c-subtle:      #5EAFA8;
+    --c-danger:      #DC2626;
+    --c-danger-bg:   #FEF2F2;
+    --c-danger-border:#FECACA;
+    --c-gold:        #D97706;
+    --c-gold-bg:     #FEF3C7;
+    --c-gold-border: #FDE68A;
+    --c-green-bg:    #DCFCE7;
+    --c-green-text:  #166534;
+    --c-green-border:#BBF7D0;
+    --c-warn-bg:     #FFF7ED;
+    --c-warn-text:   #9A3412;
+    --c-warn-border: #FED7AA;
+
+    --font-body: 'Fira Sans', system-ui, sans-serif;
+    --font-mono: 'Fira Code', monospace;
+
+    --r-sm:   6px;
+    --r:      12px;
+    --r-lg:   18px;
+    --r-xl:   24px;
+    --r-full: 9999px;
+
+    --shadow-sm: 0 1px 3px rgba(15,118,110,0.08), 0 1px 2px rgba(15,118,110,0.04);
+    --shadow:    0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
+    --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
+    --ease: cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── Wrap ───────────────────────────────────────────────────── */
+  .db-wrap {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    min-height: 100vh;
+    color: var(--c-text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Hero ───────────────────────────────────────────────────── */
+  .db-hero {
+    background: linear-gradient(135deg, var(--c-fg) 0%, var(--c-primary) 60%, var(--c-secondary) 100%);
+    padding: 48px 24px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .db-hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,184,166,.18), transparent 65%);
+    top: -200px; right: -150px;
+    pointer-events: none;
+  }
+  .db-hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .db-hero-eyebrow {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--c-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .db-hero-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--c-secondary);
+    box-shadow: 0 0 0 3px rgba(20,184,166,0.3);
+  }
+  .db-hero-title {
+    font-family: var(--font-mono);
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .db-hero-sub {
+    color: rgba(255,255,255,0.65);
+    font-size: 0.9rem;
+    max-width: 420px;
+  }
+
+  /* ── Stats Bar ──────────────────────────────────────────────── */
+  .db-stats {
+    max-width: 1200px;
+    margin: -28px auto 0;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    position: relative;
+    z-index: 10;
+  }
+  .db-stat-card {
+    background: var(--c-surface);
+    border-radius: var(--r-lg);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(153,246,228,0.4);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+  }
+  .db-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+  .db-stat-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--r);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .db-stat-icon svg { width: 22px; height: 22px; }
+  .db-stat-icon--teal  { background: #CCFBF1; color: var(--c-primary); }
+  .db-stat-icon--blue  { background: #DBEAFE; color: var(--c-accent); }
+  .db-stat-icon--gold  { background: var(--c-gold-bg); color: var(--c-gold); }
+  .db-stat-icon--red   { background: var(--c-danger-bg); color: var(--c-danger); }
+  .db-stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+  .db-stat-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--c-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── Inner layout ───────────────────────────────────────────── */
+  .db-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* ── Section shell ──────────────────────────────────────────── */
+  .db-section {}
+  .db-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .db-section-title {
+    font-family: var(--font-mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .db-section-title span.db-badge {
+    font-family: var(--font-body);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: var(--r-full);
+    background: var(--c-gold-bg);
+    color: var(--c-gold);
+    border: 1px solid var(--c-gold-border);
+  }
+  .db-section-title span.db-badge--warn {
+    background: var(--c-warn-bg);
+    color: var(--c-warn-text);
+    border-color: var(--c-warn-border);
+  }
+  .db-divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--c-border), transparent);
+    margin-bottom: 24px;
+  }
+
+  /* ── Pending Residence Cards ────────────────────────────────── */
+  .db-residences-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+  }
+  .db-res-card {
+    background: var(--c-surface);
+    border-radius: var(--r-lg);
+    border: 1px solid rgba(153,246,228,0.5);
+    box-shadow: var(--shadow-sm);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: box-shadow 200ms var(--ease), transform 200ms var(--ease);
+  }
+  .db-res-card:hover {
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+  .db-res-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .db-res-name {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    line-height: 1.3;
+  }
+  .db-pending-chip {
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: var(--r-full);
+    background: var(--c-gold-bg);
+    color: var(--c-gold);
+    border: 1px solid var(--c-gold-border);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+  .db-res-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .db-res-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.845rem;
+    color: var(--c-text);
+  }
+  .db-res-meta-row svg {
+    width: 15px; height: 15px;
+    color: var(--c-subtle);
+    flex-shrink: 0;
+  }
+  .db-res-meta-row strong {
+    color: var(--c-subtle);
+    font-weight: 500;
+    min-width: 80px;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .db-res-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 4px;
+    border-top: 1px solid var(--c-muted);
+  }
+  .db-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--r);
+    font-size: 0.845rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    text-decoration: none;
+    transition: all 180ms var(--ease);
+    white-space: nowrap;
+    flex: 1;
+    justify-content: center;
+  }
+  .db-btn svg { width: 14px; height: 14px; }
+  .db-btn-approve {
+    background: var(--c-green-bg);
+    color: var(--c-green-text);
+    border: 1px solid var(--c-green-border);
+  }
+  .db-btn-approve:hover {
+    background: #bbf7d0;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .db-btn-reject {
+    background: var(--c-danger-bg);
+    color: var(--c-danger);
+    border: 1px solid var(--c-danger-border);
+  }
+  .db-btn-reject:hover {
+    background: #fecaca;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+  .db-btn-edit {
+    background: #DBEAFE;
+    color: var(--c-accent);
+    border: 1px solid #BFDBFE;
+  }
+  .db-btn-edit:hover {
+    background: #BFDBFE;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ── Report Cards ───────────────────────────────────────────── */
+  .db-reports-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .db-report-card {
+    background: var(--c-surface);
+    border-radius: var(--r-lg);
+    border: 1px solid var(--c-warn-border);
+    box-shadow: var(--shadow-sm);
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: box-shadow 200ms var(--ease);
+  }
+  .db-report-card:hover {
+    box-shadow: var(--shadow);
+  }
+  .db-report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .db-report-residence {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--c-fg);
+  }
+  .db-report-date {
+    font-size: 0.78rem;
+    color: var(--c-subtle);
+    white-space: nowrap;
+  }
+  .db-report-body {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .db-report-field {}
+  .db-report-field-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--c-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 4px;
+  }
+  .db-report-field-value {
+    font-size: 0.875rem;
+    color: var(--c-text);
+    line-height: 1.5;
+  }
+  .db-report-comment {
+    font-size: 0.875rem;
+    color: var(--c-text);
+    background: var(--c-warn-bg);
+    border-left: 3px solid var(--c-gold);
+    padding: 10px 14px;
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .db-report-footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 4px;
+    border-top: 1px solid var(--c-muted);
+  }
+  .db-btn-review {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 20px;
+    border-radius: var(--r);
+    font-size: 0.845rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    text-decoration: none;
+    background: var(--c-primary);
+    color: #fff;
+    transition: all 180ms var(--ease);
+  }
+  .db-btn-review:hover {
+    background: var(--c-primary-dk);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+  .db-btn-review svg { width: 14px; height: 14px; }
+
+  /* ── Empty states ───────────────────────────────────────────── */
+  .db-empty {
+    background: var(--c-surface);
+    border-radius: var(--r-lg);
+    border: 1.5px dashed var(--c-border);
+    padding: 48px 24px;
+    text-align: center;
+  }
+  .db-empty-icon {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--c-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    color: var(--c-subtle);
+  }
+  .db-empty-icon svg { width: 24px; height: 24px; }
+  .db-empty h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--c-fg);
+    margin-bottom: 6px;
+  }
+  .db-empty p {
+    font-size: 0.845rem;
+    color: var(--c-subtle);
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .db-stats { grid-template-columns: repeat(2, 1fr); }
+    .db-residences-grid { grid-template-columns: 1fr; }
+    .db-report-body { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .db-stats { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .db-hero { padding: 36px 16px 32px; }
+    .db-inner { padding: 32px 16px 48px; }
+    .db-report-body { grid-template-columns: 1fr; }
+    .db-res-actions { flex-direction: column; }
+    .db-btn { flex: unset; width: 100%; }
+  }
+</style>
+
+<div class="db-wrap">
+
+  <!-- ── Hero ──────────────────────────────────────────────────── -->
+  <div class="db-hero">
+    <div class="db-hero-inner" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:20px;">
+      <div>
+        <div class="db-hero-eyebrow">Admin Panel</div>
+        <h1 class="db-hero-title">Control Centre</h1>
+        <p class="db-hero-sub">Manage listings, resolve reports, and keep HomeFinder KE running smoothly.</p>
+      </div>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="{% url 'add_mover' %}" class="db-btn" style="background:#0F766E; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
+          🚚 Add Mover
+        </a>
+        <a href="{% url 'add_furniture_vendor' %}" class="db-btn" style="background:#D97706; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
+          🛋️ Add Furniture Vendor
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Stats ─────────────────────────────────────────────────── -->
+  <div class="db-stats">
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon db-stat-icon--teal">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ total_views }}</div>
+        <div class="db-stat-label">Total Views</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon db-stat-icon--blue">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ total_users }}</div>
+        <div class="db-stat-label">Total Users</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon db-stat-icon--gold">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ approved_count }}</div>
+        <div class="db-stat-label">Approved</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon db-stat-icon--red">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ pending_count }}</div>
+        <div class="db-stat-label">Pending Review</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Analytics Row ────────────────────────────────────────────── -->
+  <div style="max-width:1200px; margin:20px auto 0; padding:0 24px; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px;">
+
+    <div class="db-stat-card" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);">
+      <div class="db-stat-icon" style="background:rgba(217,119,6,0.15); color:#D97706;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value" style="color:#92400E;">{{ premium_count }}</div>
+        <div class="db-stat-label" style="color:#B45309;">Premium Listings</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon" style="background:#CCFBF1; color:#0F766E;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ new_this_week }}</div>
+        <div class="db-stat-label">New This Week</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon" style="background:#DBEAFE; color:#0369A1;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ new_this_month }}</div>
+        <div class="db-stat-label">New This Month</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon" style="background:#FCE7F3; color:#DB2777;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ total_favorites }}</div>
+        <div class="db-stat-label">Total Favorites</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon" style="background:#FCE7F3; color:#DB2777;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ favorites_this_week }}</div>
+        <div class="db-stat-label">Favs This Week</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon" style="background:#F3E8FF; color:#7C3AED;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ boost_requests_count }}</div>
+        <div class="db-stat-label">Boost Requests</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon" style="background:#FEE2E2; color:#DC2626;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ hidden_count }}</div>
+        <div class="db-stat-label">Hidden</div>
+      </div>
+    </div>
+
+    <div class="db-stat-card">
+      <div class="db-stat-icon" style="background:#FFF7ED; color:#EA580C;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+      </div>
+      <div>
+        <div class="db-stat-value">{{ paused_count }}</div>
+        <div class="db-stat-label">Paused</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Main content ───────────────────────────────────────────── -->
+  <div class="db-inner">
+
+    <!-- Pending Approvals -->
+    <div class="db-section">
+      <div class="db-section-head">
+        <h2 class="db-section-title">
+          Pending Approvals
+          {% if pending_residences %}
+            <span class="db-badge">{{ pending_residences|length }} awaiting</span>
+          {% endif %}
+        </h2>
+      </div>
+      <div class="db-divider"></div>
+
+      {% if pending_residences %}
+      <div class="db-residences-grid">
+        {% for residence in pending_residences %}
+        <div class="db-res-card">
+          <div class="db-res-card-header">
+            <div class="db-res-name">{{ residence.name }}</div>
+            <span class="db-pending-chip">Pending</span>
+          </div>
+
+          <div class="db-res-meta">
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <strong>County</strong>
+              {{ residence.county }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <strong>Town</strong>
+              {{ residence.town }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <strong>Owner</strong>
+              {{ residence.owner }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <strong>Submitted</strong>
+              {{ residence.created_at|date:"d M Y" }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <strong>Views</strong>
+              {{ residence.views_count }}
+            </div>
+
+            {% if residence.suspected_fraud %}
+            <div class="db-res-meta-row" style="background: var(--c-danger-bg); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--c-danger-border); margin-top: 8px; flex-direction: row; align-items: flex-start; gap: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--c-danger); width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              <div style="font-size: 0.8rem; color: var(--c-danger); font-weight: 500; line-height: 1.3;">
+                <strong>🚨 AI Fraud Suspected:</strong> {{ residence.fraud_reason }}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if residence.image_quality_status == 'failed' %}
+            <div class="db-res-meta-row" style="background: var(--c-warn-bg); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--c-warn-border); margin-top: 4px; flex-direction: row; align-items: flex-start; gap: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--c-warn-text); width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <div style="font-size: 0.8rem; color: var(--c-warn-text); font-weight: 500; line-height: 1.3;">
+                <strong>🖼️ AI Image Warning:</strong> {{ residence.image_quality_feedback }}
+              </div>
+            </div>
+            {% elif residence.image_quality_status == 'passed' %}
+            <div class="db-res-meta-row" style="background: var(--c-green-bg); padding: 6px 10px; border-radius: 6px; border: 1px solid var(--c-green-border); margin-top: 4px; flex-direction: row; align-items: flex-start; gap: 8px;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--c-green-text); width: 16px; height: 16px; margin-top: 1px; flex-shrink: 0;"><polyline points="20 6 9 17 4 12"/></svg>
+              <div style="font-size: 0.8rem; color: var(--c-green-text); font-weight: 500; line-height: 1.3;">
+                <strong>🖼️ AI Image OK:</strong> Real photo verified
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="db-res-actions">
+            <a href="{% url 'approve_residence' residence.id %}" class="db-btn db-btn-approve">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Approve
+            </a>
+            <a href="{% url 'reject_residence' residence.id %}" class="db-btn db-btn-reject">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Reject
+            </a>
+            <a href="{% url 'admin:core_residence_change' residence.id %}" class="db-btn db-btn-edit">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Edit
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="db-empty">
+        <div class="db-empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h3>No Pending Approvals</h3>
+        <p>All listings have been reviewed. You're all caught up!</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ── Approved Residences ────────────────────────────────────────── -->
+    <div class="db-section" style="margin-top: 40px;">
+      <div class="db-section-head">
+        <h2 class="db-section-title">
+          Approved Residences
+          {% if approved_residences %}
+            <span class="db-badge">{{ approved_residences|length }} active</span>
+          {% endif %}
+        </h2>
+      </div>
+      <div class="db-divider"></div>
+
+      {% if approved_residences %}
+      <div class="db-residences-grid">
+        {% for residence in approved_residences %}
+        <div class="db-res-card">
+          <div class="db-res-card-header">
+            <div class="db-res-name">{{ residence.name }}</div>
+            <span class="db-pending-chip" style="background:var(--c-green-bg); color:var(--c-green-text); border-color:var(--c-green-border);">Live</span>
+          </div>
+
+          <div class="db-res-meta">
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <strong>County</strong>
+              {{ residence.county }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <strong>Town</strong>
+              {{ residence.town }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <strong>Owner</strong>
+              {{ residence.owner }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <strong>Submitted</strong>
+              {{ residence.created_at|date:"d M Y" }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <strong>Views</strong>
+              {{ residence.views_count }}
+            </div>
+          </div>
+
+          <div class="db-res-actions">
+            <a href="{% url 'residence_detail' residence.id %}" class="db-btn db-btn-approve">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              View
+            </a>
+            <a href="{% url 'admin:core_residence_change' residence.id %}" class="db-btn db-btn-edit">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Edit
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="db-empty">
+        <div class="db-empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        </div>
+        <h3>No Approved Residences</h3>
+        <p>There are no live listings currently.</p>
+      </div>
+      {% endif %}
+
+    <!-- ── Boost Requests ─────────────────────────────────────────── -->
+    {% if boost_requests %}
+    <div class="db-section" style="margin-top:40px;">
+      <div class="db-section-head">
+        <h2 class="db-section-title">
+          🚀 Boost Requests
+          <span class="db-badge" style="background:#EDE9FE; color:#7C3AED; border:1px solid #C4B5FD;">{{ boost_requests_count }} pending</span>
+        </h2>
+      </div>
+      <div class="db-divider"></div>
+      <div class="db-residences-grid">
+        {% for residence in boost_requests %}
+        <div class="db-res-card" style="border-color:#C4B5FD;">
+          <div class="db-res-card-header">
+            <div class="db-res-name">{{ residence.name }}</div>
+            <span class="db-pending-chip" style="background:#EDE9FE; color:#7C3AED; border-color:#C4B5FD;">Boost Req.</span>
+          </div>
+          <div class="db-res-meta">
+            <div class="db-res-meta-row">
+              <strong>Owner</strong> {{ residence.owner }}
+            </div>
+            <div class="db-res-meta-row">
+              <strong>Location</strong> {{ residence.town }}, {{ residence.county }}
+            </div>
+            <div class="db-res-meta-row">
+              <strong>Views</strong> {{ residence.views_count }}
+            </div>
+          </div>
+          <div class="db-res-actions">
+            <a href="{% url 'toggle_premium' residence.id %}" class="db-btn" style="background:#FEF3C7; color:#D97706; border:1px solid #FDE68A; flex:1; justify-content:center;">
+              ⭐ Grant Premium
+            </a>
+            <a href="{% url 'residence_detail' residence.id %}" class="db-btn db-btn-edit">View</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ── Top Performing Listings ──────────────────────────────────── -->
+    <div class="db-section" style="margin-top:40px;">
+      <div class="db-section-head">
+        <h2 class="db-section-title">📊 Top Viewed Listings</h2>
+      </div>
+      <div class="db-divider"></div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        {% for r in top_residences %}
+        <div style="background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-lg); padding:16px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; box-shadow:var(--shadow-sm);">
+          <div style="display:flex; align-items:center; gap:16px; flex:1; min-width:0;">
+            <div style="font-family:var(--font-mono); font-size:1.3rem; font-weight:700; color:var(--c-primary); min-width:28px; text-align:center;">{{ forloop.counter }}</div>
+            <div>
+              <div style="font-family:var(--font-mono); font-weight:700; color:var(--c-fg); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:280px;">{{ r.name }}{% if r.is_premium %} ⭐{% endif %}</div>
+              <div style="font-size:0.78rem; color:var(--c-subtle);">{{ r.town }}, {{ r.county }} · {{ r.owner }}</div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:20px; flex-shrink:0;">
+            <div style="text-align:center;">
+              <div style="font-family:var(--font-mono); font-weight:700; color:var(--c-fg); font-size:1.1rem;">{{ r.views_count }}</div>
+              <div style="font-size:0.68rem; color:var(--c-subtle); text-transform:uppercase; letter-spacing:0.06em;">Views</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-family:var(--font-mono); font-weight:700; color:var(--c-fg); font-size:1.1rem;">{{ r.favorites.count }}</div>
+              <div style="font-size:0.68rem; color:var(--c-subtle); text-transform:uppercase; letter-spacing:0.06em;">Favorites</div>
+            </div>
+            <a href="{% url 'residence_detail' r.id %}" class="db-btn-review" style="padding:7px 14px; font-size:0.78rem;">View</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Community Reports -->
+    <div class="db-section">
+      <div class="db-section-head">
+        <h2 class="db-section-title">
+          Community Reports
+          {% if reports %}
+            <span class="db-badge db-badge--warn">{{ reports|length }} open</span>
+          {% endif %}
+        </h2>
+      </div>
+      <div class="db-divider"></div>
+
+      {% if reports %}
+      <div class="db-reports-list">
+        {% for report in reports %}
+        <div class="db-report-card">
+          <div class="db-report-header">
+            <div class="db-report-residence">{{ report.residence.name }}</div>
+            <div class="db-report-date">{{ report.created_at|date:"d M Y, H:i" }}</div>
+          </div>
+
+          <div class="db-report-body">
+            <div class="db-report-field">
+              <div class="db-report-field-label">Reported By</div>
+              <div class="db-report-field-value">{{ report.reported_by }}</div>
+            </div>
+            <div class="db-report-field">
+              <div class="db-report-field-label">Reason</div>
+              <div class="db-report-field-value">{{ report.get_reason_display }}</div>
+            </div>
+          </div>
+
+          {% if report.comment %}
+          <div class="db-report-comment">"{{ report.comment }}"</div>
+          {% endif %}
+
+          <div class="db-report-footer">
+            <a href="{% url 'review_report' report.id %}" class="db-btn-review">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Mark Reviewed
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="db-empty">
+        <div class="db-empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3>No open reports</h3>
+        <p>The community hasn't flagged anything that needs attention.</p>
+      </div>
+      {% endif %}
+    </div>
+
+  </div><!-- /.db-inner -->
+</div><!-- /.db-wrap -->
+
+{% endblock %}

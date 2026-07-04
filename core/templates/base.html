@@ -1,0 +1,1290 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}HomeFinder KE{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Find apartments, bedsits, roommates, and houses for rent in Kenya. Compare prices, check verification status, and connect directly with verified property owners on HomeFinder KE.{% endblock %}">
+
+    <!-- ── Google Fonts (Fira Sans + Fira Code — matches dashboard) ── -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#0F766E">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        /* ══════════════════════════════════════════════════════════
+           HOMEFINDER KE — Unified Design Tokens
+           Teal/green palette from dashboard + Fira font family
+        ══════════════════════════════════════════════════════════ */
+        :root {
+            /* Primary palette (teal — matches dashboard) */
+            --primary:         #0F766E;
+            --primary-dark:    #0D5E58;
+            --primary-light:   #99F6E4;
+            --secondary:       #14B8A6;
+            --accent:          #0369A1;
+
+            /* Backgrounds */
+            --bg:              #F0FDFA;
+            --bg-card:         #FFFFFF;
+            --bg-card2:        #E8F8F6;
+
+            /* Foreground / text */
+            --fg:              #134E4A;
+            --fg-muted:        #5EAFA8;
+            --text:            #1C4A47;
+
+            /* Borders & surfaces */
+            --border:          #99F6E4;
+            --muted:           #E8F0F3;
+
+            /* Status colours */
+            --danger:          #DC2626;
+            --gold:            #D97706;
+            --gold-bg:         #FEF3C7;
+            --green-bg:        #DCFCE7;
+            --green-text:      #166534;
+
+            /* Typography */
+            --font-body:       'Fira Sans', system-ui, sans-serif;
+            --font-mono:       'Fira Code', monospace;
+
+            /* Radii */
+            --radius-sm:       6px;
+            --radius:          12px;
+            --radius-lg:       18px;
+            --radius-xl:       24px;
+            --radius-full:     9999px;
+
+            /* Shadows (teal-tinted) */
+            --shadow-sm:       0 1px 3px rgba(15,118,110,0.08), 0 1px 2px rgba(15,118,110,0.04);
+            --shadow:          0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
+            --shadow-lg:       0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
+
+            --ease:            cubic-bezier(0.4, 0, 0.2, 1);
+            --transition:      all 200ms var(--ease);
+        }
+
+        /* ── Base Reset ──────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #ptrIndicator {
+            position: fixed;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: top 150ms var(--ease);
+        }
+        #ptrIndicator svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--primary);
+            transition: transform 100ms linear;
+        }
+        #ptrIndicator.refreshing svg {
+            animation: ptrSpin 0.7s linear infinite;
+        }
+        @keyframes ptrSpin { to { transform: rotate(360deg); } }
+
+        main { flex: 1; }
+
+        /* ── Navbar ──────────────────────────────────────────────── */
+        .navbar {
+            background: linear-gradient(135deg, var(--fg) 0%, var(--primary) 60%, var(--secondary) 100%);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            box-shadow: var(--shadow);
+        }
+
+        /* Brand */
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .brand-icon {
+            width: 40px; height: 40px;
+            border-radius: var(--radius);
+            background: rgba(255,255,255,0.15);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .brand-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.15;
+        }
+        .brand-name {
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            letter-spacing: -0.01em;
+        }
+        .brand-tagline {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.65);
+            font-weight: 400;
+            white-space: nowrap;
+        }
+
+        /* ── Hamburger button ────────────────────────────────────── */
+        .nav-hamburger {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            width: 44px; height: 44px;
+            border-radius: var(--radius);
+            background: rgba(255,255,255,0.12);
+            border: 1.5px solid rgba(255,255,255,0.22);
+            cursor: pointer;
+            transition: var(--transition);
+            flex-shrink: 0;
+        }
+        .nav-hamburger:hover {
+            background: rgba(255,255,255,0.22);
+        }
+        .nav-hamburger span {
+            display: block;
+            width: 20px; height: 2px;
+            background: #FFFFFF;
+            border-radius: 2px;
+            transition: all 300ms var(--ease);
+            transform-origin: center;
+        }
+        /* Animate to X when open */
+        .nav-hamburger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .nav-hamburger.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+        .nav-hamburger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* ── Overlay ─────────────────────────────────────────────── */
+        .nav-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(13,46,43,0.55);
+            backdrop-filter: blur(2px);
+            z-index: 299;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 320ms var(--ease);
+        }
+        .nav-overlay.is-open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ── Drawer ──────────────────────────────────────────────── */
+        .nav-drawer {
+            position: fixed;
+            top: 0; right: 0;
+            width: 300px;
+            height: 100vh;
+            background: linear-gradient(160deg, var(--fg) 0%, var(--primary-dark) 100%);
+            z-index: 300;
+            transform: translateX(100%);
+            transition: transform 340ms var(--ease);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: -8px 0 40px rgba(13,46,43,0.35);
+        }
+        .nav-drawer.is-open {
+            transform: translateX(0);
+        }
+
+        /* Drawer header */
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .drawer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+        .drawer-brand-name {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .drawer-brand-tag {
+            font-size: 0.62rem;
+            color: rgba(255,255,255,0.55);
+            margin-top: 1px;
+        }
+        .drawer-close {
+            width: 36px; height: 36px;
+            border-radius: var(--radius-sm);
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            color: #FFF;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .drawer-close:hover { background: rgba(255,255,255,0.2); }
+
+        /* Mission strip inside drawer */
+        .drawer-mission {
+            margin: 16px 20px;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius);
+        }
+        .drawer-mission-title {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 4px;
+        }
+        .drawer-mission-text {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.55;
+        }
+
+        /* Drawer nav links */
+        .drawer-nav {
+            display: flex;
+            flex-direction: column;
+            padding: 8px 12px;
+            gap: 2px;
+            flex: 1;
+        }
+        .drawer-nav-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: rgba(255,255,255,0.35);
+            padding: 12px 8px 6px;
+        }
+        .drawer-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.82);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            padding: 11px 14px;
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+        .drawer-nav a:hover {
+            background: rgba(255,255,255,0.1);
+            color: #FFFFFF;
+            padding-left: 18px;
+        }
+        .drawer-nav a svg {
+            width: 17px; height: 17px;
+            flex-shrink: 0;
+            opacity: 0.75;
+        }
+        .drawer-nav a:hover svg { opacity: 1; }
+
+        /* Notif inside drawer */
+        .drawer-notif-badge {
+            margin-left: auto;
+            background: var(--gold);
+            color: #FFF;
+            font-size: 0.6rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: var(--radius-full);
+            font-family: var(--font-mono);
+        }
+
+        /* Drawer user section */
+        .drawer-user {
+            margin: 12px 20px;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: var(--radius-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .drawer-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--primary-light);
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .drawer-username {
+            font-family: var(--font-mono);
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .drawer-user-role {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 1px;
+        }
+
+        /* Drawer footer actions */
+        .drawer-footer {
+            padding: 16px 20px 28px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .drawer-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 11px 20px;
+            border-radius: var(--radius);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            font-family: var(--font-body);
+            transition: var(--transition);
+            border: none; cursor: pointer;
+        }
+        .drawer-btn-primary {
+            background: rgba(255,255,255,0.15);
+            color: #FFF;
+            border: 1.5px solid rgba(255,255,255,0.3);
+        }
+        .drawer-btn-primary:hover { background: rgba(255,255,255,0.25); }
+        .drawer-btn-logout {
+            background: rgba(220,38,38,0.15);
+            color: #FCA5A5;
+            border: 1.5px solid rgba(220,38,38,0.3);
+        }
+        .drawer-btn-logout:hover { background: rgba(220,38,38,0.25); color: #FFF; }
+
+        /* Hide old navbar-links — not used anymore */
+        .navbar-links { display: none !important; }
+
+        /* Legacy btn classes kept for other pages that may reference them */
+        .btn-nav, .btn-outline, .btn-sm {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 7px 14px; border-radius: var(--radius);
+            font-size: 0.82rem; font-weight: 600;
+            text-decoration: none; transition: var(--transition);
+            font-family: var(--font-body);
+        }
+        .notif-badge {
+            position: absolute; top: -4px; right: -4px;
+            background: var(--gold); color: #FFF;
+            font-size: 0.6rem; font-weight: 700;
+            width: 17px; height: 17px;
+            border-radius: var(--radius-full);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-mono);
+            border: 2px solid var(--primary);
+        }
+        .user-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-light); }
+        .user-name { font-size: 0.82rem; font-weight: 600; color: #FFF; font-family: var(--font-mono); }
+        .navbar-user { display:none; }
+
+        /* ── Alert messages ──────────────────────────────────────── */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+        .alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            border: 1px solid transparent;
+        }
+        .alert-success {
+            background: var(--green-bg);
+            color: var(--green-text);
+            border-color: #86EFAC;
+        }
+        .alert-error {
+            background: #FEE2E2;
+            color: var(--danger);
+            border-color: #FCA5A5;
+        }
+        .alert-warning {
+            background: var(--gold-bg);
+            color: #92400E;
+            border-color: #FCD34D;
+        }
+        .alert-info {
+            background: #DBEAFE;
+            color: #1E40AF;
+            border-color: #93C5FD;
+        }
+
+        /* ── Footer ──────────────────────────────────────────────── */
+        footer {
+            background: linear-gradient(135deg, var(--fg) 0%, var(--primary-dark) 100%);
+            color: rgba(255,255,255,0.75);
+            padding: 48px 0 0;
+            font-size: 0.875rem;
+            margin-top: auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 40px;
+            padding-bottom: 40px;
+        }
+
+        .footer-brand .footer-name {
+            font-family: var(--font-mono);
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 12px;
+        }
+        .footer-brand p {
+            color: rgba(255,255,255,0.6);
+            line-height: 1.7;
+            font-size: 0.85rem;
+        }
+
+        .footer-col h4 {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--secondary);
+            margin-bottom: 16px;
+        }
+        .footer-col a {
+            display: block;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            transition: var(--transition);
+        }
+        .footer-col a:hover { color: #FFFFFF; padding-left: 4px; }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.45);
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Social icon buttons */
+        .footer-social-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .footer-social-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: #FFFFFF;
+        }
+
+        /* ── Responsive ──────────────────────────────────────────── */
+        @media (max-width: 900px) {
+            .footer-grid { grid-template-columns: 1fr 1fr; }
+            .footer-brand { grid-column: 1 / -1; }
+        }
+        @media (max-width: 600px) {
+            .navbar { padding: 0 16px; }
+            .brand-tagline { display: none; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; align-items: flex-start; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition-duration: 0.01ms !important; }
+        }
+
+                /* ===========================
+            MOBILE RESPONSIVENESS
+            =========================== */
+
+        @media (max-width: 768px) {
+
+            /* Navigation */
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+                gap: 10px;
+            }
+
+            .navbar-nav {
+                flex-direction: column;
+                width: 100%;
+                text-align: center;
+            }
+
+            .nav-link {
+                display: block;
+                padding: 12px;
+            }
+
+            /* Hero Section */
+            .hero-section {
+                padding: 40px 20px;
+                text-align: center;
+            }
+
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+
+            /* Cards */
+            .card,
+            .property-card,
+            .auth-card {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+
+            /* Forms */
+            input,
+            select,
+            textarea,
+            button {
+                width: 100%;
+                font-size: 16px;
+            }
+
+            /* Tables */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            /* Dashboard stats */
+            .stats-grid,
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Residence listing grid */
+            .residence-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Images */
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            /* Buttons */
+            .btn,
+            .btn-primary,
+            .btn-danger {
+                width: 100%;
+                margin-top: 8px;
+            }
+        }
+
+       .residence-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 25px;
+        } 
+        .property-image img,
+        .card img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .admin-link {
+            color: #0F766E !important; /* Matches --c-primary */
+            font-weight: 600;
+            border-bottom: 2px solid #14B8A6; /* Matches --c-secondary accent underline */
+            padding-bottom: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .admin-link:hover {
+            color: #0D5E58 !important; /* Matches --c-primary-dk */
+            border-bottom-color: #0F766E;
+        }
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 62px;
+            background: var(--bg-card);
+            border-top: 1px solid var(--border);
+            box-shadow: 0 -4px 16px rgba(15,118,110,0.08);
+            z-index: 999;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+        .bottom-nav-inner {
+            display: flex;
+            height: 62px;
+            align-items: center;
+            justify-content: space-around;
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--fg-muted);
+            text-decoration: none;
+            font-size: 0.68rem;
+            font-weight: 500;
+            flex: 1;
+            padding: 6px 0;
+        }
+        .bottom-nav-item svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+        .bottom-nav-item.active {
+            color: var(--primary);
+        }
+        @media (max-width: 768px) {
+            .bottom-nav { display: block; }
+            body { padding-bottom: 62px; }
+        }
+        .fab-search {
+            display: none;
+            position: fixed;
+            right: 18px;
+            bottom: 78px;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: #fff;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            z-index: 998;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .fab-search svg {
+            width: 24px;
+            height: 24px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2.2;
+        }
+        .fab-search:active {
+            transform: scale(0.92);
+        }
+        @media (max-width: 768px) {
+            .fab-search.show-fab { display: flex; }
+        }
+
+        .ai-fab {
+            position: fixed;
+            left: 18px;
+            bottom: 78px;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: var(--primary-dark);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            z-index: 998;
+            border: none;
+            cursor: pointer;
+        }
+        .ai-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; }
+        .ai-chat-panel {
+            display: none;
+            position: fixed;
+            left: 18px;
+            bottom: 140px;
+            width: 320px;
+            max-width: calc(100vw - 36px);
+            height: 420px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            z-index: 999;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .ai-chat-panel.open { display: flex; }
+        .ai-chat-header { background: var(--primary-dark); color: #fff; padding: 12px 16px; font-weight: 600; font-size: 0.9rem; }
+        .ai-chat-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+        .ai-msg { padding: 8px 12px; border-radius: 12px; font-size: 0.82rem; max-width: 85%; line-height: 1.4; }
+        .ai-msg.user { align-self: flex-end; background: var(--primary); color: #fff; }
+        .ai-msg.bot { align-self: flex-start; background: var(--muted); color: var(--fg); }
+        .ai-chat-input-row { display: flex; border-top: 1px solid var(--border); }
+        .ai-chat-input-row input { flex: 1; border: none; padding: 10px 12px; font-size: 0.82rem; background: transparent; color: var(--fg); }
+        .ai-chat-input-row button { border: none; background: var(--primary); color: #fff; padding: 0 16px; cursor: pointer; }
+
+    </style>
+
+    {% block extra_head %}{% endblock %}
+    
+</head>
+<body>
+    <div id="ptrIndicator">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+</div>
+{% csrf_token %}
+<!-- ═══════════════════════════════════════
+     OVERLAY (click to close drawer)
+═══════════════════════════════════════ -->
+<div class="nav-overlay" id="navOverlay" onclick="closeDrawer()"></div>
+
+<!-- ═══════════════════════════════════════
+     SIDE DRAWER
+═══════════════════════════════════════ -->
+<div class="nav-drawer" id="navDrawer">
+
+  <!-- Drawer header -->
+  <div class="drawer-header">
+    <a href="/" class="drawer-brand">
+      <div class="brand-icon" style="width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.15);border:1.5px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <div>
+        <div class="drawer-brand-name">HomeFinder KE</div>
+        <div class="drawer-brand-tag">Find Your Home Today</div>
+      </div>
+    </a>
+    <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Mission strip -->
+  <div class="drawer-mission">
+    <div class="drawer-mission-title">Our Mission</div>
+    <div class="drawer-mission-text">Find your home today — and help another Kenyan find theirs.</div>
+  </div>
+
+  <!-- Nav links -->
+  <div class="drawer-nav">
+    <div class="drawer-nav-label">Navigation</div>
+    <a href="/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="/residences/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      Residences
+    </a>
+    <a href="/search/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search
+    </a>
+    {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
+    <a href="{% url 'add_mover' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      Add Mover
+    </a>
+    <a href="{% url 'add_furniture_vendor' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      Add Furniture Vendor
+    </a>
+    {% else %}
+    <a href="/add-residence/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      Add Listing
+    </a>
+    {% endif %}
+    <a href="/about/">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      About
+    </a>
+    <a href="{% url 'notifications' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      Notifications
+      {% if unread_notifications > 0 %}
+        <span class="drawer-notif-badge">{{ unread_notifications }}</span>
+      {% endif %}
+    </a>
+    <a href="{% url 'roommate_list' %}">Roommates</a>
+
+    {% if user.is_authenticated %}
+      {% if user.email == 'homefinder.ke.help@gmail.com' %}
+        <div class="drawer-nav-label" style="margin-top:4px;">Admin Control</div>
+        <a href="{% url 'admin_dashboard' %}" class="nav-link admin-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Admin Dashboard
+        </a>
+      {% else %}
+        <div class="drawer-nav-label" style="margin-top:4px;">Account</div>
+        <a href="/dashboard/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>      
+      {% endif %}
+    {% endif %}
+
+    <a href="/chat/" class="nav-link-item" style="position: relative; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: #134E4A; font-weight: 500; font-size: 0.9rem;">
+  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  <span>Messages</span>
+  
+  <span id="global-unread-badge" style="background: #DC2626; color: #FFFFFF; font-size: 0.7rem; font-weight: 700; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -6px; right: -8px; box-shadow: 0 2px 6px rgba(220,38,38,0.3);">
+    3
+  </span>
+    </a>
+
+
+
+  </div>
+
+  {% if user.is_authenticated %}
+    <!-- User info -->
+    <div class="drawer-user">
+      {% if user.profile.profile_picture %}
+        <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" class="drawer-avatar">
+      {% else %}
+        <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--secondary));display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;border:2px solid var(--primary-light);font-family:var(--font-mono);flex-shrink:0;">
+          {{ user.username|first|upper }}
+        </div>
+      {% endif %}
+      <div>
+        <div class="drawer-username">{{ user.username }}</div>
+        <div class="drawer-user-role">Logged in</div>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <a href="/accounts/logout/" class="drawer-btn drawer-btn-logout">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </a>
+    </div>
+  {% else %}
+    <div class="drawer-footer">
+      <a href="/accounts/login/" class="drawer-btn drawer-btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Login
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+
+<!-- ═══════════════════════════════════════
+     NAVBAR
+═══════════════════════════════════════ -->
+<nav class="navbar">
+
+    <!-- Brand -->
+    <a href="/" class="navbar-brand">
+        <div class="brand-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        </div>
+        <div class="brand-text">
+            <span class="brand-name">HomeFinder KE</span>
+            <span class="brand-tagline">Find a Home · Help Someone Find Theirs</span>
+        </div>
+    </a>
+
+    <!-- Hamburger -->
+    <button class="nav-hamburger" id="navHamburger" onclick="openDrawer()" aria-label="Open menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+</nav>
+
+<script>
+  function openDrawer() {
+    document.getElementById('navDrawer').classList.add('is-open');
+    document.getElementById('navOverlay').classList.add('is-open');
+    document.getElementById('navHamburger').classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDrawer() {
+    document.getElementById('navDrawer').classList.remove('is-open');
+    document.getElementById('navOverlay').classList.remove('is-open');
+    document.getElementById('navHamburger').classList.remove('is-open');
+    document.body.style.overflow = '';
+  }
+  // Close on Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeDrawer();
+  });
+</script>
+
+<!-- ═══════════════════════════════════════
+     MESSAGES
+═══════════════════════════════════════ -->
+{% if messages %}
+<div class="container" style="padding-top:20px;">
+    {% for message in messages %}
+        <div class="alert auto-dismiss-alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+<script>
+  document.querySelectorAll('.auto-dismiss-alert').forEach(function(el, i) {
+      setTimeout(function() {
+          el.style.transition = 'opacity 400ms ease';
+          el.style.opacity = '0';
+          setTimeout(function() { el.remove(); }, 400);
+      }, 3000 + (i * 300));
+  });
+</script>
+{% endif %}
+
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════ -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════ -->
+<footer>
+    <div class="container">
+        <div class="footer-grid">
+            <!-- Brand col -->
+            <div class="footer-brand">
+                <div class="footer-name">HomeFinder KE</div>
+                <p>Kenya's premier platform to discover quality rental homes — from bedsitters to full apartments. Finding your perfect appartment just got effortless.</p>
+                <div style="display:flex;gap:10px;margin-top:20px;">
+                    <a href="#" class="footer-social-btn" aria-label="Twitter">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+                    </a>
+                    <a href="#" class="footer-social-btn" aria-label="Instagram">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                    </a>
+                    <a href="#" class="footer-social-btn" aria-label="Facebook">
+                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+                    </a>
+                </div>
+                
+            </div>
+
+            <!-- Quick links -->
+            <div class="footer-col">
+                <h4>Quick Links</h4>
+                <a href="/">Home</a>
+                <a href="/residences/">Browse Residences</a>
+                <a href="/search/">Search</a>
+                {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
+                <a href="{% url 'add_mover' %}">Add Mover</a>
+                <a href="{% url 'add_furniture_vendor' %}">Add Furniture Vendor</a>
+                {% else %}
+                <a href="/add-residence/">List Your Property</a>
+                {% endif %}
+                <a href="/about/">About Us</a>
+            </div>
+
+            <!-- Contact -->
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <a href="mailto:homefinder.ke.help@gmail.com">homefinder.ke.help@gmail.com</a>
+                <a href="tel:+254758999426">+254 758999426</a>
+                <a href="#">Nairobi, Kenya</a>
+                <a href="/accounts/login/">Login / Register</a>
+                <div class="support-dev-box" style="max-width:360px; margin:20px auto; padding:16px; background:var(--bg-card); border-radius:14px; text-align:center;">
+  <p style="font-size:0.85rem; color:var(--fg-muted); margin-bottom:10px;">❤️ Enjoying HomeFinder Kenya? Support keeping it online — any amount, totally optional.</p>
+  <input type="tel" id="donatePhone" placeholder="07XXXXXXXX" style="width:100%; padding:8px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border);">
+  <input type="number" id="donateAmount" placeholder="Amount (KSh)" min="1" style="width:100%; padding:8px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border);">
+  <button id="donateBtn" style="background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">Support with M-Pesa</button>
+  <p id="donateStatus" style="font-size:0.78rem; margin-top:8px;"></p>
+</div>
+
+<script>
+  const donateBtn = document.getElementById('donateBtn');
+  if (donateBtn) {
+    donateBtn.addEventListener('click', () => {
+      const phone = document.getElementById('donatePhone').value.trim();
+      const amount = document.getElementById('donateAmount').value.trim();
+      const statusEl = document.getElementById('donateStatus');
+
+      if (!phone || !amount) {
+        statusEl.textContent = 'Please enter your phone number and an amount.';
+        statusEl.style.color = '#DC2626';
+        return;
+      }
+
+      donateBtn.disabled = true;
+      donateBtn.textContent = 'Sending prompt...';
+      statusEl.textContent = '';
+
+      fetch('/donate/stk-push/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+        body: JSON.stringify({ phone, amount }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          statusEl.textContent = data.message || data.error;
+          statusEl.style.color = data.message ? '#0F766E' : '#DC2626';
+          donateBtn.disabled = false;
+          donateBtn.textContent = 'Support with M-Pesa';
+        })
+        .catch(() => {
+          statusEl.textContent = 'Connection error. Please try again.';
+          statusEl.style.color = '#DC2626';
+          donateBtn.disabled = false;
+          donateBtn.textContent = 'Support with M-Pesa';
+        });
+    });
+  }
+</script>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span>&copy; 2026 HomeFinder KE. All rights reserved.</span>
+            <span style="display:flex; gap:16px;">
+                <a href="{% url 'privacy_policy' %}" style="color:inherit; text-decoration:none;">
+                    Privacy Policy
+                </a>
+                <a href="{% url 'terms_of_service' %}" style="color:inherit; text-decoration:none;">
+                    Terms of Service
+                </a>
+            </span>
+            
+        </div>
+    </div>
+</footer>
+{% if request.resolver_match.url_name != 'search' %}
+<a href="{% url 'search' %}" class="fab-search show-fab">
+  <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+</a>
+{% endif %}
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a href="{% url 'home' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="{% url 'search' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'search' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Search
+    </a>
+    <a href="{% url 'my_favorites' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'my_favorites' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Favorites
+    </a>
+    <a href="{% url 'chat_hub' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'chat_hub' or request.resolver_match.url_name == 'chat_room' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      Chat
+    </a>
+    {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
+    <a href="{% url 'admin_dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Admin
+    </a>
+    {% else %}
+    <a href="{% url 'dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+    {% endif %}
+  </div>
+</nav>
+
+{% comment %}
+<button class="ai-fab" id="aiFabBtn" title="Ask a rental question">
+  <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+</button>
+
+<div class="ai-chat-panel" id="aiChatPanel">
+  <div class="ai-chat-header">🧠 Homefinder Assistant</div>
+  <div class="ai-chat-body" id="aiChatBody">
+    <div class="ai-msg bot">Hi! Ask me anything about renting a home in Kenya — deposits, viewings, tenant rights, or how this site works.</div>
+  </div>
+  <div class="ai-chat-input-row">
+    <input type="text" id="aiChatInput" placeholder="Type your question...">
+    <button id="aiChatSend">Send</button>
+  </div>
+</div>
+<script>
+    function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return '';
+    }
+    
+  const aiFab = document.getElementById('aiFabBtn');
+  const aiPanel = document.getElementById('aiChatPanel');
+  const aiBody = document.getElementById('aiChatBody');
+  const aiInput = document.getElementById('aiChatInput');
+  const aiSend = document.getElementById('aiChatSend');
+
+  aiFab.addEventListener('click', () => aiPanel.classList.toggle('open'));
+
+  function addAiMsg(text, who) {
+    const div = document.createElement('div');
+    div.className = `ai-msg ${who}`;
+    div.textContent = text;
+    aiBody.appendChild(div);
+    aiBody.scrollTop = aiBody.scrollHeight;
+  }
+
+  function sendAiMessage() {
+    const msg = aiInput.value.trim();
+    if (!msg) return;
+    addAiMsg(msg, 'user');
+    aiInput.value = '';
+    addAiMsg('Typing...', 'bot');
+
+    fetch('/chat/ai-assistant/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({ message: msg }),
+    })
+      .then(res => res.json())
+      .then(data => {
+        aiBody.removeChild(aiBody.lastChild);
+        addAiMsg(data.reply || data.error || 'Something went wrong.', 'bot');
+      })
+      .catch(() => {
+        aiBody.removeChild(aiBody.lastChild);
+        addAiMsg('Connection error. Please try again.', 'bot');
+      });
+  }
+
+  aiSend.addEventListener('click', sendAiMessage);
+  aiInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendAiMessage(); });
+</script>
+{% endcomment %}
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('img:not([loading])').forEach(img => {
+      img.setAttribute('loading', 'lazy');
+      img.setAttribute('decoding', 'async');
+    });
+  });
+</script>
+<script>
+(function () {
+  // Only enable on touch devices
+  if (!('ontouchstart' in window)) return;
+
+  const indicator = document.getElementById('ptrIndicator');
+  let startY = 0;
+  let pulling = false;
+  const THRESHOLD = 70;
+
+  document.addEventListener('touchstart', function (e) {
+    if (window.scrollY === 0) {
+      startY = e.touches[0].clientY;
+      pulling = true;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function (e) {
+    if (!pulling) return;
+    const diff = e.touches[0].clientY - startY;
+    if (diff > 0 && window.scrollY === 0) {
+      const pullDist = Math.min(diff, 120);
+      indicator.style.top = (pullDist - 60) + 'px';
+      indicator.querySelector('svg').style.transform = `rotate(${pullDist * 3}deg)`;
+    }
+  }, { passive: true });
+
+  document.addEventListener('touchend', function (e) {
+    if (!pulling) return;
+    pulling = false;
+    const diff = e.changedTouches[0].clientY - startY;
+    if (diff > THRESHOLD && window.scrollY === 0) {
+      indicator.style.top = '20px';
+      indicator.classList.add('refreshing');
+      setTimeout(() => window.location.reload(), 400);
+    } else {
+      indicator.style.top = '-60px';
+    }
+  });
+})();
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
+    });
+  }
+</script>
+</body>
+</html>

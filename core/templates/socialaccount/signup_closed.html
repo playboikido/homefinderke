@@ -1,0 +1,73 @@
+{% extends "account/base.html" %}
+{% load static %}
+
+{% block title %}Registration Closed | HomeFinder{% endblock %}
+
+{% block account_content %}
+
+<style>
+
+.icon{
+width:90px;
+height:90px;
+margin:auto;
+border-radius:50%;
+background:#fee2e2;
+color:#dc2626;
+display:flex;
+justify-content:center;
+align-items:center;
+font-size:42px;
+margin-bottom:25px;
+}
+
+h1{
+text-align:center;
+color:#0f172a;
+margin-bottom:15px;
+}
+
+p{
+text-align:center;
+color:#64748b;
+line-height:1.8;
+margin-bottom:30px;
+}
+
+.btn{
+display:block;
+text-align:center;
+background:#2563eb;
+color:white;
+padding:15px;
+border-radius:10px;
+text-decoration:none;
+font-weight:600;
+transition:.3s;
+}
+
+.btn:hover{
+background:#1d4ed8;
+}
+
+</style>
+
+<div class="icon">
+🚫
+</div>
+
+<h1>Registration Closed</h1>
+
+<p>
+
+HomeFinder is not accepting new registrations at this moment.
+
+Please check again later or contact the administrator if you believe this is an error.
+
+</p>
+
+<a href="{% url 'home' %}" class="btn">
+Return Home
+</a>
+
+{% endblock %}

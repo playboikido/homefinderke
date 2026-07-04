@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | HomeFinderKE</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(
+                135deg,
+                #0f172a,
+                #1e293b,
+                #2563eb
+            );
+            padding:20px;
+        }
+
+        .login-card{
+            width:100%;
+            max-width:450px;
+            background:#ffffff;
+            border-radius:20px;
+            padding:40px;
+            box-shadow:0 15px 40px rgba(0,0,0,0.2);
+        }
+
+        .logo{
+            text-align:center;
+            margin-bottom:30px;
+        }
+
+        .logo h1{
+            color:#2563eb;
+            font-size:32px;
+        }
+
+        .logo p{
+            color:#666;
+            margin-top:10px;
+        }
+
+        .form-group{
+            margin-bottom:20px;
+        }
+
+        label{
+            display:block;
+            margin-bottom:8px;
+            color:#333;
+            font-weight:600;
+        }
+
+        input{
+            width:100%;
+            padding:14px;
+            border:1px solid #ddd;
+            border-radius:10px;
+            font-size:16px;
+            outline:none;
+        }
+
+        input:focus{
+            border-color:#2563eb;
+        }
+
+        .login-btn{
+            width:100%;
+            padding:15px;
+            background:#2563eb;
+            color:white;
+            border:none;
+            border-radius:10px;
+            cursor:pointer;
+            font-size:16px;
+            font-weight:bold;
+        }
+
+        .login-btn:hover{
+            background:#1d4ed8;
+        }
+
+        .divider{
+            text-align:center;
+            margin:25px 0;
+            color:#888;
+        }
+
+        .google-btn{
+            display:block;
+            text-align:center;
+            width:100%;
+            padding:15px;
+            background:#fff;
+            border:1px solid #ddd;
+            border-radius:10px;
+            text-decoration:none;
+            color:#333;
+            font-weight:bold;
+        }
+
+        .google-btn:hover{
+            background:#f5f5f5;
+        }
+
+        .signup-link{
+            text-align:center;
+            margin-top:25px;
+        }
+
+        .signup-link a{
+            color:#2563eb;
+            text-decoration:none;
+            font-weight:bold;
+        }
+
+        .signup-link a:hover{
+            text-decoration:underline;
+        }
+
+        .errorlist{
+            color:red;
+            list-style:none;
+            margin-bottom:15px;
+        }
+
+        /* reCAPTCHA blending */
+        .captcha-wrapper{
+            margin-top:18px;
+            display:flex;
+            justify-content:center;
+        }
+
+        .g-recaptcha{
+            border-radius:10px;
+            overflow:hidden;
+            border:1px solid #ddd;
+            transition:border-color 0.2s;
+        }
+
+        .g-recaptcha:focus-within{
+            border-color:#2563eb;
+        }
+        .auth-links {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.auth-links a {
+    color: #2563eb;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.auth-links a:hover {
+    text-decoration: underline;
+}
+
+        /* Password field with eye icon */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 42px;
+        }
+
+        .eye-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            color: #888;
+        }
+
+        .eye-toggle:hover {
+            color: #2563eb;
+        }
+
+        .eye-toggle svg {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+
+    <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        <h1>HomeFinderKE</h1>
+        <p>Sign in to your account</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="form-group">
+            <label>Email or Username</label>
+            {{ form.login }}
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <div class="password-wrapper">
+                <button type="button" class="eye-toggle" onclick="togglePassword()" aria-label="Toggle password visibility">
+                    <svg id="eyeOpen" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <svg id="eyeClosed" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                </button>
+                {{ form.password }}
+            </div>
+        </div>
+        <div class="auth-links">
+            <a href="{% url 'account_reset_password' %}">
+                    Forgot Password?
+            </a>
+         </div>
+
+        <button type="submit" class="login-btn">
+            Sign In
+        </button>
+
+        
+
+    </form>
+
+    <div class="divider">
+        OR
+    </div>
+
+    <a href="/accounts/google/login/" class="google-btn">
+        Continue with Google
+    </a>
+
+    <div class="signup-link">
+        Don't have an account?
+        <a href="{% url 'account_signup' %}">
+            Create Account
+        </a>
+    </div>
+
+</div>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.querySelector('input[name="password"]') || document.querySelector('.password-wrapper input');
+        const eyeOpen = document.getElementById('eyeOpen');
+        const eyeClosed = document.getElementById('eyeClosed');
+        if (passwordInput) {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            eyeOpen.style.display = isHidden ? 'none' : 'block';
+            eyeClosed.style.display = isHidden ? 'block' : 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

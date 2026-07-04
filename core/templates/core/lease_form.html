@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Generate Lease Agreement — HomeFinder Kenya{% endblock %}
+{% block content %}
+<div style="max-width:560px; margin:40px auto; padding:0 20px; font-family:'Fira Sans',sans-serif;">
+  <h2 style="color:#134E4A; margin-bottom:6px;">Generate Lease Agreement</h2>
+  <p style="color:#5EAFA8; margin-bottom:24px;">for {{ residence.name }}</p>
+
+  <form method="post" style="display:flex; flex-direction:column; gap:14px;">
+    {% csrf_token %}
+    {% for field in form %}
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:4px; color:#134E4A;">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<p style="color:#DC2626; font-size:0.8rem;">{{ field.errors|striptags }}</p>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" id="leaseSubmitBtn" style="background:#0F766E; color:#fff; border:none; padding:12px 24px; border-radius:10px; font-weight:600; cursor:pointer; margin-top:10px;">
+      Generate & Download PDF
+    </button>
+    <p id="leaseStatus" style="display:none; color:#0F766E; font-size:0.85rem; margin-top:8px;">✅ Your lease PDF is downloading — check your browser's downloads.</p>
+  </form>
+
+  <p style="font-size:0.75rem; color:#94A3B8; margin-top:20px;">
+    This generates a lease template, not a legally binding contract. Both parties should review it independently before signing.
+  </p>
+</div>
+<script>
+  document.querySelector('form').addEventListener('submit', function () {
+    const btn = document.getElementById('leaseSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    document.getElementById('leaseStatus').style.display = 'block';
+  });
+</script>
+{% endblock %}

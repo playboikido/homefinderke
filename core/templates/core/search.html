@@ -1,0 +1,454 @@
+{% extends 'base.html' %}
+
+{% block title %}Search Filter Engine — HomeFinder KE{% endblock %}
+{% block meta_description %}Search houses, apartments, and roommates for rent in Kenya. Filter by rent price, location, water and fibre internet availability.{% endblock %}
+
+{% block content %}
+<!-- Include Leaflet.js CSS & JS for OpenStreetMap -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  :root {
+    --primary: #0F766E;
+    --primary-dark: #0D5E58;
+    --border-color: #99F6E4;
+    --bg-light: #F0FDFA;
+    --text-dark: #134E4A;
+  }
+
+  .s-wrapper { background: var(--bg-light); min-height: 100vh; padding-top: 110px; padding-bottom: 80px; font-family: 'Fira Sans', sans-serif; }
+  .s-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .filter-panel-card { background: #FFFFFF; border: 1.5px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: 0 8px 24px rgba(15,118,110,0.06); margin-bottom: 24px; }
+  .search-row-box { display: flex; gap: 12px; align-items: center; }
+  .input-bar-decorator { flex: 1; display: flex; align-items: center; background: var(--bg-light); border: 1.5px solid var(--border-color); border-radius: 10px; padding: 0 16px; }
+  .input-bar-decorator input { width: 100%; border: none; background: transparent; outline: none; padding: 14px 0; color: var(--text-dark); font-size: 1rem; }
+
+  /* View Mode Switcher Styles */
+  .view-switcher-zone {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    background: #E6FFFA;
+    padding: 6px;
+    border-radius: 10px;
+    width: fit-content;
+    border: 1px solid var(--border-color);
+  }
+  .view-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--primary);
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 150ms;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .view-btn.active {
+    background: var(--primary);
+    color: #FFFFFF;
+  }
+
+  /* Map Container Layout */
+  #map-view-container {
+    display: none; /* Hidden by default */
+    height: 60vh;
+    border-radius: 16px;
+    border: 1.5px solid var(--border-color);
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(15,118,110,0.05);
+    background: #FFFFFF;
+  }
+  #map { width: 100%; height: 100%; }
+
+  /* Map Popup Custom Styling */
+  .map-popup-card { font-family: 'Fira Sans', sans-serif; padding: 4px; }
+  .map-popup-title { font-weight: 700; color: var(--text-dark); margin: 0 0 4px 0; font-size: 0.95rem; }
+  .map-popup-price { color: var(--primary); font-weight: 700; margin-bottom: 8px; }
+  .map-popup-distance { font-size: 0.8rem; color: #6B7280; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+  .map-directions-btn {
+    display: inline-block; background: var(--primary); color: #FFFFFF !important; text-decoration: none;
+    padding: 6px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-align: center; width: 100%; box-sizing: border-box;
+  }
+
+  /* Existing Card Controls */
+  .icon-toggle-btn { background: var(--bg-light); border: 1.5px solid var(--border-color); color: var(--primary); width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 150ms; flex-shrink: 0; }
+  .icon-toggle-btn:hover, .icon-toggle-btn.active { background: var(--primary); color: #FFFFFF; }
+  .engine-submit-btn { background: var(--primary); color: #FFFFFF; border: none; padding: 0 20px; height: 50px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: background 150ms; flex-shrink: 0; }
+  .engine-submit-btn:hover { background: var(--primary-dark); }
+  .filter-options-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 20px; padding-top: 20px; border-top: 1px dashed var(--border-color); }
+  .input-block { display: flex; flex-direction: column; gap: 6px; }
+  .input-block label { font-size: 0.75rem; font-weight: 700; color: var(--text-dark); text-transform: uppercase; }
+  .input-block input, .input-block select { width: 100%; padding: 10px; border-radius: 8px; border: 1.5px solid var(--border-color); background: #FFFFFF; outline: none; font-size: 0.88rem; box-sizing: border-box; }
+  .rent-range-split { display: flex; gap: 8px; }
+  .chips-row { grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .chip-item { display: flex; align-items: center; gap: 6px; background: var(--bg-light); border: 1.5px solid var(--border-color); padding: 8px 14px; border-radius: 50px; font-size: 0.82rem; cursor: pointer; }
+  .chip-item input { accent-color: var(--primary); margin: 0; }
+  .chip-item:has(input:checked) { background: #CCFBF1; font-weight: 600; }
+  .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+  .property-card { background: #FFFFFF; border-radius: 16px; border: 1.5px solid var(--border-color); overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(15,118,110,0.02); transition: transform 200ms; }
+  .property-card:hover { transform: translateY(-4px); }
+  .property-img-slot { height: 180px; position: relative; background: #E8F8F6; overflow: hidden; }
+  .property-img-slot img { width: 100%; height: 100%; object-fit: cover; }
+  .area-indicator-pill { position: absolute; bottom: 12px; left: 12px; background: rgba(19, 78, 74, 0.88); backdrop-filter: blur(4px); color: #E6FFFA; font-size: 0.75rem; font-weight: 500; padding: 4px 10px; border-radius: 8px; display: flex; align-items: center; gap: 4px; }
+  .property-body { padding: 18px; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .property-title { font-family: 'Fira Code', monospace; font-size: 0.98rem; font-weight: 700; margin: 0; color: var(--text-dark); }
+  .property-price { font-family: 'Fira Code', monospace; font-weight: 700; color: var(--primary); font-size: 1.2rem; margin-top: auto; }
+  .property-footer { padding: 12px 18px 16px; border-top: 1px solid #E8F8F6; display: flex; justify-content: space-between; align-items: center; }
+  .action-details-link { background: var(--primary); color: #FFFFFF; text-decoration: none; font-size: 0.85rem; font-weight: 600; padding: 8px 16px; border-radius: 8px; transition: background 150ms; }
+  .live-card-distance { font-size: 0.78rem; color: #5EAFA8; font-weight: 500; }
+
+  @media(max-width: 900px) { .filter-options-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media(max-width: 600px) { .filter-options-grid { grid-template-columns: 1fr; } .search-row-box { flex-direction: column; align-items: stretch; } .icon-toggle-btn, .engine-submit-btn { width: 100%; } }
+</style>
+
+<div class="s-wrapper">
+  <div class="s-container">
+
+    <!-- Active Filter Form Processing Deck -->
+    <div class="filter-panel-card">
+      <form method="GET" action="/search/">
+        <div class="search-row-box">
+          <div class="input-bar-decorator">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color: var(--primary); margin-right: 10px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" name="q" placeholder="Modify or broaden search criteria..." value="{{ request.GET.q|default_if_none:'' }}">
+          </div>
+          <button type="button" class="icon-toggle-btn active" id="engineGridToggle">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+          <button type="submit" class="engine-submit-btn">Apply Filters</button>
+        </div>
+
+        <div class="filter-options-grid" id="engineOptionsTray">
+          <div class="input-block">
+            <label>County Zone</label>
+            <input type="text" name="county" value="{{ request.GET.county|default_if_none:'' }}" placeholder="e.g. Nairobi">
+          </div>
+          <div class="input-block">
+            <label>Specific Area / Town</label>
+            <input type="text" name="town" value="{{ request.GET.town|default_if_none:'' }}" placeholder="e.g. Kilimani">
+          </div>
+          <div class="input-block">
+            <label>Configuration</label>
+            <select name="house_type">
+              <option value="">All Layouts</option>
+              <option value="single" {% if request.GET.house_type == 'single' %}selected{% endif %}>Single</option>
+              <option value="bedsitter" {% if request.GET.house_type == 'bedsitter' %}selected{% endif %}>Bedsitter</option>
+              <option value="double_room" {% if request.GET.house_type == 'double_room' %}selected{% endif %}>Double Room</option>
+              <option value="studio" {% if request.GET.house_type == 'studio' %}selected{% endif %}>Studio</option>
+              <option value="1_bedroom" {% if request.GET.house_type == '1_bedroom' %}selected{% endif %}>1 Bedroom</option>
+              <option value="2_bedroom" {% if request.GET.house_type == '2_bedroom' %}selected{% endif %}>2 Bedroom</option>
+              <option value="3_bedroom" {% if request.GET.house_type == '3_bedroom' %}selected{% endif %}>3 Bedroom</option>
+            </select>
+          </div>
+          <div class="input-block">
+            <label>Price Range Budget (KSh)</label>
+            <div class="rent-range-split">
+                <input type="number" name="min_rent" value="{{ request.GET.min_rent|default_if_none:'' }}" placeholder="Min">
+                <input type="number" name="max_rent" value="{{ request.GET.max_rent|default_if_none:'' }}" placeholder="Max">
+            </div>
+          </div>
+          <div class="input-block">
+            <label>Sorting Priority</label>
+            <select name="sort">
+              <option value="">Standard Relevance</option>
+              <option value="highest_rated" {% if request.GET.sort == 'highest_rated' %}selected{% endif %}>Highest Rated</option>
+              <option value="lowest_price" {% if request.GET.sort == 'lowest_price' %}selected{% endif %}>Lowest Price</option>
+            </select>
+          </div>
+          <div class="chips-row">
+            <label class="chip-item"><input type="checkbox" name="water" value="yes" {% if request.GET.water %}checked{% endif %}> 💧 Constant Water</label>
+            <label class="chip-item"><input type="checkbox" name="fibre" value="yes" {% if request.GET.fibre %}checked{% endif %}> 🌐 Fibre Internet</label>
+            <label class="chip-item"><input type="checkbox" name="gated" value="yes" {% if request.GET.gated %}checked{% endif %}> 🔒 Gated Area</label>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- View Toggle Control Switcher System -->
+    <div class="view-switcher-zone">
+      <button class="view-btn active" id="show-list-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg> List View
+      </button>
+      <button class="view-btn" id="show-map-btn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 20 3 17V4l6 3 6-3 6 3v13l-6-3-6 3z"/></svg> Interactive Map
+      </button>
+    </div>
+
+    <!-- VIEW A: List Cards Component Grid Layout -->
+    <div class="results-grid" id="list-view-container">
+      {% for residence in page_obj %}
+        <article class="property-card" data-lat="{{ residence.latitude }}" data-lng="{{ residence.longitude }}" data-id="{{ residence.id }}">
+          <div class="property-img-slot">
+            {% if residence.front_image %}
+              <img src="{{ residence.front_image.url }}" alt="Property layout thumbnail">
+            {% endif %}
+            <span class="area-indicator-pill">
+              {{ residence.town }}, {{ residence.county }}
+            </span>
+          </div>
+          <div class="property-body">
+            <h3 class="property-title">{{ residence.name }}</h3>
+            <div class="property-price">KSh {{ residence.rent_price|floatformat:"0" }} <span style="font-size: 0.72rem; color: var(--text-dark); font-weight: 400;">/month</span></div>
+          </div>
+          <div class="property-footer">
+            <!-- Distance placeholder updated dynamically on fly matching client geolocation -->
+            <span class="live-card-distance" id="dist-card-{{ residence.id }}">Calculating distance...</span>
+            <a href="{% url 'residence_detail' residence.id %}" class="action-details-link">View Details</a>
+          </div>
+        </article>
+      {% empty %}
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-dark); background: #FFFFFF; border-radius: 16px; border: 1.5px dashed var(--border-color)">
+          <h3>No matches found</h3>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- VIEW B: Leaflet Map Container Slot -->
+    <div id="map-view-container">
+        <div id="map"></div>
+    </div>
+
+  </div>
+</div>
+<div id="scrollSentinel" style="height:1px;"></div>
+
+<script>
+  // 1. Basic Filters Drawer Toggle Menu
+  document.getElementById('engineGridToggle').addEventListener('click', function() {
+      this.classList.toggle('active');
+      const box = document.getElementById('engineOptionsTray');
+      box.style.display = (box.style.display === 'none') ? 'grid' : 'none';
+  });
+  
+  const sentinel = document.getElementById('scrollSentinel');
+    if (sentinel) {
+    new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadNextPage();
+    }, { rootMargin: '200px' }).observe(sentinel);
+  }
+
+  // 2. View Mode Toggle Switch Logic Layout Control
+  const listContainer = document.getElementById('list-view-container');
+  const mapContainer = document.getElementById('map-view-container');
+  const listBtn = document.getElementById('show-list-btn');
+  const mapBtn = document.getElementById('show-map-btn');
+
+  let mapInitialized = false;
+  let map, userLocationMarker;
+  let userLat = null, userLng = null;
+
+  // Safe parsed collection array of property data from Django Context
+  const properties = [
+    {% for residence in page_obj %}
+      {% if residence.latitude and residence.longitude %}
+      {
+        id: "{{ residence.id }}",
+        name: "{{ residence.name|escapejs }}",
+        price: "KSh {{ residence.rent_price|floatformat:'0' }}",
+        lat: parseFloat("{{ residence.latitude }}"),
+        lng: parseFloat("{{ residence.longitude }}"),
+        url: "{% url 'residence_detail' residence.id %}"
+      },
+      {% endif %}
+    {% endfor %}
+  ];
+
+  listBtn.addEventListener('click', () => {
+    listBtn.classList.add('active');
+    mapBtn.classList.remove('active');
+    listContainer.style.display = 'grid';
+    mapContainer.style.display = 'none';
+  });
+
+  mapBtn.addEventListener('click', () => {
+    mapBtn.classList.add('active');
+    listBtn.classList.remove('active');
+    listContainer.style.display = 'none';
+    mapContainer.style.display = 'block';
+    
+    // Lazy layout refresh to render Leaflet map bounds correctly when unhidden
+    if (!mapInitialized) {
+        initMapEngine();
+        mapInitialized = true;
+    } else {
+        map.invalidateSize();
+    }
+  });
+
+  // 3. Haversine Math Formula to Calculate Clean Distance
+  function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of the earth in km
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in km
+  }
+
+  // 4. Initialize Map Engine Function
+  function initMapEngine() {
+    // Default Fallback center viewpoint (e.g., Central Nairobi Zone)
+    const defaultCenter = [-1.286389, 36.817223];
+    map = L.map('map').setView(defaultCenter, 13);
+
+    // Load OpenStreetMap Mapnik standard layer graphics texture tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Plant residence pinpoint markers matching dataset values
+    properties.forEach(p => {
+        let distanceText = "Enable location for distance";
+        let directionUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`;
+
+        if(userLat && userLng) {
+            const dist = calculateDistance(userLat, userLng, p.lat, p.lng);
+            distanceText = `📍 ${dist.toFixed(1)} km from away`;
+            directionUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${p.lat},${p.lng}`;
+        }
+
+        const customPopupHTML = `
+            <div class="map-popup-card">
+                <h4 class="map-popup-title">${p.name}</h4>
+                <div class="map-popup-price">${p.price}/mo</div>
+                <div class="map-popup-distance">${distanceText}</div>
+                <a href="${directionUrl}" target="_blank" class="map-directions-btn">Get Directions 🗺️</a>
+            </div>
+        `;
+
+        L.marker([p.lat, p.lng]).addTo(map).bindPopup(customPopupHTML);
+    });
+
+    // Handle User Location if tracking was approved faster than button tap trigger click event
+    if(userLat && userLng) {
+        markUserOnMap(userLat, userLng);
+    }
+  }
+
+  function markUserOnMap(lat, lng) {
+     if (map && !userLocationMarker) {
+         userLocationMarker = L.circleMarker([lat, lng], {
+             color: '#0284C7',
+             fillColor: '#38BDF8',
+             fillOpacity: 0.8,
+             radius: 8
+         }).addTo(map).bindPopup("<b>Your Current Location</b>").openPopup();
+         
+         // Smooth pan view to bound frame containing user coordinates nicely
+         map.setView([lat, lng], 12);
+     }
+  }
+
+  // 5. Native Device Geolocation Tracker API Activation Handshakes
+  if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(position => {
+          userLat = position.coords.latitude;
+          userLng = position.coords.longitude;
+
+          // Update existing view text metrics fields on active card nodes
+          properties.forEach(p => {
+              const dist = calculateDistance(userLat, userLng, p.lat, p.lng);
+              const cardElement = document.getElementById(`dist-card-${p.id}`);
+              if(cardElement) {
+                  cardElement.textContent = `⚡ ${dist.toFixed(1)} km away`;
+              }
+          });
+
+          // Draw blue tracker dot on active live map container seamlessly if active
+          if (mapInitialized) {
+              markUserOnMap(userLat, userLng);
+          }
+      }, error => {
+          console.warn("Location tracking permission was declined or timed out.");
+          // Update card labels to gracefully handle fallback state
+          properties.forEach(p => {
+              const cardElement = document.getElementById(`dist-card-${p.id}`);
+              if(cardElement) cardElement.textContent = "Location disabled";
+          });
+      });
+  }
+</script>
+<script>
+  let currentPage = 1;
+let hasNext = false;
+let isLoadingMore = false;
+
+function runFastSearch() {
+  const form = searchInput.closest('form');
+  const params = new URLSearchParams(new FormData(form));
+  currentPage = 1;
+  fetch(`/search/?${params.toString()}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(res => res.json())
+    .then(data => {
+      renderResults(data.results, false);
+      hasNext = data.has_next;
+    });
+}
+
+  function loadNextPage() {
+    if (!hasNext || isLoadingMore) return;
+    isLoadingMore = true;
+    const form = searchInput.closest('form');
+    const params = new URLSearchParams(new FormData(form));
+    params.set('page', currentPage + 1);
+    fetch(`/search/?${params.toString()}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    .then(res => res.json())
+    .then(data => {
+      renderResults(data.results, true);
+      hasNext = data.has_next;
+      currentPage += 1;
+      isLoadingMore = false;
+    });
+  }
+
+  function renderResults(results, append = false) {
+  if (results.length === 0 && !append) {
+    listContainer.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-dark);background:#FFFFFF;border-radius:16px;border:1.5px dashed var(--border-color)"><h3>No matches found</h3></div>`;
+    return;
+  }
+  const html = results.map(r => `
+    <article class="property-card" data-lat="${r.lat || ''}" data-lng="${r.lng || ''}" data-id="${r.id}">
+      <div class="property-img-slot">
+        ${r.image ? `<img src="${r.image}" alt="Property layout thumbnail" loading="lazy" decoding="async">` : ''}
+        <span class="area-indicator-pill">${r.estate}, ${r.county}</span>
+      </div>
+      <div class="property-body">
+        <h3 class="property-title">${r.name}</h3>
+        <div class="property-price">KSh ${r.price} <span style="font-size:0.72rem;color:var(--text-dark);font-weight:400;">/month</span></div>
+      </div>
+      <div class="property-footer">
+        <span class="live-card-distance" id="dist-card-${r.id}">${(r.lat && r.lng) ? 'Calculating distance...' : 'Location not available'}</span>
+        <a href="${r.url}" class="action-details-link">View Details</a>
+      </div>
+    </article>
+  `).join('');
+  if (append) {
+    listContainer.insertAdjacentHTML('beforeend', html);
+  } else {
+    listContainer.innerHTML = html;
+  }
+}
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(runFastSearch, 350);
+    });
+    searchInput.closest('form').addEventListener('submit', e => {
+      e.preventDefault();
+      runFastSearch();
+    });
+  }
+  hasNext = {{ page_obj.has_next|yesno:"true,false" }};
+  currentPage = {{ page_obj.number }};
+</script>
+{% endblock %}

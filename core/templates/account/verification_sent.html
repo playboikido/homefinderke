@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Email — HomeFinder Kenya{% endblock %}
+
+{% block content %}
+<style>
+  .verify-wrap {
+    font-family: 'Fira Sans', system-ui, sans-serif;
+    background: #F0FDFA; /* Matches your --c-bg */
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .verify-card {
+    background: #FFFFFF;
+    border-radius: 18px;
+    border: 1px solid rgba(153, 246, 228, 0.5);
+    box-shadow: 0 12px 32px rgba(15, 118, 110, 0.1);
+    max-width: 500px;
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+  }
+  .verify-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #CCFBF1;
+    color: #0F766E;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .verify-icon svg { width: 32px; height: 32px; }
+  .verify-title {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #134E4A;
+    margin-bottom: 16px;
+  }
+  .verify-text {
+    color: #1C4A47;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .verify-hint {
+    background: #FEF3C7;
+    border: 1px solid #FDE68A;
+    color: #D97706;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
+  }
+  .btn-home {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    background: #0F766E;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    width: 100%;
+  }
+  .btn-home:hover {
+    background: #0D5E58;
+    transform: translateY(-1px);
+  }
+</style>
+
+<div class="verify-wrap">
+  <div class="verify-card">
+    <div class="verify-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 19v-8.93a2 2 0 01.89-1.664l8-5.333a2 2 0 012.22 0l8 5.333A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76" />
+      </svg>
+    </div>
+    
+    <h1 class="verify-title">Verify Your Email</h1>
+    <p class="verify-text">
+      We have sent a verification link to your email address. Please follow the link provided to finalize your signup process and activate your account.
+    </p>
+    
+    <div class="verify-hint">
+      <strong>Can't find it?</strong> Check your main inbox or spam folder. It usually arrives within a few minutes.
+    </div>
+
+    <a href="/" class="btn-home">Return to Homepage</a>
+  </div>
+</div>
+{% endblock %}

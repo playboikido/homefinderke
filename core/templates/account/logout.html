@@ -1,0 +1,132 @@
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout | HomeFinderKE</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            padding:20px;
+
+            background:linear-gradient(
+                135deg,
+                #0f172a,
+                #1e293b,
+                #2563eb
+            );
+        }
+
+        .logout-card{
+            width:100%;
+            max-width:500px;
+            background:white;
+            border-radius:20px;
+            padding:45px;
+            text-align:center;
+            box-shadow:0 15px 40px rgba(0,0,0,.2);
+        }
+
+        .icon{
+            font-size:60px;
+            margin-bottom:20px;
+        }
+
+        h1{
+            color:#2563eb;
+            margin-bottom:15px;
+        }
+
+        p{
+            color:#666;
+            line-height:1.7;
+            margin-bottom:15px;
+        }
+
+        .btn{
+            display:block;
+            width:100%;
+            padding:15px;
+            border:none;
+            border-radius:10px;
+            font-size:16px;
+            cursor:pointer;
+            text-decoration:none;
+            font-weight:bold;
+            margin-top:15px;
+        }
+
+        .logout-btn{
+            background:#dc3545;
+            color:white;
+        }
+
+        .logout-btn:hover{
+            background:#bb2d3b;
+        }
+
+        .home-btn{
+            background:#2563eb;
+            color:white;
+        }
+
+        .home-btn:hover{
+            background:#1d4ed8;
+        }
+    </style>
+</head>
+<body>
+
+<div class="logout-card">
+
+    <div class="icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+        
+    </div>
+
+    <h1>Leaving so soon?</h1>
+
+    <p>
+        You are about to log out of <strong>HomeFinderKE</strong>.
+    </p>
+
+    <p>
+        You can still continue exploring available houses and properties as a guest.
+    </p>
+
+    <p>
+        Thank you for using HomeFinderKE.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="btn logout-btn">
+            Confirm Logout
+        </button>
+    </form>
+
+    <a href="{% url 'home' %}" class="btn home-btn">
+        Continue Browsing Homes
+    </a>
+    
+
+</div>
+
+</body>
+</html>

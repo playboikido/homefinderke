@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Server Error | HomeFinder{% endblock %}
+
+{% block content %}
+
+<style>
+
+:root{
+--primary:#2563eb;
+--secondary:#1d4ed8;
+--danger:#ef4444;
+--light:#f8fafc;
+--dark:#0f172a;
+--gray:#64748b;
+}
+
+.error-wrapper{
+
+min-height:85vh;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+padding:40px 20px;
+
+background:linear-gradient(135deg,#eff6ff,#ffffff);
+
+}
+
+.error-card{
+
+max-width:700px;
+
+width:100%;
+
+background:white;
+
+border-radius:22px;
+
+padding:55px;
+
+text-align:center;
+
+box-shadow:0 20px 45px rgba(0,0,0,.08);
+
+}
+
+.error-icon{
+
+font-size:70px;
+
+margin-bottom:20px;
+
+}
+
+.error-number{
+
+font-size:110px;
+
+font-weight:800;
+
+color:#ef4444;
+
+line-height:1;
+
+margin-bottom:10px;
+
+}
+
+.error-card h1{
+
+color:#0f172a;
+
+margin-bottom:20px;
+
+}
+
+.error-card p{
+
+color:#64748b;
+
+font-size:17px;
+
+line-height:1.8;
+
+margin-bottom:35px;
+
+}
+
+.button-group{
+
+display:flex;
+
+justify-content:center;
+
+gap:15px;
+
+flex-wrap:wrap;
+
+}
+
+.btn-primary{
+
+background:#2563eb;
+
+color:white;
+
+padding:14px 30px;
+
+border-radius:10px;
+
+text-decoration:none;
+
+font-weight:600;
+
+}
+
+.btn-primary:hover{
+
+background:#1d4ed8;
+
+}
+
+.btn-secondary{
+
+background:#e2e8f0;
+
+color:#334155;
+
+padding:14px 30px;
+
+border-radius:10px;
+
+text-decoration:none;
+
+font-weight:600;
+
+}
+
+.btn-secondary:hover{
+
+background:#cbd5e1;
+
+}
+
+.notice{
+
+margin-top:40px;
+
+padding:18px;
+
+background:#fef2f2;
+
+border-left:5px solid #ef4444;
+
+border-radius:10px;
+
+text-align:left;
+
+color:#991b1b;
+
+}
+
+@media(max-width:600px){
+
+.error-card{
+
+padding:30px 22px;
+
+}
+
+.error-number{
+
+font-size:80px;
+
+}
+
+.button-group{
+
+flex-direction:column;
+
+}
+
+.btn-primary,
+.btn-secondary{
+
+width:100%;
+
+}
+
+}
+
+</style>
+
+<div class="error-wrapper">
+
+<div class="error-card">
+
+<div class="error-icon">
+
+</div>
+
+<div class="error-number">
+500
+</div>
+
+<h1>Something went wrong.</h1>
+
+<p>
+
+Our servers encountered an unexpected error while processing your request.
+
+Our team has been notified, and we're working to resolve the issue.
+
+</p>
+
+<div class="button-group">
+
+<a href="{% url 'home' %}" class="btn-primary">
+
+🏠 Return Home
+
+</a>
+
+<a href="javascript:location.reload();" class="btn-secondary">
+
+🔄 Try Again
+
+</a>
+
+</div>
+
+<div class="notice">
+
+<strong>HomeFinder Notice</strong><br>
+
+If this problem continues, please contact support and include the time the error occurred.
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}

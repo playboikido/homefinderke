@@ -1,0 +1,369 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit {{ residence.name }} — HomeFinder Kenya{% endblock %}
+
+{% block content %}
+
+<style>
+  /* ── Google Fonts ─────────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+  /* ── Design Tokens (matches dashboard) ───────────────────────── */
+  :root {
+    --c-primary:     #0F766E;
+    --c-primary-dk:  #0D5E58;
+    --c-secondary:   #14B8A6;
+    --c-accent:      #0369A1;
+    --c-bg:          #F0FDFA;
+    --c-fg:          #134E4A;
+    --c-surface:     #FFFFFF;
+    --c-muted:       #E8F0F3;
+    --c-border:      #99F6E4;
+    --c-text:        #1C4A47;
+    --c-subtle:      #5EAFA8;
+
+    --font-body:     'Fira Sans', system-ui, sans-serif;
+    --font-mono:     'Fira Code', monospace;
+
+    --r:      12px;
+    --r-lg:   18px;
+    --r-xl:   24px;
+    --r-full: 9999px;
+
+    --shadow:    0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
+    --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
+    --ease: cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── Scope ──────────────────────────────────────────────────── */
+  .er-wrap {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    min-height: 100vh;
+    color: var(--c-text);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .er-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+  }
+
+  /* ── Hero ─────────────────────────────────────────────────────── */
+  .er-hero {
+    background: linear-gradient(135deg, var(--c-fg) 0%, var(--c-primary) 60%, var(--c-secondary) 100%);
+    padding: 48px 24px 56px;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+  }
+  .er-hero::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,184,166,.18), transparent 65%);
+    top: -190px; right: -140px;
+    pointer-events: none;
+  }
+  .er-hero-inner {
+    max-width: 640px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .er-hero-icon {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    color: #FFFFFF;
+  }
+  .er-hero-icon svg { width: 24px; height: 24px; }
+  .er-hero-eyebrow {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--c-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    font-family: var(--font-mono);
+  }
+  .er-hero-title {
+    font-family: var(--font-mono);
+    font-size: clamp(1.4rem, 3.5vw, 1.9rem);
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  /* ── Card ─────────────────────────────────────────────────────── */
+  .er-section {
+    margin-top: -28px;
+    position: relative;
+    z-index: 10;
+  }
+  .er-card {
+    background: var(--c-surface);
+    border-radius: var(--r-xl);
+    padding: 32px 32px 28px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(153,246,228,0.4);
+  }
+
+  .er-card form p { margin: 0 0 20px; }
+  .er-card form p:last-of-type { margin-bottom: 24px; }
+
+  .er-card form label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--c-fg);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 7px;
+  }
+
+  .er-card form input[type="text"],
+  .er-card form input[type="email"],
+  .er-card form input[type="tel"],
+  .er-card form input[type="number"],
+  .er-card form textarea,
+  .er-card form select {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--c-text);
+    background: var(--c-bg);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--r);
+    padding: 11px 14px;
+    transition: border-color 180ms var(--ease), box-shadow 180ms var(--ease);
+    box-sizing: border-box;
+  }
+  .er-card form textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+  .er-card form input:focus,
+  .er-card form textarea:focus,
+  .er-card form select:focus {
+    outline: none;
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 3px rgba(15,118,110,0.12);
+  }
+
+  /* File inputs (e.g. front_image, vacancy_poster) */
+  .er-card form input[type="file"] {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 0.84rem;
+    color: var(--c-subtle);
+    background: var(--c-muted);
+    border: 1.5px dashed var(--c-border);
+    border-radius: var(--r);
+    padding: 14px;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: border-color 180ms var(--ease), background 180ms var(--ease);
+  }
+  .er-card form input[type="file"]:hover {
+    border-color: var(--c-primary);
+    background: #CCFBF1;
+  }
+
+  /* Checkbox lists (like house_type CheckboxSelectMultiple) */
+  .er-card form ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .er-card form ul li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--c-bg);
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--r);
+  }
+  .er-card form ul li label {
+    margin: 0 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+    color: var(--c-text) !important;
+    display: inline-block !important;
+  }
+  .er-card form ul li input[type="checkbox"] {
+    margin: 0 !important;
+  }
+
+  /* Checkboxes (water, fibre, gated, cctv, guard) */
+  .er-card form input[type="checkbox"],
+  .er-card form input[type="radio"] {
+    width: 17px; height: 17px;
+    accent-color: var(--c-primary);
+    cursor: pointer;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .er-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 13px 26px;
+    border-radius: var(--r);
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border: none;
+    cursor: pointer;
+    background: var(--c-primary);
+    color: #FFFFFF;
+    transition: all 200ms var(--ease);
+  }
+  .er-btn:hover {
+    background: var(--c-primary-dk);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+  }
+
+  @media (max-width: 600px) {
+    .er-card { padding: 26px 22px 22px; }
+    .er-hero { padding: 40px 20px 48px; }
+  }
+</style>
+
+<div class="er-wrap">
+
+  <!-- Hero -->
+  <div class="er-hero">
+    <div class="er-hero-inner">
+      <div class="er-hero-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+      <div class="er-hero-eyebrow">Editing Listing</div>
+      <h1 class="er-hero-title">Edit {{ residence.name }}</h1>
+    </div>
+  </div>
+
+  <div class="er-inner">
+    <div class="er-section">
+
+      <div class="er-card">
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ form.as_p }}
+
+          <button type="submit" class="er-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Changes
+          </button>
+        </form>
+      </div>
+
+    </div><!-- /.er-section -->
+  </div><!-- /.er-inner -->
+</div><!-- /.er-wrap -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const descField = document.querySelector('textarea[name="description"]');
+    if (descField) {
+        // Create container for label/button row
+        const row = document.createElement('div');
+        row.style.display = 'none';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.marginBottom = '6px';
+        row.style.marginTop = '10px';
+
+        const label = document.createElement('span');
+        label.innerText = 'Polish with AI:';
+        label.style.fontSize = '0.78rem';
+        label.style.fontWeight = '600';
+        label.style.color = 'var(--c-fg)';
+        label.style.textTransform = 'uppercase';
+        label.style.letterSpacing = '0.05em';
+
+        const aiBtn = document.createElement('button');
+        aiBtn.type = 'button';
+        aiBtn.id = 'ai-improve-btn';
+        aiBtn.innerText = '🧠 AI Improve';
+        aiBtn.style.padding = '6px 12px';
+        aiBtn.style.fontSize = '0.8rem';
+        aiBtn.style.background = 'var(--c-primary)';
+        aiBtn.style.color = '#fff';
+        aiBtn.style.border = 'none';
+        aiBtn.style.borderRadius = '6px';
+        aiBtn.style.cursor = 'pointer';
+        aiBtn.style.fontFamily = 'var(--font-body)';
+        aiBtn.style.fontWeight = '600';
+
+        const loadingDiv = document.createElement('div');
+        loadingDiv.id = 'ai-loading';
+        loadingDiv.innerText = 'Polishing description with AI...';
+        loadingDiv.style.display = 'none';
+        loadingDiv.style.fontSize = '0.85rem';
+        loadingDiv.style.color = 'var(--c-primary)';
+        loadingDiv.style.marginTop = '6px';
+        loadingDiv.style.fontWeight = '500';
+
+        row.appendChild(label);
+        row.appendChild(aiBtn);
+
+        // Insert row before textarea and loadingDiv after textarea
+        descField.parentNode.insertBefore(row, descField);
+        descField.parentNode.insertBefore(loadingDiv, descField.nextSibling);
+
+        aiBtn.addEventListener('click', function() {
+            const currentText = descField.value.trim();
+            if (!currentText) {
+                alert('Please type a draft description first before using AI Improve.');
+                return;
+            }
+
+            aiBtn.disabled = true;
+            loadingDiv.style.display = 'block';
+
+            fetch('{% url "ai_improve_description" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ description: currentText })
+            })
+            .then(res => res.json())
+            .then(data => {
+                aiBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+                if (data.improved_text) {
+                    descField.value = data.improved_text;
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            })
+            .catch(err => {
+                aiBtn.disabled = false;
+                loadingDiv.style.display = 'none';
+                alert('An error occurred while calling the AI service.');
+            });
+        });
+    }
+});
+</script>
+{% endblock %}

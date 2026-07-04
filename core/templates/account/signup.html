@@ -1,0 +1,204 @@
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | HomeFinderKE</title>
+
+    <style>
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial, Helvetica, sans-serif;
+        }
+
+        body{
+            min-height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:linear-gradient(
+                135deg,
+                #0f172a,
+                #1e293b,
+                #2563eb
+            );
+            padding:20px;
+        }
+
+        .signup-card{
+            width:100%;
+            max-width:500px;
+            background:#fff;
+            border-radius:20px;
+            padding:40px;
+            box-shadow:0 15px 40px rgba(0,0,0,.2);
+        }
+
+        .logo{
+            text-align:center;
+            margin-bottom:30px;
+        }
+
+        .logo h1{
+            color:#2563eb;
+            font-size:32px;
+        }
+
+        .logo p{
+            color:#666;
+            margin-top:10px;
+        }
+
+        .signup-card p{
+            margin-bottom:15px;
+        }
+
+        .signup-card label{
+            display:block;
+            margin-bottom:8px;
+            color:#333;
+            font-weight:600;
+        }
+
+        .signup-card input{
+            width:100%;
+            padding:14px;
+            border:1px solid #ddd;
+            border-radius:10px;
+            font-size:16px;
+            margin-bottom:18px;
+            outline:none;
+        }
+
+        .signup-card input:focus{
+            border-color:#2563eb;
+        }
+
+        .signup-btn{
+            width:100%;
+            padding:15px;
+            background:#2563eb;
+            color:white;
+            border:none;
+            border-radius:10px;
+            font-size:16px;
+            font-weight:bold;
+            cursor:pointer;
+        }
+
+        .signup-btn:hover{
+            background:#1d4ed8;
+        }
+
+        .divider{
+            text-align:center;
+            margin:25px 0;
+            color:#888;
+        }
+
+        .google-btn{
+            display:block;
+            text-align:center;
+            width:100%;
+            padding:15px;
+            border:1px solid #ddd;
+            border-radius:10px;
+            text-decoration:none;
+            color:#333;
+            font-weight:bold;
+            background:#fff;
+        }
+
+        .google-btn:hover{
+            background:#f5f5f5;
+        }
+
+        .login-link{
+            text-align:center;
+            margin-top:25px;
+        }
+
+        .login-link a{
+            color:#2563eb;
+            text-decoration:none;
+            font-weight:bold;
+        }
+
+        .login-link a:hover{
+            text-decoration:underline;
+        }
+
+        .errorlist{
+            color:red;
+            list-style:none;
+            margin-bottom:15px;
+        }
+
+        ul{
+            padding-left:20px;
+            color:#666;
+            margin-bottom:20px;
+        }
+
+        /* reCAPTCHA blending */
+        .captcha-wrapper{
+            margin-top:18px;
+            display:flex;
+            justify-content:center;
+        }
+
+        .g-recaptcha{
+            border-radius:10px;
+            overflow:hidden;
+            border:1px solid #ddd;
+            transition:border-color 0.2s;
+        }
+
+        .g-recaptcha:focus-within{
+            border-color:#2563eb;
+        }
+    </style>
+</head>
+<body>
+
+<div class="signup-card">
+
+    <div class="logo">
+        <h1>HomeFinderKE</h1>
+        <p>Create your account</p>
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}     
+
+        <button type="submit" class="signup-btn">
+            Create Account
+        </button>
+
+        
+    </form>
+
+    <div class="divider">
+        OR
+    </div>
+
+    <a href="{% provider_login_url 'google' %}" class="google-btn">
+        Continue with Google
+    </a>
+
+    <div class="login-link">
+        Already have an account?
+        <a href="{% url 'account_login' %}">
+            Sign In
+        </a>
+    </div>
+    
+
+</div>
+
+</body>
+</html>
