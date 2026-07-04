@@ -97,9 +97,7 @@ urlpatterns = [
         ), 
     path('about/', views.about, name='about'), 
 
-    path('admin/', admin.site.urls),
 
-    path('accounts/', include('allauth.urls')),
     path('admin-dashboard-redirect/', views.admin_dashboard, name='admin_dashboard_view'),
     path('add-mover/', views.add_mover, name='add_mover'),
     path('add-furniture-vendor/', views.add_furniture_vendor, name='add_furniture_vendor'),

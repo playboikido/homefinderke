@@ -21,9 +21,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('control-panel-2947/', admin.site.urls),
-    path('', include('core.urls')),
-    path('accounts/', include('accounts.urls')),
     path('accounts/', include('allauth.urls')),
+    path('accounts/custom/', include('accounts.urls')),
+    path('', include('core.urls')),
     path('chat/', include('chat.urls')),
 ]
 

@@ -710,9 +710,18 @@
         .bottom-nav-item.active {
             color: var(--primary);
         }
-        @media (max-width: 768px) {
-            .bottom-nav { display: block; }
-            body { padding-bottom: 62px; }
+        /* Only show bottom-nav in standalone (PWA) mode */
+        body.is-standalone .bottom-nav {
+            display: block;
+        }
+        body.is-standalone {
+            padding-bottom: 62px;
+        }
+        @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+            @media (max-width: 768px) {
+                .bottom-nav { display: block; }
+                body { padding-bottom: 62px; }
+            }
         }
         .fab-search {
             display: none;
@@ -741,8 +750,14 @@
         .fab-search:active {
             transform: scale(0.92);
         }
-        @media (max-width: 768px) {
-            .fab-search.show-fab { display: flex; }
+        /* Only show fab-search on mobile in standalone mode */
+        body.is-standalone .fab-search.show-fab {
+            display: flex;
+        }
+        @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+            @media (max-width: 768px) {
+                .fab-search.show-fab { display: flex; }
+            }
         }
 
         .ai-fab {
@@ -1285,6 +1300,15 @@
       navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
     });
   }
+  // Detect PWA standalone mode and tag the body element
+  document.addEventListener('DOMContentLoaded', () => {
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    if (isStandalone) {
+      document.body.classList.add('is-standalone');
+    } else {
+      document.body.classList.add('is-browser');
+    }
+  });
 </script>
 </body>
 </html>

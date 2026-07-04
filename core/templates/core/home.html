@@ -777,6 +777,22 @@
             const installBox = document.getElementById('pwa-install-box');
             const installBtn = document.getElementById('install-pwa-btn');
 
+            // Detect if device is iOS and not already in standalone mode
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+            if (isIOS && !isStandalone) {
+                // Show custom iOS installation box
+                installBox.style.display = 'block';
+                installBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px; height:20px; vertical-align:middle; margin-right:6px;"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+                    How to Install on iPhone
+                `;
+                installBtn.addEventListener('click', () => {
+                    alert("To install HomeFinder KE on your iPhone:\n1. Tap the Share button at the bottom of Safari.\n2. Scroll down and choose 'Add to Home Screen'.");
+                });
+            }
+
             window.addEventListener('beforeinstallprompt', (e) => {
                 // Prevent the mini-infobar from appearing on mobile
                 e.preventDefault();
