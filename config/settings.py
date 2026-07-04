@@ -75,7 +75,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'axes.middleware.AxesMiddleware',
 ]
-
+WHITENOISE_MANIFEST_STRICT = False
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
