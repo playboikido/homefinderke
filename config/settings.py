@@ -63,6 +63,7 @@ CLOUDINARY_STORAGE = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -171,13 +172,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STORAGES = {
-    "default": {
-        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
-    },
-}
+       "default": {
+           "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+       },
+       "staticfiles": {
+           "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+       },
+   }
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
