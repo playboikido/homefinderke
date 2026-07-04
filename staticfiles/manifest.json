@@ -1,0 +1,17 @@
+{
+  "name": "HomeFinder Kenya",
+  "short_name": "HomeFinder KE",
+  "description": "Find your next home in Kenya with ease.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F0FDFA",
+  "theme_color": "#0F766E",
+  "icons": [
+    {
+      "src": "/static/images/favicon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
