@@ -212,7 +212,7 @@ body {
 
 .hero-bg {
   position: absolute; inset: 0;
-  /* background-image: url('/static/images/hero-buildings.jpg'); */
+/* background-image removed to prevent collectstatic error */
   /* background-size: cover; */
   /* background-position: center 30%; */
   /* filter: brightness(0.32) saturate(1.2); */
