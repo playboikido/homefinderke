@@ -50,13 +50,21 @@ INSTALLED_APPS = [
     'allauth.account',
     'allauth.socialaccount',
 
+
     'allauth.socialaccount.providers.google',
     'axes',
     'captcha',
     
-    'django_recaptcha',
-    'chat',
+    'cloudinary_storage',
+    'cloudinary',
+    'chat',    
 ]
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -164,6 +172,17 @@ STATICFILES_DIRS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
