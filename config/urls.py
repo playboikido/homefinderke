@@ -23,6 +23,7 @@ urlpatterns = [
     path('control-panel-2947/', admin.site.urls),
     path('', include('core.urls')),
     path('accounts/', include('accounts.urls')),
+    path('accounts/', include('allauth.urls')),
     path('chat/', include('chat.urls')),
 ]
 
