@@ -1067,4 +1067,29 @@ def initiate_donation(request):
 
     except Exception as e:
         print("INTASEND ERROR:", e)
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+from .forms import UserReportForm
+from .models import UserReport
+
+@login_required
+def report_user(request, user_id):
+    reported_user = get_object_or_404(User, pk=user_id)
+
+    if reported_user == request.user:
+        messages.error(request, "You can't report yourself.")
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = UserReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.reported_user = reported_user
+            report.reported_by = request.user
+            report.save()
+            messages.success(request, 'Thank you — your report has been submitted for review.')
+            return redirect('home')
+    else:
+        form = UserReportForm()
+
+    return render(request, 'core/report_user.html', {'form': form, 'reported_user': reported_user})

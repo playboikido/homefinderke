@@ -198,6 +198,9 @@
     <div class="thread-info">
       <div class="thread-name">{{ row.other_user.username }}</div>
       <div class="thread-preview">{{ row.last_text|truncatechars:32 }}</div>
+      <a href="{% url 'report_user' row.  other_user.id %}" style="color:#DC2626; font-size:0.75rem; margin-left:10px;">
+        🚩 Report User
+      </a>
     </div>
     {% if row.unread_count > 0 %}
       <span style="background:#0F766E;color:#fff;font-size:0.7rem;font-weight:700;border-radius:999px;padding:2px 8px;flex-shrink:0;">{{ row.unread_count }}</span>

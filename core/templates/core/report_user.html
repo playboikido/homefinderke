@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Report User — HomeFinder Kenya{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin:60px auto; padding:0 20px; font-family:'Fira Sans',sans-serif;">
+  <div style="background:var(--bg-card, #fff); border-radius:18px; padding:32px 28px; box-shadow:0 8px 24px rgba(15,118,110,0.10);">
+    <h2 style="color:var(--fg, #134E4A); margin-bottom:6px;">Report {{ reported_user.username }}</h2>
+    <p style="color:var(--fg-muted, #5EAFA8); font-size:0.85rem; margin-bottom:24px;">
+      Reports are reviewed by our team. False reports may result in action against your own account.
+    </p>
+
+    <form method="post" style="display:flex; flex-direction:column; gap:16px;">
+      {% csrf_token %}
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:5px; color:var(--fg, #134E4A);">Reason</label>
+        {{ form.reason }}
+      </div>
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:5px; color:var(--fg, #134E4A);">Additional details</label>
+        {{ form.comment }}
+      </div>
+      <button type="submit" style="background:#DC2626; color:#fff; border:none; padding:12px; border-radius:10px; font-weight:600; cursor:pointer;">
+        Submit Report
+      </button>
+    </form>
+  </div>
+</div>
+
+<style>
+  select, textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border, #99F6E4);
+    font-family: inherit;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+  }
+</style>
+{% endblock %}

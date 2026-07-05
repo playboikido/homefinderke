@@ -36,3 +36,6 @@ class FurnitureVendorAdmin(admin.ModelAdmin):
     search_fields = ('name', 'location', 'phone_number', 'description')
     list_editable = ('is_approved',)
     ordering = ('-created_at',)
+
+from .models import UserReport
+admin.site.register(UserReport)

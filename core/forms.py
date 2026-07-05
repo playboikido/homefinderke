@@ -238,3 +238,13 @@ class FurnitureVendorForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe types of furniture, custom work, delivery options...'}),
             'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
         }
+
+from .models import UserReport
+
+class UserReportForm(forms.ModelForm):
+    class Meta:
+        model = UserReport
+        fields = ['reason', 'comment']
+        widgets = {
+            'comment': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional — add any extra detail'}),
+        }

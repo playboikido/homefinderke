@@ -381,6 +381,35 @@ class ResidenceReport(models.Model):
     def __str__(self):
         return f"{self.residence.name} - {self.reason}"
 
+USER_REPORT_CHOICES = [
+    ('harassment', 'Harassment or abusive messages'),
+    ('scam', 'Suspected scam or fraud'),
+    ('fake_profile', 'Fake profile / impersonation'),
+    ('inappropriate', 'Inappropriate content or behavior'),
+    ('other', 'Other'),
+]
+
+class UserReport(models.Model):
+    reported_user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reports_received'
+    )
+    reported_by = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reports_filed'
+    )
+    reason = models.CharField(max_length=50, choices=USER_REPORT_CHOICES)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    reviewed = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.reported_user.username} - {self.reason}"
 
 class Favorite(models.Model):
 
