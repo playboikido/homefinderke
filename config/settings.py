@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google',
     'axes',
     'captcha',
+    'django_recaptcha',
     
     'cloudinary_storage',
     'cloudinary',

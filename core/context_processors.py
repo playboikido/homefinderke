@@ -2,7 +2,7 @@ from .models import Notification
 
 def notification_count(request):
 
-    if request.user.is_authenticated:
+    if hasattr(request, 'user') and request.user.is_authenticated:
 
         count = Notification.objects.filter(
             user=request.user,
