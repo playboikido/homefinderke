@@ -135,7 +135,7 @@ Message:
                 """,
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=['homefinder.ke.help@gmail.com'],
-                fail_silently=False,
+                fail_silently=True,
             )
             messages.success(request, 'Your message has been sent successfully.')
             return redirect('about')

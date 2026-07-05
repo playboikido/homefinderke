@@ -12,7 +12,7 @@ Register
 Join HomeFinder KE and help others find homes.
 </p>
 
-<form method="POST">
+<form method="POST" action="{% if next_url %}?next={{ next_url }}{% endif %}">
 
     {% csrf_token %}
 
