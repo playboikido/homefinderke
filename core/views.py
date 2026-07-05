@@ -464,6 +464,13 @@ def approve_residence(request, pk):
     residence.approved = True
     residence.save()
 
+    for saved_search in SavedSearch.objects.filter(is_active=True):
+        if saved_search.matches(residence):
+            Notification.objects.create(
+                user=saved_search.user,
+                message=f"New listing matches your saved search: {residence.name} in {residence.town}, {residence.county} — KSh {residence.rent_price:,.0f}/month."
+            )
+
     if residence.owner and residence.owner.email:
         send_mail(
             subject='Your Property Has Been Approved!',
@@ -1093,3 +1100,33 @@ def report_user(request, user_id):
         form = UserReportForm()
 
     return render(request, 'core/report_user.html', {'form': form, 'reported_user': reported_user})
+
+from .models import SavedSearch
+
+@login_required
+def save_search(request):
+    if request.method == 'POST':
+        SavedSearch.objects.create(
+            user=request.user,
+            keyword=request.POST.get('q', ''),
+            county=request.POST.get('county', ''),
+            town=request.POST.get('town', ''),
+            house_type=request.POST.get('house_type', ''),
+            min_rent=request.POST.get('min_rent') or None,
+            max_rent=request.POST.get('max_rent') or None,
+        )
+        messages.success(request, "Search saved! We'll notify you when a matching listing appears.")
+    return redirect('search')
+
+
+@login_required
+def my_saved_searches(request):
+    searches = SavedSearch.objects.filter(user=request.user)
+    return render(request, 'core/saved_searches.html', {'searches': searches})
+
+
+@login_required
+def delete_saved_search(request, pk):
+    SavedSearch.objects.filter(pk=pk, user=request.user).delete()
+    messages.info(request, 'Saved search removed.')
+    return redirect('my_saved_searches')

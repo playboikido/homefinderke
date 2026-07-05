@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}My Saved Searches — HomeFinder Kenya{% endblock %}
+{% block content %}
+<div style="max-width:700px; margin:40px auto; padding:0 20px; font-family:'Fira Sans',sans-serif;">
+  <h2 style="color:var(--fg, #134E4A); margin-bottom:24px;">My Saved Searches</h2>
+
+  {% if searches %}
+  <div style="display:flex; flex-direction:column; gap:14px;">
+    {% for s in searches %}
+    <div style="background:var(--bg-card, #fff); border-radius:12px; padding:16px 20px; box-shadow:0 2px 8px rgba(15,118,110,0.08); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div style="font-size:0.85rem; color:var(--fg, #134E4A);">
+        {% if s.keyword %}"<strong>{{ s.keyword }}</strong>" {% endif %}
+        {% if s.town %}in {{ s.town }}{% elif s.county %}in {{ s.county }}{% endif %}
+        {% if s.min_rent or s.max_rent %}· KSh {{ s.min_rent|default:"0" }}–{{ s.max_rent|default:"any" }}{% endif %}
+      </div>
+      <a href="{% url 'delete_saved_search' s.id %}" style="color:#DC2626; font-size:0.78rem;">Remove</a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+    <p style="color:var(--fg-muted, #5EAFA8);">You haven't saved any searches yet. Go to Search, set your filters, and tap "Save This Search."</p>
+  {% endif %}
+</div>
+{% endblock %}

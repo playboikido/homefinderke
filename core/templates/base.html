@@ -1068,6 +1068,7 @@
                 <a href="/">Home</a>
                 <a href="/residences/">Browse Residences</a>
                 <a href="/search/">Search</a>
+                <a href="{% url 'my_saved_searches' %}">Saved Searches</a>
                 {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
                 <a href="{% url 'add_mover' %}">Add Mover</a>
                 <a href="{% url 'add_furniture_vendor' %}">Add Furniture Vendor</a>

@@ -435,6 +435,39 @@ class Favorite(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.residence.name}"
  
+class SavedSearch(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_searches')
+
+    keyword = models.CharField(max_length=200, blank=True)
+    county = models.CharField(max_length=100, blank=True)
+    town = models.CharField(max_length=100, blank=True)
+    house_type = models.CharField(max_length=50, blank=True)
+    min_rent = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    max_rent = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def matches(self, residence):
+        if self.keyword and self.keyword.lower() not in (residence.name + residence.description).lower():
+            return False
+        if self.county and self.county.lower() != (residence.county or '').lower():
+            return False
+        if self.town and self.town.lower() != (residence.town or '').lower():
+            return False
+        if self.house_type and self.house_type != residence.house_type:
+            return False
+        if self.min_rent and residence.rent_price and residence.rent_price < self.min_rent:
+            return False
+        if self.max_rent and residence.rent_price and residence.rent_price > self.max_rent:
+            return False
+        return True
+
+    def __str__(self):
+        return f"{self.user.username}'s search: {self.keyword or 'any'} in {self.town or self.county or 'anywhere'}"
 
 class LeaseAgreement(models.Model):
     residence = models.ForeignKey(Residence, on_delete=models.CASCADE, related_name='leases')

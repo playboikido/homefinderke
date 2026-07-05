@@ -129,6 +129,9 @@ urlpatterns = [
     path('robots.txt', views.robots_txt, name='robots_txt'),
     path('sitemap.xml', views.sitemap_xml, name='sitemap_xml'),
     path('report-user/<int:user_id>/', views.report_user, name='report_user'),
+    path('save-search/', views.save_search, name='save_search'),
+    path('saved-searches/', views.my_saved_searches, name='my_saved_searches'),
+    path('saved-searches/<int:pk>/delete/', views.delete_saved_search, name='delete_saved_search'),
 ]
 urlpatterns += static(
     settings.MEDIA_URL,
