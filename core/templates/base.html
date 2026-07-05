@@ -17,7 +17,17 @@
     <link rel="manifest" href="{% static 'manifest.json' %}">
     <meta name="theme-color" content="#0F766E">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="HomeFinder KE">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon.svg' %}">
+    <script>
+        (function () {
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+            || window.navigator.standalone === true;
+            document.documentElement.classList.add(isStandalone ? 'pwa-installed' : 'pwa-browser');
+        })();
+    </script>
     <style>
         /* ══════════════════════════════════════════════════════════
            HOMEFINDER KE — Unified Design Tokens
@@ -719,8 +729,8 @@
         }
         @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
             @media (max-width: 768px) {
-                .bottom-nav { display: block; }
-                body { padding-bottom: 62px; }
+                html.pwa-installed .bottom-nav { display: block; }
+                html.pwa-installed body { padding-bottom: 62px; }
             }
         }
         .fab-search {
@@ -756,7 +766,7 @@
         }
         @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
             @media (max-width: 768px) {
-                .fab-search.show-fab { display: flex; }
+                html.pwa-installed .fab-search.show-fab { display: flex; }
             }
         }
 
@@ -1065,6 +1075,9 @@
                 <a href="/add-residence/">List Your Property</a>
                 {% endif %}
                 <a href="/about/">About Us</a>
+                <button id="pwaInstallBtn" style="display:none; background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:600; cursor:pointer; margin:16px auto; display:none;">
+                     📲Install HomeFinder App
+                </button>
             </div>
 
             <!-- Contact -->
@@ -1247,6 +1260,41 @@
     }
   });
 })();
+</script>
+<script>
+  let deferredInstallPrompt = null;
+  const installBtn = document.getElementById('pwaInstallBtn');
+  const isStandaloneNow = window.matchMedia('(display-mode: standalone)').matches
+    || window.navigator.standalone === true;
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
+  if (!isStandaloneNow && installBtn) {
+    if (isIOS) {
+      // iOS has no install prompt API — show manual instructions instead
+      installBtn.style.display = 'block';
+      installBtn.textContent = '📲 Add to Home Screen';
+      installBtn.addEventListener('click', () => {
+        alert('To install: tap the Share button in Safari, then "Add to Home Screen".');
+      });
+    } else {
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        installBtn.style.display = 'block';
+      });
+
+      installBtn.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.style.display = 'none';
+        }
+        deferredInstallPrompt = null;
+      });
+    }
+  }
 </script>
 <script>
   if ('serviceWorker' in navigator) {
