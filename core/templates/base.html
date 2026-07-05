@@ -1074,53 +1074,7 @@
                 <a href="tel:+254758999426">+254 758999426</a>
                 <a href="#">Nairobi, Kenya</a>
                 <a href="/accounts/login/">Login / Register</a>
-                <div class="support-dev-box" style="max-width:360px; margin:20px auto; padding:16px; background:var(--bg-card); border-radius:14px; text-align:center;">
-  <p style="font-size:0.85rem; color:var(--fg-muted); margin-bottom:10px;">❤️ Enjoying HomeFinder Kenya? Support keeping it online — any amount, totally optional.</p>
-  <input type="tel" id="donatePhone" placeholder="07XXXXXXXX" style="width:100%; padding:8px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border);">
-  <input type="number" id="donateAmount" placeholder="Amount (KSh)" min="1" style="width:100%; padding:8px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border);">
-  <button id="donateBtn" style="background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">Support with M-Pesa</button>
-  <p id="donateStatus" style="font-size:0.78rem; margin-top:8px;"></p>
-</div>
-
-<script>
-  const donateBtn = document.getElementById('donateBtn');
-  if (donateBtn) {
-    donateBtn.addEventListener('click', () => {
-      const phone = document.getElementById('donatePhone').value.trim();
-      const amount = document.getElementById('donateAmount').value.trim();
-      const statusEl = document.getElementById('donateStatus');
-
-      if (!phone || !amount) {
-        statusEl.textContent = 'Please enter your phone number and an amount.';
-        statusEl.style.color = '#DC2626';
-        return;
-      }
-
-      donateBtn.disabled = true;
-      donateBtn.textContent = 'Sending prompt...';
-      statusEl.textContent = '';
-
-      fetch('/donate/stk-push/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
-        body: JSON.stringify({ phone, amount }),
-      })
-        .then(res => res.json())
-        .then(data => {
-          statusEl.textContent = data.message || data.error;
-          statusEl.style.color = data.message ? '#0F766E' : '#DC2626';
-          donateBtn.disabled = false;
-          donateBtn.textContent = 'Support with M-Pesa';
-        })
-        .catch(() => {
-          statusEl.textContent = 'Connection error. Please try again.';
-          statusEl.style.color = '#DC2626';
-          donateBtn.disabled = false;
-          donateBtn.textContent = 'Support with M-Pesa';
-        });
-    });
-  }
-</script>
+                {% include 'core/donation.html' %}
             </div>
         </div>
 

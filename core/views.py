@@ -1027,4 +1027,44 @@ def sitemap_xml(request):
     
     return HttpResponse(xml_content, content_type='application/xml')
 
-
+import os
+from intasend import APIService
+
+@require_POST
+def initiate_donation(request):
+    try:
+        data = json.loads(request.body)
+        phone = data.get('phone', '').strip()
+        amount = data.get('amount')
+
+        if not phone or not amount or float(amount) < 1:
+            return JsonResponse({'success': False, 'error': 'Please enter a valid phone number and amount.'}, status=400)
+
+        # Ensure phone is in standard 254 format for IntaSend
+        if phone.startswith('0'):
+            phone = '254' + phone[1:]
+        elif phone.startswith('+254'):
+            phone = phone[1:]
+
+        # IntaSend SDK Initialization
+        secret_token = os.getenv('INTASEND_SECRET_TOKEN')
+        publishable_key = os.getenv('INTASEND_PUBLISHABLE_KEY')
+
+        if not secret_token or not publishable_key:
+            return JsonResponse({'success': False, 'error': 'Payment gateway keys missing.'}, status=500)
+
+        service = APIService(token=secret_token, publishable_key=publishable_key, test=False)
+
+        # Execute M-Pesa STK Push
+        response = service.collect.mpesa_stk_push(
+            phone_number=phone,
+            email="homefinder.ke.help@gmail.com",
+            amount=float(amount),
+            narrative="HomeFinder Support Donation"
+        )
+        
+        return JsonResponse({'success': True, 'message': 'Prompt sent to your phone! Please complete the payment.'})
+
+    except Exception as e:
+        print("INTASEND ERROR:", e)
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

@@ -114,6 +114,7 @@ urlpatterns = [
     path('roommates/profile/', views.roommate_profile_edit, name='roommate_profile_edit'),
     path('roommates/deactivate/', views.roommate_deactivate, name='roommate_deactivate'),
     path('donate/stk-push/', views.donate_stk_push, name='donate_stk_push'),
+    path('initiate-donation/', views.initiate_donation, name='initiate_donation'),
     path('donate/callback/', views.mpesa_callback, name='mpesa_callback'),
     path('residence/<int:pk>/download-pdf/', views.download_residence_pdf, name='download_residence_pdf'),
     path('privacy-policy/', TemplateView.as_view(template_name='core/privacy_policy.html'), name='privacy_policy'),

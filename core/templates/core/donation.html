@@ -1,0 +1,129 @@
+<div class="support-dev-box" style="max-width:360px; margin:20px auto; padding:16px; background:var(--bg-card); border-radius:14px; text-align:center;">
+    <p style="font-size:0.85rem; color:var(--fg-muted); margin-bottom:10px;">❤️ Enjoying HomeFinder Kenya? Support keeping it online — any amount, totally optional.</p>
+    
+    <!-- Tab Navigation -->
+    <div style="display:flex; justify-content:center; gap:10px; margin-bottom:15px; border-bottom: 1px solid var(--border); padding-bottom:10px;">
+        <button id="tab-online" class="tab-btn active" style="background:transparent; border:none; border-bottom: 2px solid var(--primary); color:var(--primary); font-weight:600; cursor:pointer; padding:5px 10px;">Online Prompt</button>
+        <button id="tab-manual" class="tab-btn" style="background:transparent; border:none; color:var(--fg-muted); font-weight:600; cursor:pointer; padding:5px 10px;">Manual Paybill</button>
+    </div>
+
+    <!-- Online Prompt Tab -->
+    <div id="content-online" class="tab-content" style="display:block;">
+        <form id="donationForm" onsubmit="event.preventDefault(); initiateStkPush();">
+            {% csrf_token %}
+            <input type="tel" id="donatePhone" required placeholder="07XXXXXXXX or 2547XXXXXXXX" style="width:100%; padding:8px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border);">
+            <input type="number" id="donateAmount" required placeholder="Amount (KSh)" min="1" style="width:100%; padding:8px; margin-bottom:8px; border-radius:8px; border:1px solid var(--border);">
+            <button id="donateBtn" type="submit" style="background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">Send STK Push</button>
+        </form>
+        <p id="donateStatus" style="font-size:0.78rem; margin-top:8px;"></p>
+    </div>
+
+    <!-- Manual Paybill Tab -->
+    <div id="content-manual" class="tab-content" style="display:none; text-align:left; font-size:0.85rem; color:var(--text);">
+        <p style="margin-bottom:8px;"><strong>Step-by-step instructions:</strong></p>
+        <ol style="padding-left:20px; line-height:1.6;">
+            <li>Go to M-Pesa menu</li>
+            <li>Select <strong>Lipa na M-Pesa</strong></li>
+            <li>Select <strong>Paybill</strong></li>
+            <li>Enter Business Number: <strong>247247</strong> (Equity Bank)</li>
+            <li>Enter Account Number: <strong>0220186748988</strong></li>
+            <li>Enter the amount you wish to donate</li>
+            <li>Enter your M-Pesa PIN and confirm</li>
+        </ol>
+        <p style="margin-top:10px; font-weight:600; text-align:center; color:var(--primary);">Thank you for your support!</p>
+    </div>
+</div>
+
+<script>
+    // Tab Switching Logic
+    const tabOnline = document.getElementById('tab-online');
+    const tabManual = document.getElementById('tab-manual');
+    const contentOnline = document.getElementById('content-online');
+    const contentManual = document.getElementById('content-manual');
+
+    function switchTab(tab) {
+        if (tab === 'online') {
+            tabOnline.style.borderBottom = '2px solid var(--primary)';
+            tabOnline.style.color = 'var(--primary)';
+            tabManual.style.borderBottom = 'none';
+            tabManual.style.color = 'var(--fg-muted)';
+            contentOnline.style.display = 'block';
+            contentManual.style.display = 'none';
+        } else {
+            tabManual.style.borderBottom = '2px solid var(--primary)';
+            tabManual.style.color = 'var(--primary)';
+            tabOnline.style.borderBottom = 'none';
+            tabOnline.style.color = 'var(--fg-muted)';
+            contentManual.style.display = 'block';
+            contentOnline.style.display = 'none';
+        }
+    }
+
+    tabOnline.addEventListener('click', () => switchTab('online'));
+    tabManual.addEventListener('click', () => switchTab('manual'));
+
+    // STK Push Submission Logic
+    function initiateStkPush() {
+        const phone = document.getElementById('donatePhone').value.trim();
+        const amount = document.getElementById('donateAmount').value.trim();
+        const statusEl = document.getElementById('donateStatus');
+        const donateBtn = document.getElementById('donateBtn');
+
+        if (!phone || !amount) {
+            statusEl.textContent = 'Please enter both phone number and amount.';
+            statusEl.style.color = '#DC2626';
+            return;
+        }
+
+        donateBtn.disabled = true;
+        donateBtn.textContent = 'Initiating prompt...';
+        statusEl.textContent = '';
+
+        // Safely fetch CSRF token from document cookies
+        const getCookie = (name) => {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        };
+
+        fetch('/initiate-donation/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ phone: phone, amount: amount })
+        })
+        .then(response => response.json())
+        .then(data => {
+            donateBtn.disabled = false;
+            donateBtn.textContent = 'Send STK Push';
+            
+            if (data.success) {
+                statusEl.textContent = data.message || 'Prompt sent to your phone! Please complete the payment.';
+                statusEl.style.color = '#0F766E';
+            } else {
+                statusEl.textContent = data.error || 'Failed to send prompt. Redirecting to manual instructions...';
+                statusEl.style.color = '#DC2626';
+                // Switch to manual tab on failure so the user has an immediate fallback
+                setTimeout(() => switchTab('manual'), 2500);
+            }
+        })
+        .catch(error => {
+            donateBtn.disabled = false;
+            donateBtn.textContent = 'Send STK Push';
+            statusEl.textContent = 'Network error. Redirecting to manual instructions...';
+            statusEl.style.color = '#DC2626';
+            setTimeout(() => switchTab('manual'), 2500);
+        });
+    }
+</script>
