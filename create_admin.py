@@ -5,12 +5,15 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 from django.contrib.auth.models import User
 
-username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'shakido_admin')
-email = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@shakido.com')
-password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', 'ShakidoAdmin2026!')
+username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
-if not User.objects.filter(username=username).exists():
-    User.objects.create_superuser(username=username, email=email, password=password)
-    print(f"Superuser '{username}' created successfully!")
+if username and email and password:
+    if not User.objects.filter(username=username).exists():
+        User.objects.create_superuser(username=username, email=email, password=password)
+        print(f"Superuser '{username}' created successfully!")
+    else:
+        print(f"Superuser '{username}' already exists.")
 else:
-    print(f"Superuser '{username}' already exists.")
+    print("No DJANGO_SUPERUSER_* env vars set — skipping admin creation.")
