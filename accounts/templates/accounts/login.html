@@ -1,23 +1,63 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Login
-{% endblock %}
+{% block title %}Login — HomeFinder Kenya{% endblock %}
 
 {% block content %}
+<div style="max-width:420px; margin:60px auto; padding:0 20px; font-family:'Fira Sans',sans-serif;">
+  <div style="background:var(--bg-card, #fff); border-radius:18px; padding:36px 28px; box-shadow:0 8px 24px rgba(15,118,110,0.10);">
+    <h2 style="color:var(--fg, #134E4A); margin-bottom:6px; text-align:center;">Welcome Back</h2>
+    <p style="color:var(--fg-muted, #5EAFA8); text-align:center; font-size:0.85rem; margin-bottom:28px;">Log in to HomeFinder Kenya</p>
 
-<h2>Login</h2>
+    {% if form.non_field_errors %}
+      <div style="background:#FEE2E2; color:#DC2626; padding:10px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:16px;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
 
-<form method="POST" action="{% if next_url %}?next={{ next_url }}{% endif %}">
+    <form method="POST" action="{% if next_url %}?next={{ next_url }}{% endif %}" style="display:flex; flex-direction:column; gap:16px;">
+      {% csrf_token %}
 
-    {% csrf_token %}
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:5px; color:var(--fg, #134E4A);">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
 
-    {{ form.as_p }}
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:5px; color:var(--fg, #134E4A);">Password</label>
+        {{ form.password }}
+        {{ form.password.errors }}
+      </div>
 
-    <button type="submit">
-        Login
-    </button>
+      <div>
+        {{ form.captcha }}
+        {{ form.captcha.errors }}
+      </div>
 
-</form>
+      <button type="submit" style="background:var(--primary, #0F766E); color:#fff; border:none; padding:12px; border-radius:10px; font-weight:600; font-size:0.95rem; cursor:pointer;">
+        Log In
+      </button>
+    </form>
 
+    <p style="text-align:center; font-size:0.85rem; margin-top:20px; color:var(--fg-muted, #5EAFA8);">
+      Don't have an account? <a href="{% url 'register' %}" style="color:var(--primary, #0F766E); font-weight:600;">Sign up</a>
+    </p>
+  </div>
+</div>
+
+<style>
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border, #99F6E4);
+    font-family: inherit;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+  }
+  input[type="text"]:focus, input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary, #0F766E);
+  }
+</style>
 {% endblock %}

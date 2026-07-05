@@ -1,40 +1,81 @@
 {% extends 'base.html' %}
 
-{% block title %}
-Register
-{% endblock %}
+{% block title %}Create Account — HomeFinder Kenya{% endblock %}
 
 {% block content %}
+<div style="max-width:460px; margin:60px auto; padding:0 20px; font-family:'Fira Sans',sans-serif;">
+  <div style="background:var(--bg-card, #fff); border-radius:18px; padding:36px 28px; box-shadow:0 8px 24px rgba(15,118,110,0.10);">
+    <h2 style="color:var(--fg, #134E4A); margin-bottom:6px; text-align:center;">Create Account</h2>
+    <p style="color:var(--fg-muted, #5EAFA8); text-align:center; font-size:0.85rem; margin-bottom:28px;">Join HomeFinder Kenya and help others find homes.</p>
 
-<h2>Create Account</h2>
+    {% if form.non_field_errors %}
+      <div style="background:#FEE2E2; color:#DC2626; padding:10px 14px; border-radius:8px; font-size:0.85rem; margin-bottom:16px;">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
 
-<p>
-Join HomeFinder KE and help others find homes.
-</p>
+    <form method="POST" action="{% if next_url %}?next={{ next_url }}{% endif %}" style="display:flex; flex-direction:column; gap:16px;">
+      {% csrf_token %}
 
-<form method="POST" action="{% if next_url %}?next={{ next_url }}{% endif %}">
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:5px; color:var(--fg, #134E4A);">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
 
-    {% csrf_token %}
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:5px; color:var(--fg, #134E4A);">Email</label>
+        {{ form.email }}
+        {{ form.email.errors }}
+      </div>
 
-    {{ form.non_field_errors }}
-    {{ form.username.label_tag }} {{ form.username }} {{ form.username.errors }}
-    {{ form.email.label_tag }} {{ form.email }} {{ form.email.errors }}
-    {{ form.password1.label_tag }} {{ form.password1 }} {{ form.password1.errors }}
-    {{ form.password2.label_tag }} {{ form.password2 }} {{ form.password2.errors }}
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:5px; color:var(--fg, #134E4A);">Password</label>
+        {{ form.password1 }}
+        {{ form.password1.errors }}
+      </div>
 
-    <p style="font-size:0.85rem; margin:14px 0;">
-    {{ form.agree_to_terms }}
-    I agree to the <a href="{% url 'terms' %}" target="_blank">Terms of Service</a>
-    {{ form.agree_to_terms.errors }}
+      <div>
+        <label style="display:block; font-weight:600; font-size:0.85rem; margin-bottom:5px; color:var(--fg, #134E4A);">Confirm Password</label>
+        {{ form.password2 }}
+        {{ form.password2.errors }}
+      </div>
+
+      <p style="font-size:0.85rem; display:flex; align-items:flex-start; gap:8px;">
+        {{ form.agree_to_terms }}
+        <span>I agree to the <a href="{% url 'terms' %}" target="_blank" style="color:var(--primary, #0F766E); font-weight:600;">Terms of Service</a></span>
+      </p>
+      {{ form.agree_to_terms.errors }}
+
+      <div>
+        {{ form.captcha }}
+        {{ form.captcha.errors }}
+      </div>
+
+      <button type="submit" style="background:var(--primary, #0F766E); color:#fff; border:none; padding:12px; border-radius:10px; font-weight:600; font-size:0.95rem; cursor:pointer;">
+        Create Account
+      </button>
+    </form>
+
+    <p style="text-align:center; font-size:0.85rem; margin-top:20px; color:var(--fg-muted, #5EAFA8);">
+      Already have an account? <a href="{% url 'login' %}" style="color:var(--primary, #0F766E); font-weight:600;">Log in</a>
     </p>
+  </div>
+</div>
 
-    {{ form.captcha }}
-    {{ form.captcha.errors }}
-
-    <button type="submit">
-        Register
-    </button>
-
-</form>
-
+<style>
+  input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border, #99F6E4);
+    font-family: inherit;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+  }
+  input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+    outline: none;
+    border-color: var(--primary, #0F766E);
+  }
+</style>
 {% endblock %}
