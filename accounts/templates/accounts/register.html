@@ -16,7 +16,20 @@ Join HomeFinder KE and help others find homes.
 
     {% csrf_token %}
 
-    {{ form.as_p }}
+    {{ form.non_field_errors }}
+    {{ form.username.label_tag }} {{ form.username }} {{ form.username.errors }}
+    {{ form.email.label_tag }} {{ form.email }} {{ form.email.errors }}
+    {{ form.password1.label_tag }} {{ form.password1 }} {{ form.password1.errors }}
+    {{ form.password2.label_tag }} {{ form.password2 }} {{ form.password2.errors }}
+
+    <p style="font-size:0.85rem; margin:14px 0;">
+    {{ form.agree_to_terms }}
+    I agree to the <a href="{% url 'terms' %}" target="_blank">Terms of Service</a>
+    {{ form.agree_to_terms.errors }}
+    </p>
+
+    {{ form.captcha }}
+    {{ form.captcha.errors }}
 
     <button type="submit">
         Register

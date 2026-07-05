@@ -168,12 +168,15 @@ from django_recaptcha.widgets import ReCaptchaV2Checkbox
 
 class UserRegistrationForm(UserCreationForm):
     email = forms.EmailField(required=True)
+    agree_to_terms = forms.BooleanField(
+        required=True,
+        error_messages={'required': 'You must agree to the Terms of Service to create an account.'}
+    )
     captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
 
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
-
 
 class UserLoginForm(forms.Form):
     username = forms.CharField()
@@ -234,4 +237,4 @@ class FurnitureVendorForm(forms.ModelForm):
             'location': forms.TextInput(attrs={'placeholder': 'e.g. Kasarani, Nairobi'}),
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe types of furniture, custom work, delivery options...'}),
             'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
-        }
+        }
