@@ -1,9 +1,8 @@
 import os
 import django
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'homefinderke.settings')  # Replace with your true folder name
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'homefinderke.settings')
 django.setup()
-
 from django.contrib.auth.models import User
 
 username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'shakido_admin')
