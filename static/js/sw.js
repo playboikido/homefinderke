@@ -42,11 +42,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
- // Page navigations: network-first, never serve stale cached HTML —
-// only fall back to a dedicated offline page if the network genuinely fails
-if (req.mode === 'navigate') {
-  event.respondWith(
-    fetch(req).catch(() => caches.match(OFFLINE_URL))
-  );
-}
+  // Page navigations: network-first, fall back to cache, then offline page
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, resClone));
+          return res;
+        })
+        .catch(() => caches.match(req).then((cached) => cached || caches.match(OFFLINE_URL)))
+    );
+  }
 });
