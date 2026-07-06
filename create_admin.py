@@ -10,10 +10,15 @@ email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
 password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
 
 if username and email and password:
-    if not User.objects.filter(username=username).exists():
-        User.objects.create_superuser(username=username, email=email, password=password)
+    user, created = User.objects.get_or_create(username=username, defaults={'email': email})
+    user.email = email
+    user.set_password(password)
+    user.is_staff = True
+    user.is_superuser = True
+    user.save()
+    if created:
         print(f"Superuser '{username}' created successfully!")
     else:
-        print(f"Superuser '{username}' already exists.")
+        print(f"Superuser '{username}' password reset successfully!")
 else:
     print("No DJANGO_SUPERUSER_* env vars set — skipping admin creation.")
