@@ -189,7 +189,6 @@ class ContactForm(forms.Form):
     email = forms.EmailField()
     subject = forms.CharField(max_length=200)
     message = forms.CharField(widget=forms.Textarea)
-    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
 
 from .models import Residence, LeaseAgreement
 
