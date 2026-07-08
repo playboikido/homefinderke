@@ -23,8 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
+<<<<<<< HEAD
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com', '.code.run']
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com', 'https://*.code.run']
+=======
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+>>>>>>> b4fb55a05b1538046e6ebeb318fe2a6fd16e093e
 
 # Application definition
 
