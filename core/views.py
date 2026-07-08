@@ -4,7 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
 
-from .models import Residence, ResidenceReport
+from .models import Residence, ResidenceReport, ResidenceView
 from .forms import ResidenceForm, ResidenceReportForm, MoverForm, FurnitureVendorForm
 from django.contrib import messages
 from .models import Residence, ResidenceReport, Favorite
@@ -221,9 +221,16 @@ def residence_detail(request, pk):
     # Only count views for non-owners
     if not request.user.is_authenticated or residence.owner != request.user:
         if request.user.is_authenticated:
-            residence.viewers.add(request.user)  # keeps track of who has ever viewed
-            residence.views_count += 1
-            residence.save(update_fields=['views_count'])
+            from django.utils import timezone
+            view, created = ResidenceView.objects.get_or_create(
+                residence=residence, user=request.user,
+                defaults={'last_viewed': timezone.now().date()}
+            )
+            if created or view.last_viewed != timezone.now().date():
+                view.last_viewed = timezone.now().date()
+                view.save(update_fields=['last_viewed'])
+                residence.views_count += 1
+                residence.save(update_fields=['views_count'])
         else:
             if not request.session.session_key:
                 request.session.create()

@@ -256,6 +256,13 @@ class Residence(models.Model):
                 self.vacancy_poster = compressed
         super().save(*args, **kwargs)    
 
+class ResidenceView(models.Model):
+    residence = models.ForeignKey(Residence, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    last_viewed = models.DateField(auto_now=True)
+
+    class Meta:
+        unique_together = ('residence', 'user')
 
 class ResidencePhoto(models.Model):
 
