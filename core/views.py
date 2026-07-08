@@ -567,18 +567,17 @@ def add_review(request, pk):
         messages.warning(request, 'You have already reviewed this residence.')
         return redirect('residence_detail', pk=residence.pk)
 
-<<<<<<< HEAD
+
     if residence.owner == request.user:
         messages.warning(request, "You can't review your own listing.")
         return redirect('residence_detail', pk=residence.pk)
 
-=======
 
     if residence.owner == request.user:
         messages.warning(request, "You can't review your own listing.")
         return redirect('residence_detail', pk=residence.pk)
         
->>>>>>> b4fb55a05b1538046e6ebeb318fe2a6fd16e093e
+
     if request.method == 'POST':
         form = ReviewForm(request.POST)
         if form.is_valid():
