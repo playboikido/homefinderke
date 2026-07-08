@@ -10,14 +10,22 @@ User = get_user_model()
 
 @login_required
 def chat_hub(request, conversation_id=None):
-    my_conversations = request.user.conversations.all()
+    # prefetch participants + messages so the loop below doesn't re-hit the DB
+    # 3 extra queries per conversation (N+1) was the main cause of the slow sidebar load.
+    my_conversations = request.user.conversations.prefetch_related('participants', 'messages').all()
 
     # Build sidebar data: other participant, last message preview, unread count
     conversation_rows = []
     for convo in my_conversations:
-        other = convo.participants.exclude(id=request.user.id).first()
-        last_msg = convo.messages.last()
-        unread_count = convo.messages.filter(is_read=False).exclude(sender=request.user).count()
+        participants = convo.participants.all()  # served from prefetch cache, no query
+        other = next((p for p in participants if p.id != request.user.id), None)
+
+        convo_messages = convo.messages.all()  # served from prefetch cache, no query
+        last_msg = convo_messages[len(convo_messages) - 1] if convo_messages else None
+        unread_count = sum(
+            1 for m in convo_messages if not m.is_read and m.sender_id != request.user.id
+        )
+
         conversation_rows.append({
             'id': convo.id,
             'other_user': other,
