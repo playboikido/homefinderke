@@ -25,8 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Application definition
