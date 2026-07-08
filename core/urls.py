@@ -79,9 +79,9 @@ urlpatterns = [
         ),
 
     path(
-        'residence/<int:pk>/edit/',
-        views.edit_residence,
-        name='edit_residence'
+        'residence/<int:pk>/viewers/',
+        views.residence_viewers,
+        name='residence_viewers'
         ),
 
     path(
@@ -132,6 +132,7 @@ urlpatterns = [
     path('save-search/', views.save_search, name='save_search'),
     path('saved-searches/', views.my_saved_searches, name='my_saved_searches'),
     path('saved-searches/<int:pk>/delete/', views.delete_saved_search, name='delete_saved_search'),
+    
 ]
 urlpatterns += static(
     settings.MEDIA_URL,

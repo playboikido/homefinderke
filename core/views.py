@@ -327,6 +327,13 @@ def staff_or_help_admin_required(view_func):
 
 
 @staff_or_help_admin_required
+def residence_viewers(request, pk):
+    residence = get_object_or_404(Residence, pk=pk)
+    viewers = residence.viewers.all().order_by('username')
+    return render(request, 'core/residence_viewers.html', {
+        'residence': residence,
+        'viewers': viewers,
+    })
 def admin_dashboard(request):
     from datetime import timedelta
     from django.db.models import Count
@@ -596,7 +603,10 @@ def add_review(request, pk):
 
 @login_required
 def edit_residence(request, pk):
-    residence = get_object_or_404(Residence, pk=pk, owner=request.user)
+    residence = get_object_or_404(Residence, pk=pk)
+    is_admin = request.user.is_staff or request.user.email == 'homefinder.ke.help@gmail.com'
+    if residence.owner != request.user and not is_admin:
+        raise Http404
 
     if request.method == 'POST':
         form = ResidenceForm(request.POST, request.FILES, instance=residence)
@@ -963,6 +973,13 @@ def ai_recommendations(request):
 
 
 @staff_or_help_admin_required
+def residence_viewers(request, pk):
+    residence = get_object_or_404(Residence, pk=pk)
+    viewers = residence.viewers.all().order_by('username')
+    return render(request, 'core/residence_viewers.html', {
+        'residence': residence,
+        'viewers': viewers,
+    })
 def add_mover(request):
     if request.method == 'POST':
         form = MoverForm(request.POST, request.FILES)
