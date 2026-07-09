@@ -1183,3 +1183,37 @@ def delete_saved_search(request, pk):
     SavedSearch.objects.filter(pk=pk, user=request.user).delete()
     messages.info(request, 'Saved search removed.')
     return redirect('my_saved_searches')
+
+def activity_feed(request):
+    from datetime import timedelta
+    from django.utils import timezone
+    from django.db.models import Count
+
+    cutoff = timezone.now() - timedelta(days=7)
+
+    new_listings = Residence.objects.filter(
+        approved=True, created_at__gte=cutoff
+    ).order_by('-created_at')[:15]
+
+    new_roommates = RoommateProfile.objects.filter(
+        is_active=True, created_at__gte=cutoff
+    ).order_by('-created_at')[:15]
+
+    trending = Residence.objects.filter(
+        approved=True
+    ).annotate(
+        recent_views=Count('viewers')
+    ).order_by('-recent_views')[:10]
+
+    events = []
+    for r in new_listings:
+        events.append({'type': 'new_listing', 'time': r.created_at, 'residence': r})
+    for rp in new_roommates:
+        events.append({'type': 'new_roommate', 'time': rp.created_at, 'town': rp.preferred_town or rp.preferred_county})
+    for r in trending:
+        if r.recent_views >= 3:
+            events.append({'type': 'trending', 'time': r.created_at, 'residence': r, 'views': r.recent_views})
+
+    events.sort(key=lambda e: e['time'], reverse=True)
+
+    return render(request, 'core/activity_feed.html', {'events': events[:30]})

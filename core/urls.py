@@ -109,7 +109,7 @@ urlpatterns = [
         name='compare_residences'
     ),
     path('offline/', TemplateView.as_view(template_name='core/offline.html'), name='offline'),
-
+    path('activity/', views.activity_feed, name='activity_feed'),
     path('residence/<int:pk>/generate-lease/', views.generate_lease, name='generate_lease'),
     path('lease/<int:pk>/download/', views.download_lease_pdf, name='download_lease_pdf'),
     path('roommates/', views.roommate_list, name='roommate_list'),
@@ -134,6 +134,7 @@ urlpatterns = [
     path('save-search/', views.save_search, name='save_search'),
     path('saved-searches/', views.my_saved_searches, name='my_saved_searches'),
     path('saved-searches/<int:pk>/delete/', views.delete_saved_search, name='delete_saved_search'),
+
     
 ]
 urlpatterns += static(

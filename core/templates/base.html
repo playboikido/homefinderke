@@ -1081,6 +1081,7 @@
                      📲Install HomeFinder App
                 </button>
             </div>
+            <button id="darkModeToggle" aria-label="Toggle dark mode" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">🌙</button>
 
             <!-- Contact -->
             <div class="footer-col">
@@ -1212,6 +1213,28 @@
   aiInput.addEventListener('keydown', e => { if (e.key === 'Enter') sendAiMessage(); });
 </script>
 {% endcomment %}
+
+<script>
+  (function() {
+    const root = document.documentElement;
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') root.setAttribute('data-theme', 'dark');
+
+    const btn = document.getElementById('darkModeToggle');
+    if (btn) {
+      btn.addEventListener('click', () => {
+        const isDark = root.getAttribute('data-theme') === 'dark';
+        if (isDark) {
+          root.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'light');
+        } else {
+          root.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+        }
+      });
+    }
+  })();
+</script>
 
 <script>
   document.addEventListener('DOMContentLoaded', function () {
