@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HomeFinder KE — Getting your home ready…</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --primary: #0F766E;
+    --primary-dark: #0D5E58;
+    --secondary: #14B8A6;
+    --accent: #0369A1;
+    --gold: #D97706;
+    --bg: #F0FDFA;
+    --bg-card: #FFFFFF;
+    --fg: #134E4A;
+    --fg-muted: #5EAFA8;
+    --border: #99F6E4;
+    --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; background:var(--bg); font-family:'Fira Sans', system-ui, sans-serif; }
+  body{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background-image: radial-gradient(var(--border) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+  .card{
+    width:min(400px, 90vw);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-lg);
+    padding: 36px 32px 28px;
+    text-align:center;
+  }
+  .wordmark{ display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:8px; }
+  .wordmark span{ font-family:'Fira Code', monospace; font-weight:700; font-size:18px; color:var(--fg); }
+  .tagline{ font-size:11.5px; color:var(--fg-muted); margin:0 0 24px; }
+
+  .house{ width:120px; height:120px; margin:0 auto 20px; }
+  .house-line{
+    fill:none; stroke:var(--primary); stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:210; stroke-dashoffset:210;
+    animation: draw 2.6s ease-in-out infinite;
+  }
+  @keyframes draw{
+    0%{ stroke-dashoffset:210; } 55%,80%{ stroke-dashoffset:0; } 100%{ stroke-dashoffset:-210; }
+  }
+  .door{ transform-origin:88px 88px; animation:wait 2.6s ease-in-out infinite; }
+  @keyframes wait{ 0%,100%{ transform:rotate(0deg); } }
+  .awake .house-line{ animation:none; stroke-dashoffset:0; }
+  .awake .door{ animation:open .7s ease-forwards; }
+  @keyframes open{ to{ transform:rotate(-32deg); } }
+
+  h1{ font-size:18px; font-weight:600; color:var(--fg); margin:0 0 6px; }
+  .status{ font-size:13px; color:var(--fg-muted); margin:0 0 22px; }
+  .status .dots::after{ content:''; display:inline-block; width:1em; text-align:left; animation:dots 1.4s steps(4,end) infinite; }
+  @keyframes dots{ 0%{content:'';} 25%{content:'.';} 50%{content:'..';} 75%{content:'...';} }
+
+  .tip-box{ border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:16px 4px; margin-bottom:20px; min-height:58px; display:flex; align-items:center; justify-content:center; }
+  .tip{ font-size:13px; line-height:1.55; color:var(--fg); opacity:0; transition:opacity .5s ease; }
+  .tip.visible{ opacity:1; }
+  .tip .eyebrow{ display:block; font-family:'Fira Code', monospace; font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--gold); margin-bottom:5px; }
+
+  .progress-track{ width:100%; height:3px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:16px; }
+  .progress-fill{ height:100%; width:30%; background:linear-gradient(90deg, var(--secondary), var(--primary)); border-radius:2px; animation:sweep 1.7s ease-in-out infinite; }
+  @keyframes sweep{ 0%{ transform:translateX(-100%);} 100%{ transform:translateX(340%);} }
+
+  .skip{ font-size:12px; color:var(--fg-muted); }
+  .skip a{ color:var(--accent); text-decoration:none; border-bottom:1px solid var(--accent); }
+  .elapsed{ font-family:'Fira Code', monospace; font-size:10.5px; color:var(--fg-muted); margin-top:12px; }
+
+  @media (prefers-reduced-motion: reduce){ .house-line{ animation:none; stroke-dashoffset:0; } .progress-fill{ animation:none; } }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="wordmark">
+      <svg width="24" height="24" viewBox="0 0 32 32">
+        <circle cx="16" cy="16" r="16" fill="#14B8A6"/>
+        <path d="M16 6 L6 15 H10 V25 H22 V15 H26 Z" fill="#0F766E"/>
+        <path d="M13 14 L16 17 L13 20" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>HomeFinder KE</span>
+    </div>
+    <p class="tagline">Find a Home · Help Someone Find Theirs</p>
+
+    <div class="house">
+      <svg viewBox="0 0 24 24" width="100%" height="100%">
+        <path class="house-line" d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <g class="door"><polyline class="house-line" points="9 22 9 12 15 12 15 22"/></g>
+      </svg>
+    </div>
+
+    <h1>Getting your home ready</h1>
+    <p class="status" id="statusLine">Waking up HomeFinder<span class="dots"></span></p>
+
+    <div class="tip-box"><p class="tip visible" id="tipText">
+      <span class="eyebrow">While you wait</span>
+      Save any listing you like — it'll be right where you left it once we're in.
+    </p></div>
+
+    <div class="progress-track"><div class="progress-fill"></div></div>
+
+    <p class="skip">Taking a while? <a href="#" id="skipLink">Go straight to HomeFinder →</a></p>
+    <p class="elapsed" id="elapsed">0:00 elapsed</p>
+  </div>
+
+<script>
+(function(){
+  var APP_URL = "https://homefinderke.onrender.com/"; // <-- replace with your real Render app URL
+
+  var tips = [
+    { eyebrow:"While you wait", text:"Save any listing you like — it'll be right where you left it once we're in." },
+    { eyebrow:"Did you know", text:"Free Render services sleep after 15 minutes of no traffic. This is just it waking back up." },
+    { eyebrow:"Tip", text:"Set up saved searches so new matches land in your inbox instead of you checking back." },
+    { eyebrow:"While you wait", text:"Filtering by commute time, not just distance, usually finds better matches." },
+    { eyebrow:"Almost there", text:"Your server is booting up. It'll be fast from here on out." }
+  ];
+
+  var tipEl = document.getElementById('tipText');
+  var statusEl = document.getElementById('statusLine');
+  var elapsedEl = document.getElementById('elapsed');
+  var cardEl = document.getElementById('card');
+  document.getElementById('skipLink').href = APP_URL;
+
+  var i = 0;
+  setInterval(function(){
+    tipEl.classList.remove('visible');
+    setTimeout(function(){
+      i = (i+1) % tips.length;
+      tipEl.innerHTML = '<span class="eyebrow">'+tips[i].eyebrow+'</span>'+tips[i].text;
+      tipEl.classList.add('visible');
+    }, 500);
+  }, 4500);
+
+  var start = Date.now();
+  setInterval(function(){
+    var s = Math.floor((Date.now()-start)/1000);
+    var m = Math.floor(s/60), ss = String(s%60).padStart(2,'0');
+    elapsedEl.textContent = m+':'+ss+' elapsed';
+    if (s > 20) statusEl.firstChild.textContent = 'Almost there';
+    if (s > 45) statusEl.firstChild.textContent = 'Still working on it';
+  }, 1000);
+
+  function wake(){
+    var ctrl = new AbortController();
+    var t = setTimeout(function(){ ctrl.abort(); }, 20000);
+    fetch(APP_URL, { mode:'no-cors', cache:'no-store', signal: ctrl.signal })
+      .then(function(){
+        clearTimeout(t);
+        cardEl.classList.add('awake');
+        statusEl.innerHTML = "You're in — redirecting<span class=\"dots\"></span>";
+        setTimeout(function(){ window.location.href = APP_URL; }, 650);
+      })
+      .catch(function(){
+        clearTimeout(t);
+        setTimeout(wake, 1500);
+      });
+  }
+  wake();
+})();
+</script>
+</body>
+</html>
