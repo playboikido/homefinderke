@@ -511,13 +511,6 @@
               <a href="https://t.me/share/url?url={{ share_url|urlencode }}&text={{ residence.name|urlencode }}" target="_blank" rel="noopener">Telegram</a>
               <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ residence.name|urlencode }}" target="_blank" rel="noopener">X</a>
               <button type="button" onclick="copyShareLink()">Copy Link</button>
-            <div class="rd-qr-block" style="margin-top:14px; text-align:center;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&color=0F766E&data={{ share_url|urlencode }}"
-                 alt="QR code for this listing"
-                 width="140" height="140"
-                 style="border-radius:8px; border:1px solid var(--c-border);">
-            <p style="font-size:0.75rem; color:var(--c-subtle); margin-top:6px;">Scan to open this listing</p>
-          </div>
           </div>
         </div>
       </div>
@@ -1024,7 +1017,6 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 {% if residence.latitude and residence.longitude %}
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <script>
   const affordBtn = document.getElementById('affordCheckBtn');
   if (affordBtn) {
