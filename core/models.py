@@ -52,6 +52,17 @@ def compress_image(image_field, max_size=(1280, 1280), quality=70):
         
 from django.conf import settings
 from django.db.models.signals import post_save
+@receiver(post_save, sender=User)
+def notify_admin_new_account(sender, instance, created, **kwargs):
+    if created:
+        from django.core.mail import send_mail
+        send_mail(
+            subject='New HomeFinder KE account created',
+            message=f'A new account was just created.\n\nUsername: {instance.username}\nEmail: {instance.email}\nJoined: {instance.date_joined}',
+            from_email=None,  # uses DEFAULT_FROM_EMAIL automatically
+            recipient_list=['homefinder.ke.help@gmail.com'],
+            fail_silently=True,
+        )
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
 
