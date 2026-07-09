@@ -48,6 +48,11 @@ urlpatterns = [
          views.review_report,
          name='review_report'
     ),
+    path(
+        'review-user-report/<int:pk>/',
+         views.review_user_report,
+         name='review_user_report'
+    ),
     path('review-user-report/<int:pk>/', views.review_user_report, name='review_user_report'),
     path('suspend-user/<int:user_id>/', views.suspend_user, name='suspend_user'),
     path(

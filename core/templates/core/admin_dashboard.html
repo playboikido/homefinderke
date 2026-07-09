@@ -819,7 +819,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               View
             </a>
-            <a href="{% url 'admin:core_residence_change' residence.id %}" class="db-btn db-btn-edit">
+            <a href="{% url 'edit_residence' residence.id %}" class="db-btn db-btn-edit">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               Edit
             </a>
@@ -910,23 +910,24 @@
     </div>
 
     <!-- Community Reports -->
-    <div class="db-section">
+    <!-- User Reports -->
+    <div class="db-section" style="margin-top:40px;">
       <div class="db-section-head">
         <h2 class="db-section-title">
-          Community Reports
-          {% if reports %}
-            <span class="db-badge db-badge--warn">{{ reports|length }} open</span>
+          User Reports
+          {% if user_reports %}
+            <span class="db-badge db-badge--warn">{{ user_reports|length }} open</span>
           {% endif %}
         </h2>
       </div>
       <div class="db-divider"></div>
 
-      {% if reports %}
+      {% if user_reports %}
       <div class="db-reports-list">
-        {% for report in reports %}
+        {% for report in user_reports %}
         <div class="db-report-card">
           <div class="db-report-header">
-            <div class="db-report-residence">{{ report.residence.name }}</div>
+            <div class="db-report-residence">{{ report.reported_user }}</div>
             <div class="db-report-date">{{ report.created_at|date:"d M Y, H:i" }}</div>
           </div>
 
@@ -946,7 +947,7 @@
           {% endif %}
 
           <div class="db-report-footer">
-            <a href="{% url 'review_report' report.id %}" class="db-btn-review">
+            <a href="{% url 'review_user_report' report.id %}" class="db-btn-review">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               Mark Reviewed
             </a>
@@ -960,38 +961,61 @@
         <div class="db-empty-icon">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         </div>
-        <h3>No open reports</h3>
-        <p>The community hasn't flagged anything that needs attention.</p>
+        <h3>No open user reports</h3>
+        <p>Nobody has flagged another account recently.</p>
       </div>
       {% endif %}
-      {% if user_reports %}
-<div class="db-reports-list">
-  {% for ureport in user_reports %}
-  <div class="db-report-card">
-    <div class="db-report-header">
-      <div class="db-report-residence">{{ ureport.reported_user.username }}</div>
-      <div class="db-report-date">{{ ureport.created_at|date:"d M Y, H:i" }}</div>
     </div>
-    <div class="db-report-body">
-      <div class="db-report-field">
-        <div class="db-report-field-label">Reported By</div>
-        <div class="db-report-field-value">{{ ureport.reported_by }}</div>
+
+    <!-- User Login Activity -->
+    <div class="db-section" style="margin-top:40px;">
+      <div class="db-section-head">
+        <h2 class="db-section-title">
+          User Login Activity
+          <span class="db-badge">{{ all_users|length }} accounts</span>
+        </h2>
       </div>
-      <div class="db-report-field">
-        <div class="db-report-field-label">Reason</div>
-        <div class="db-report-field-value">{{ ureport.get_reason_display }}</div>
+      <div class="db-divider"></div>
+
+      <div style="max-height:480px; overflow-y:auto; border:1px solid var(--c-border); border-radius:var(--r-lg);">
+        <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+          <thead style="position:sticky; top:0; background:var(--c-surface); z-index:1;">
+            <tr style="text-align:left; border-bottom:1px solid var(--c-border);">
+              <th style="padding:10px 14px;">Username</th>
+              <th style="padding:10px 14px;">Email</th>
+              <th style="padding:10px 14px;">Last Login</th>
+              <th style="padding:10px 14px;">Joined</th>
+              <th style="padding:10px 14px;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in all_users %}
+            <tr style="border-bottom:1px solid var(--c-border);">
+              <td style="padding:10px 14px; font-weight:600; color:var(--c-fg);">{{ u.username }}</td>
+              <td style="padding:10px 14px; color:var(--c-subtle);">{{ u.email }}</td>
+              <td style="padding:10px 14px;">
+                {% if u.last_login %}
+                  <span style="color:var(--c-green-text, #16A34A); font-weight:600;">●</span> {{ u.last_login|date:"d M Y, H:i" }}
+                {% else %}
+                  <span style="color:var(--c-subtle);">Never logged in</span>
+                {% endif %}
+              </td>
+              <td style="padding:10px 14px; color:var(--c-subtle);">{{ u.date_joined|date:"d M Y" }}</td>
+              <td style="padding:10px 14px;">
+                {% if u.is_active %}
+                  <span class="db-badge" style="background:var(--c-green-bg, #DCFCE7); color:var(--c-green-text, #16A34A); border-color:var(--c-green-border, #BBF7D0);">Active</span>
+                {% else %}
+                  <span class="db-badge db-badge--warn">Disabled</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
       </div>
     </div>
-    {% if ureport.comment %}
-    <div class="db-report-comment">"{{ ureport.comment }}"</div>
-    {% endif %}
-    <div class="db-report-footer">
-      <a href="{% url 'review_user_report' ureport.id %}" class="db-btn-review">Mark Reviewed</a>
-      <a href="{% url 'suspend_user' ureport.reported_user.id %}" class="db-btn db-btn-reject">Suspend User</a>
-    </div>
-  </div>
-  {% endfor %}
-</div>
+
+    <!-- Community Reports -->
 {% endif %}
     </div>
 

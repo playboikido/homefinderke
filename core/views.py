@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
-
+from .models import Residence, ResidenceReport, UserReport
 from .models import Residence, ResidenceReport, ResidenceView
 from .forms import ResidenceForm, ResidenceReportForm, MoverForm, FurnitureVendorForm
 from django.contrib import messages
@@ -356,6 +356,8 @@ def admin_dashboard(request):
     total_users        = User.objects.count()
     reports            = ResidenceReport.objects.filter(reviewed=False).order_by('-created_at')
     user_reports       = UserReport.objects.filter(reviewed=False).order_by('-created_at')
+    all_users          = User.objects.all().order_by('-last_login')
+    user_reports       = UserReport.objects.filter(reviewed=False).order_by('-created_at')
     premium_residences = Residence.objects.filter(approved=True, is_premium=True)
     premium_count      = premium_residences.count()
     hidden_count       = Residence.objects.filter(is_hidden=True).count()
@@ -386,6 +388,8 @@ def admin_dashboard(request):
         'pending_count':        pending_count,
         'total_users':          total_users,
         'reports':              reports,
+        'user_reports':         user_reports,
+        'all_users':            all_users,
         'user_reports':         user_reports,
         'total_views':          total_views,
         'premium_residences':   premium_residences,
@@ -547,6 +551,13 @@ def review_report(request, pk):
     report.save()
     return redirect('admin_dashboard')
 
+
+@staff_or_help_admin_required
+def review_user_report(request, pk):
+    report = get_object_or_404(UserReport, pk=pk)
+    report.reviewed = True
+    report.save()
+    return redirect('admin_dashboard')
 @staff_or_help_admin_required
 def review_user_report(request, pk):
     report = get_object_or_404(UserReport, pk=pk)
@@ -627,22 +638,24 @@ def add_review(request, pk):
 
 @login_required
 def edit_residence(request, pk):
-    residence = get_object_or_404(Residence, pk=pk)
     is_admin = request.user.is_staff or request.user.email == 'homefinder.ke.help@gmail.com'
-    if residence.owner != request.user and not is_admin:
-        raise Http404
+    if is_admin:
+        residence = get_object_or_404(Residence, pk=pk)
+    else:
+        residence = get_object_or_404(Residence, pk=pk, owner=request.user)
 
     if request.method == 'POST':
         form = ResidenceForm(request.POST, request.FILES, instance=residence)
         if form.is_valid():
             form.save()
             messages.success(request, 'Residence updated successfully.')
+            if is_admin and residence.owner != request.user:
+                return redirect('admin_dashboard')
             return redirect('residence_detail', pk=residence.pk)
     else:
         form = ResidenceForm(instance=residence)
 
     return render(request, 'core/edit_residence.html', {'form': form, 'residence': residence})
-
 
 @login_required
 def edit_profile(request):
