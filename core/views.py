@@ -355,6 +355,7 @@ def admin_dashboard(request):
     pending_count      = pending_residences.count()
     total_users        = User.objects.count()
     reports            = ResidenceReport.objects.filter(reviewed=False).order_by('-created_at')
+    user_reports       = UserReport.objects.filter(reviewed=False).order_by('-created_at')
     premium_residences = Residence.objects.filter(approved=True, is_premium=True)
     premium_count      = premium_residences.count()
     hidden_count       = Residence.objects.filter(is_hidden=True).count()
@@ -385,6 +386,7 @@ def admin_dashboard(request):
         'pending_count':        pending_count,
         'total_users':          total_users,
         'reports':              reports,
+        'user_reports':         user_reports,
         'total_views':          total_views,
         'premium_residences':   premium_residences,
         'premium_count':        premium_count,
@@ -545,6 +547,21 @@ def review_report(request, pk):
     report.save()
     return redirect('admin_dashboard')
 
+@staff_or_help_admin_required
+def review_user_report(request, pk):
+    report = get_object_or_404(UserReport, pk=pk)
+    report.reviewed = True
+    report.save()
+    return redirect('admin_dashboard')
+
+
+@staff_or_help_admin_required
+def suspend_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    user.profile.is_suspended = True
+    user.profile.save()
+    messages.success(request, f'{user.username} has been suspended.')
+    return redirect('admin_dashboard')
 
 @login_required
 def save_favorite(request, pk):

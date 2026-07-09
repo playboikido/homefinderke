@@ -944,6 +944,35 @@
         <p>The community hasn't flagged anything that needs attention.</p>
       </div>
       {% endif %}
+      {% if user_reports %}
+<div class="db-reports-list">
+  {% for ureport in user_reports %}
+  <div class="db-report-card">
+    <div class="db-report-header">
+      <div class="db-report-residence">{{ ureport.reported_user.username }}</div>
+      <div class="db-report-date">{{ ureport.created_at|date:"d M Y, H:i" }}</div>
+    </div>
+    <div class="db-report-body">
+      <div class="db-report-field">
+        <div class="db-report-field-label">Reported By</div>
+        <div class="db-report-field-value">{{ ureport.reported_by }}</div>
+      </div>
+      <div class="db-report-field">
+        <div class="db-report-field-label">Reason</div>
+        <div class="db-report-field-value">{{ ureport.get_reason_display }}</div>
+      </div>
+    </div>
+    {% if ureport.comment %}
+    <div class="db-report-comment">"{{ ureport.comment }}"</div>
+    {% endif %}
+    <div class="db-report-footer">
+      <a href="{% url 'review_user_report' ureport.id %}" class="db-btn-review">Mark Reviewed</a>
+      <a href="{% url 'suspend_user' ureport.reported_user.id %}" class="db-btn db-btn-reject">Suspend User</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
     </div>
 
   </div><!-- /.db-inner -->

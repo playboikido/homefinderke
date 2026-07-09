@@ -347,6 +347,7 @@ class Profile(models.Model):
     )
 
     bio = models.TextField(blank=True)
+    is_suspended = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if self.profile_picture and hasattr(self.profile_picture, 'file'):
