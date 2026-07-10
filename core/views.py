@@ -352,7 +352,7 @@ def admin_dashboard(request):
     total_users        = User.objects.count()
     reports            = ResidenceReport.objects.filter(reviewed=False).order_by('-created_at')
     user_reports       = UserReport.objects.filter(reviewed=False).order_by('-created_at')
-    all_users          = User.objects.all().order_by('-last_login')
+    all_users = User.objects.all().order_by('-date_joined')[:100]
     user_reports       = UserReport.objects.filter(reviewed=False).order_by('-created_at')
     premium_residences = Residence.objects.filter(approved=True, is_premium=True)
     premium_count      = premium_residences.count()

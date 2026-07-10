@@ -787,7 +787,25 @@
             border: none;
             cursor: pointer;
         }
-        .ai-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; }
+        .ai-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2;
+        position: fixed;
+            left: 78px;
+            bottom: 92px;
+            background: var(--primary-dark, #0D5E58);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            z-index: 998;
+            white-space: nowrap;
+            animation: aiPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes aiPulse {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+           }
         .ai-chat-panel {
             display: none;
             position: fixed;
@@ -795,7 +813,7 @@
             bottom: 140px;
             width: 320px;
             max-width: calc(100vw - 36px);
-            height: 420px;
+            height: min(420px, calc(100vh - 160px));
             background: var(--bg-card);
             border-radius: 16px;
             box-shadow: var(--shadow-lg);
@@ -1149,13 +1167,17 @@
 </button>
 
 <div class="ai-chat-panel" id="aiChatPanel">
-  <div class="ai-chat-header">🧠 Homefinder Assistant</div>
+  <div class="ai-chat-header" style="display:flex; align-items:center; justify-content:space-between;">
+    <span>🤖 HomefinderKE Assistant</span>
+    <button type="button" onclick="document.getElementById('aiChatPanel').classList.remove('open')" style="background:none; border:none; color:#fff; font-size:1.3rem; cursor:pointer; line-height:1; padding:0 4px;">✕</button>
+  </div>
   <div class="ai-chat-body" id="aiChatBody">
     <div class="ai-msg bot">Hi! Ask me anything about renting a home in Kenya — deposits, viewings, tenant rights, or how this site works.</div>
   </div>
   <div class="ai-chat-input-row">
     <input type="text" id="aiChatInput" placeholder="Type your question...">
     <button id="aiChatSend">Send</button>
+    <div class="ai-fab-label" id="aiFabLabel" onclick="document.getElementById('aiChatPanel').classList.add('open'); this.style.display='none';">Ask Finder 💬</div>
   </div>
 </div>
 <script>
@@ -1173,7 +1195,7 @@
   const aiSend = document.getElementById('aiChatSend');
 
   aiFab.addEventListener('click', () => aiPanel.classList.toggle('open'));
-
+  document.getElementById('aiFabLabel')?.remove();
   function addAiMsg(text, who) {
     const div = document.createElement('div');
     div.className = `ai-msg ${who}`;
