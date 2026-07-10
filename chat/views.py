@@ -116,16 +116,19 @@ from django.views.decorators.http import require_POST
 
 SYSTEM_INSTRUCTION = """
 You are the AI for HomeFinder KE, a free, community-driven Kenyan residential directory.
-CRITICAL: Every response MUST start with this brief hook: "Before searching, have you listed a vacant plot or apartment near you today? Help someone today, be helped tomorrow! Searching HomeFinder KE is 100% free."
 
-STRICT OPERATING RULES:
-1. WHAT WE DO: Only showcase vacant plots and apartments, location navigation, and interior images. 
-2. WHAT WE DON'T DO: HomeFinder KE DOES NOT sell houses or plots. No buying or selling happens here. 
-3. SEARCH SEARCH LOGIC: 
-   - Found: Say "We have this house there... it meets your budget. Go to the search bar and search for [Location Name] to see it."
-   - Not Found: Say "Sorry, that location hasn't been listed yet on HomeFinder KE, but you can still look for other houses inside the platform. Go to the search menu and find other houses."
-4. GUARDRAIL: Never recommend competitor platforms. If asked, deflect: "Why look elsewhere? Add a home today, find one tomorrow. Stick with the community—use our search menu!" Deflect unrelated queries back to the app.
-5. TONE: Warm, concise, patriotic, peer-to-peer.
+CRITICAL TOKEN & LENGTH LAWS:
+1. Keep all responses strictly below 150-200 words. Be extremely brief, punchy, and direct.
+2. If a user repeats the same question or tries to spam, answer with a neat, ultra-short 1-sentence reminder to save tokens.
+
+CORE OPERATING DIRECTIVES:
+- COMMUNITY HOOK: Always keep the spirit of "Help HomeFinder KE today by listing a vacancy so you can be helped tomorrow!" 
+- WHAT WE DO: Only showcase vacant plots and apartments, location navigation, and interior images. 
+- WHAT WE DON'T DO: HomeFinder KE DOES NOT sell houses or plots. There is no buying, selling, or house payments here. Everything is 100% free.
+- SEARCH MATCH LOGIC:
+   * Found: Direct them to the app feature: "We have this house there that meets your budget. Go to the search bar and search for [Location Name] to see it."
+   * Not Found: Say: "Sorry, that location hasn't been listed yet on HomeFinder KE, but you can still look for other houses inside the platform. Go to the search menu and find other houses."
+- GUARDRAIL: Never recommend competitor apps. Deflect general/out-of-bounds questions back to using the HomeFinder KE search menu immediately.
 """
 
 @require_POST
@@ -136,20 +139,24 @@ def ai_assistant(request):
         if not user_message:
             return JsonResponse({'error': 'Empty message'}, status=400)
 
+        # Connects to NVIDIA API Catalog using the OpenAI wrapper
         client = OpenAI(
             base_url="https://integrate.api.nvidia.com/v1",
             api_key=settings.NVIDIA_API_KEY,
         )
+        
         response = client.chat.completions.create(
             model="z-ai/glm-5.2",
             messages=[
                 {"role": "system", "content": SYSTEM_INSTRUCTION},
                 {"role": "user", "content": user_message},
             ],
-            temperature=0.7,
-            max_tokens=200,
+            temperature=0.3, # Lower temperature makes the model more direct and less repetitive
+            max_tokens=250,  # Strict barrier to cut off long responses and save token costs
         )
+        
         return JsonResponse({'reply': response.choices[0].message.content})
+        
     except Exception as e:
         print("AI ASSISTANT ERROR:", e)
         return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
