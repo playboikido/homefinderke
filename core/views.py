@@ -28,18 +28,17 @@ from django.urls import reverse
 from django.utils import timezone
 import json
 import base64
-from google import genai as google_genai
-from google.genai import types as genai_types
+from openai import OpenAI
 from django.views.decorators.http import require_POST
 
-# ─── AI Gemini helpers ──────────────────────────────────────────────────────
-def _get_gemini_client():
-    return google_genai.Client(api_key=settings.GEMINI_API_KEY)
+# ─── AI NVIDIA helpers ──────────────────────────────────────────────────────
+def _get_nvidia_client():
+    return OpenAI(base_url="https://integrate.api.nvidia.com/v1", api_key=settings.NVIDIA_API_KEY)
 
 def _ai_fraud_check(residence):
-    """Use Gemini to flag suspicious listings. Returns (is_fraud, reason)."""
+    """Use NVIDIA to flag suspicious listings. Returns (is_fraud, reason)."""
     try:
-        client = _get_gemini_client()
+        client = _get_nvidia_client()
         prompt = (
             f"You are a fraud detection assistant for a Kenyan property rental site. "
             f"Analyze this listing and determine if it looks fraudulent or suspicious:\n\n"
@@ -55,12 +54,13 @@ def _ai_fraud_check(residence):
             f"Respond with JSON only, no markdown: {{\"fraud\": true/false, \"reason\": \"short explanation\"}}\n"
             f"If rent for a 1-bedroom in Nairobi is below KSh 5,000 or a bedsitter below KSh 2,000, flag it."
         )
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=prompt,
-            config=genai_types.GenerateContentConfig(temperature=0.1, max_output_tokens=100)
+        response = client.chat.completions.create(
+            model="z-ai/glm-5.2",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.1,
+            max_tokens=100,
         )
-        text = response.text.strip().strip('`').replace('json', '').strip()
+        text = response.choices[0].message.content.strip().strip('`').replace('json', '').strip()
         data = json.loads(text)
         return data.get('fraud', False), data.get('reason', '')
     except Exception as e:
@@ -68,30 +68,39 @@ def _ai_fraud_check(residence):
         return False, ''
 
 def _ai_image_check(image_field):
-    """Use Gemini Vision to check if the image is a real property photo. Returns (status, feedback)."""
+    """Use NVIDIA vision model to check if the image is a real property photo. Returns (status, feedback)."""
     try:
-        client = _get_gemini_client()
+        import base64
+        client = _get_nvidia_client()
         image_bytes = image_field.read()
         image_field.seek(0)  # Reset file pointer
         b64 = base64.b64encode(image_bytes).decode('utf-8')
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=[
-                genai_types.Part.from_bytes(data=image_bytes, mime_type='image/jpeg'),
-                "You are a property image quality checker. Look at this image and determine: "
-                "1) Is it a real photo of a house/apartment/room/exterior? "
-                "2) Is it clear and good quality (not blurry, not a screenshot, not a cartoon/meme/random image)? "
-                "Respond with JSON only, no markdown: {\"status\": \"passed\" or \"failed\", \"feedback\": \"short reason\"}"
+
+        response = client.chat.completions.create(
+            model="z-ai/glm-5.2",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": (
+                            "You are a property image quality checker. Look at this image and determine: "
+                            "1) Is it a real photo of a house/apartment/room/exterior? "
+                            "2) Is it clear and good quality (not blurry, not a screenshot, not a cartoon/meme/random image)? "
+                            "Respond with JSON only, no markdown: {\"status\": \"passed\" or \"failed\", \"feedback\": \"short reason\"}"
+                        )},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
+                    ]
+                }
             ],
-            config=genai_types.GenerateContentConfig(temperature=0.1, max_output_tokens=80)
+            temperature=0.1,
+            max_tokens=80,
         )
-        text = response.text.strip().strip('`').replace('json', '').strip()
+        text = response.choices[0].message.content.strip().strip('`').replace('json', '').strip()
         data = json.loads(text)
         return data.get('status', 'unchecked'), data.get('feedback', '')
     except Exception as e:
         print("AI IMAGE CHECK ERROR:", e)
         return 'unchecked', ''
-
 
 def home(request):
     residences = Residence.objects.filter(approved=True, is_hidden=False)
