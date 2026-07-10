@@ -223,6 +223,10 @@ def residence_detail(request, pk):
     # Only count views for non-owners
     if not request.user.is_authenticated or residence.owner != request.user:
         if request.user.is_authenticated:
+            if not residence.viewers.filter(id=request.user.id).exists():
+                residence.viewers.add(request.user)
+                residence.views_count += 1
+                residence.save(update_fields=['views_count'])
             from django.utils import timezone
             view, created = ResidenceView.objects.get_or_create(
                 residence=residence, user=request.user,
@@ -237,12 +241,7 @@ def residence_detail(request, pk):
             if not request.session.session_key:
                 request.session.create()
             
-            viewed_list = request.session.get('viewed_residences', [])
-            if residence.pk not in viewed_list:
-                viewed_list.append(residence.pk)
-                request.session['viewed_residences'] = viewed_list
-                residence.views_count += 1
-                residence.save(update_fields=['views_count'])
+                            
 
     # Handle gallery uploads (POST only, no duplicate loop)
     if request.method == 'POST':
