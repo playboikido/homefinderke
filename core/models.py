@@ -132,7 +132,7 @@ class Residence(models.Model):
         unique=True
     )
 
-    description = models.TextField(blank=True)
+    description = models.TextField()
 
     house_type = models.CharField(
         max_length=50,
@@ -144,14 +144,12 @@ class Residence(models.Model):
         max_digits=10,
         decimal_places=2,
         null=True,
-        blank=True
     )
 
     deposit_amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
-        blank=True
     )
 
     county = models.CharField(
@@ -165,22 +163,18 @@ class Residence(models.Model):
 
     landmark = models.CharField(
         max_length=200,
-        blank=True
     )
 
     nearest_stage = models.CharField(
         max_length=200,
-        blank=True
     )
 
     nearby_school = models.CharField(
         max_length=200,
-        blank=True
     )
 
     nearby_hospital = models.CharField(
         max_length=200,
-        blank=True
     )
 
     phone_number = models.CharField(max_length=20)
@@ -189,14 +183,12 @@ class Residence(models.Model):
         max_digits=9,
         decimal_places=6,
         null=True,
-        blank=True
     )
 
     longitude = models.DecimalField(
         max_digits=9,
         decimal_places=6,
         null=True,
-        blank=True
     )
 
     water_available = models.BooleanField(default=False)
@@ -208,13 +200,11 @@ class Residence(models.Model):
 
     front_image = models.ImageField(
         upload_to='residences/fronts/',
-        blank=True,
         null=True
     )
 
     vacancy_poster = models.ImageField(
         upload_to='residences/posters/',
-        blank=True,
         null=True
     )
 
