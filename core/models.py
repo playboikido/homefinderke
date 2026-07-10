@@ -190,6 +190,8 @@ class Residence(models.Model):
         decimal_places=6,
         null=True,
     )
+    submission_latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    submission_longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
 
     water_available = models.BooleanField(default=False)
     fibre_available = models.BooleanField(default=False)

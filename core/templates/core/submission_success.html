@@ -293,8 +293,30 @@
         My Dashboard
       </a>
     </div>
+    residence.owner = request.user
+                residence.approved = False
 
+                sub_lat = request.POST.get('submission_latitude')
+                sub_lng = request.POST.get('submission_longitude')
+                if sub_lat and sub_lng:
+                    try:
+                        residence.submission_latitude = float(sub_lat)
+                        residence.submission_longitude = float(sub_lng)
+                    except ValueError:
+                        pass
+
+                residence.save()
+                # ── AI Analysis (non-blocking) ──────────────────────────────
+                try:
+                    is_fraud, reason = _ai_fraud_check(residence)
+                    residence.suspected_fraud = is_fraud
+                    residence.fraud_reason = reason
+                    residence.save(update_fields=['suspected_fraud', 'fraud_reason'])
+                except Exception as ai_err:
+                    print("AI ANALYSIS ERROR:", ai_err)
+                return render(request, 'core/submission_success.html')
   </div>
 </div>
+
 
 {% endblock %}

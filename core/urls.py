@@ -60,7 +60,7 @@ urlpatterns = [
         views.save_favorite,
         name='save_favorite'
      ),
-
+    path('ai-fix-description/', views.ai_fix_description, name='ai_fix_description'),
     path(
         'my-favorites/',
         views.my_favorites,
@@ -103,6 +103,7 @@ urlpatterns = [
         name='notifications'
         ), 
     path('about/', views.about, name='about'), 
+    path('residence/<int:pk>/verify-location/', views.verify_location, name='verify_location'),
 
 
     path('admin-dashboard-redirect/', views.admin_dashboard, name='admin_dashboard_view'),

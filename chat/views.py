@@ -148,9 +148,72 @@ def ai_assistant(request):
         if not user_message:
             return JsonResponse({'error': 'Empty message'}, status=400)
 
-        # 2. DYNAMIC DATA FETCH FROM DATABASE
-        # current_approved_residences = ", ".join([f"{item['category']} in {item['location']}" for item in Residence.objects.filter(is_approved=True).values('location', 'category')])
-        current_approved_residences = "Bedsitters in Nairobi, 1 Bedrooms in Murang'a, Apartments in Kiambu"
+        # 2. DYNAMIC DATA FETCH FROM DATABASE — actual search based on what the user typed
+        from core.models import Residence
+        from django.db.models import Q
+
+        approved_qs = Residence.objects.filter(approved=True, is_hidden=False)
+        msg_lower = user_message.lower()
+
+        # Match a house type mentioned in the message
+        house_type_keywords = {
+            'single': ['single'],
+            'bedsitter': ['bedsitter', 'bed seater', 'bedsitta', 'bedsita'],
+            'double_room': ['double room', 'double'],
+            'studio': ['studio'],
+            '1_bedroom': ['1 bedroom', 'one bedroom', '1bed', 'one bed'],
+            '2_bedroom': ['2 bedroom', 'two bedroom', '2bed', 'two bed'],
+            '3_bedroom': ['3 bedroom', 'three bedroom', '3bed', 'three bed'],
+        }
+        matched_types = [ht for ht, kws in house_type_keywords.items() if any(kw in msg_lower for kw in kws)]
+
+        # Match a town/county that's actually in the live data (avoids guessing at place names)
+        known_places = set()
+        for town, county in approved_qs.values_list('town', 'county'):
+            if town:
+                known_places.add(town)
+            if county:
+                known_places.add(county)
+        matched_place = next((p for p in known_places if p and p.lower() in msg_lower), None)
+
+        results = approved_qs
+        if matched_place:
+            results = results.filter(Q(town__iexact=matched_place) | Q(county__iexact=matched_place))
+        if matched_types:
+            results = results.filter(house_type__in=matched_types)
+
+        results = results.order_by('-is_premium', '-views_count')
+        total_matches = results.count()
+        top_5 = list(results[:5])
+
+        if top_5:
+            listing_lines = []
+            for r in top_5:
+                tag = " (PREMIUM)" if r.is_premium else ""
+                listing_lines.append(
+                    f"- {r.name}{tag}: {r.get_house_type_display()} in {r.town}, {r.county}, KSh {r.rent_price}/month"
+                )
+            current_approved_residences = "\n".join(listing_lines)
+            if total_matches > 5:
+                current_approved_residences += (
+                    f"\n({total_matches - 5} more matching listings exist but aren't shown here — "
+                    f"tell the user to use the search menu to see the rest.)"
+                )
+        else:
+            # No exact match — suggest a few recently listed alternatives instead of a dead end
+            fallback = approved_qs.order_by('-created_at')[:5]
+            if fallback:
+                fallback_lines = [
+                    f"- {r.name}: {r.get_house_type_display()} in {r.town}, {r.county}, KSh {r.rent_price}/month"
+                    for r in fallback
+                ]
+                current_approved_residences = (
+                    "NO EXACT MATCH for what the user asked. However, these were recently listed elsewhere "
+                    "on the platform (mention these as alternatives, be clear they don't match exactly):\n"
+                    + "\n".join(fallback_lines)
+                )
+            else:
+                current_approved_residences = "No approved listings exist anywhere on the platform yet."
 
         SYSTEM_INSTRUCTION = f"""
 You are the AI for HomeFinder KE, a free, community-driven Kenyan residential directory.
@@ -167,8 +230,11 @@ STRICT OPERATING RULES:
 
 SEARCH MATCH LOGIC:
    * Found (Matches Live Data Exactly): Direct them to the app feature: "We have this house there that meets your budget. Go to the search bar and search for [Location Name] to see it."
-   * Not Found (Missing from Live Data): Say exactly: "Sorry, that location or house type hasn't been listed yet on HomeFinder KE, but you can still look for other houses inside the platform. Go to the search menu and find other houses."
+   * Not Found (no exact match): Say something like: "We don't have a [house type] in [place] listed yet, but here are a few other options recently added on HomeFinder KE:" — then list the alternatives given to you, clearly noting these are different areas, not what they searched for. Always still mention the search menu for more options.
 - GUARDRAIL: Never recommend competitor apps. Deflect general/out-of-bounds questions back to using the HomeFinder KE search menu immediately.
+
+- RESULT LIMIT: You will only ever be given up to 5 real matching listings, sorted with PREMIUM ones first. If more exist beyond those 5, you'll be told the count — always mention that and tell the user to search the site menu for the rest. Never invent additional listings beyond what's given to you.
+- When presenting listings, list them by name, house type, and rent price exactly as given — don't add details that weren't provided (no descriptions, amenities, or contact info unless explicitly present in the data given to you).
 
 LIVE APPROVED DATA (ONLY REFER TO THIS):
 [{current_approved_residences}]

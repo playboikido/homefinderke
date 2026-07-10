@@ -67,41 +67,34 @@ def _ai_fraud_check(residence):
         print("AI FRAUD CHECK ERROR:", e)
         return False, ''
 
-def _ai_image_check(image_field):
-    """Use NVIDIA vision model to check if the image is a real property photo. Returns (status, feedback)."""
+@require_POST
+def ai_fix_description(request):
+    import json
     try:
-        import base64
-        client = _get_nvidia_client()
-        image_bytes = image_field.read()
-        image_field.seek(0)  # Reset file pointer
-        b64 = base64.b64encode(image_bytes).decode('utf-8')
+        data = json.loads(request.body)
+        original = data.get('description', '').strip()
+        if not original:
+            return JsonResponse({'error': 'No description provided'}, status=400)
 
+        client = _get_nvidia_client()
         response = client.chat.completions.create(
             model="z-ai/glm-5.2",
             messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": (
-                            "You are a property image quality checker. Look at this image and determine: "
-                            "1) Is it a real photo of a house/apartment/room/exterior? "
-                            "2) Is it clear and good quality (not blurry, not a screenshot, not a cartoon/meme/random image)? "
-                            "Respond with JSON only, no markdown: {\"status\": \"passed\" or \"failed\", \"feedback\": \"short reason\"}"
-                        )},
-                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
-                    ]
-                }
+                {"role": "system", "content": (
+                    "You improve rental listing descriptions for a Kenyan property site. "
+                    "Fix grammar and clarity, keep it honest and factual, don't invent details "
+                    "that weren't mentioned, keep it concise (under 100 words), and keep a friendly, "
+                    "professional tone suited to Kenyan renters."
+                )},
+                {"role": "user", "content": f"Improve this listing description:\n\n{original}"},
             ],
-            temperature=0.1,
-            max_tokens=80,
+            temperature=0.4,
+            max_tokens=200,
         )
-        text = response.choices[0].message.content.strip().strip('`').replace('json', '').strip()
-        data = json.loads(text)
-        return data.get('status', 'unchecked'), data.get('feedback', '')
+        return JsonResponse({'improved': response.choices[0].message.content.strip()})
     except Exception as e:
-        print("AI IMAGE CHECK ERROR:", e)
-        return 'unchecked', ''
-
+        print("AI DESCRIPTION FIX ERROR:", e)
+        return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
 def home(request):
     residences = Residence.objects.filter(approved=True, is_hidden=False)
 
@@ -308,11 +301,6 @@ def add_residence(request):
                     residence.suspected_fraud = is_fraud
                     residence.fraud_reason = reason
                     save_fields = ['suspected_fraud', 'fraud_reason']
-                    if 'front_image' in request.FILES:
-                        img_status, img_feedback = _ai_image_check(request.FILES['front_image'])
-                        residence.image_quality_status = img_status
-                        residence.image_quality_feedback = img_feedback
-                        save_fields += ['image_quality_status', 'image_quality_feedback']
                     residence.save(update_fields=save_fields)
                 except Exception as ai_err:
                     print("AI ANALYSIS ERROR:", ai_err)
@@ -930,6 +918,26 @@ def mpesa_callback(request):
     return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
 
 from reportlab.platypus import Image as RLImage
+
+@staff_or_help_admin_required
+def verify_location(request, pk):
+    residence = get_object_or_404(Residence, pk=pk)
+
+    distance_km = None
+    if (residence.latitude and residence.longitude and
+            residence.submission_latitude and residence.submission_longitude):
+        from math import radians, sin, cos, sqrt, atan2
+        lat1, lon1 = radians(float(residence.latitude)), radians(float(residence.longitude))
+        lat2, lon2 = radians(float(residence.submission_latitude)), radians(float(residence.submission_longitude))
+        dlat, dlon = lat2 - lat1, lon2 - lon1
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        distance_km = round(6371 * 2 * atan2(sqrt(a), sqrt(1 - a)), 2)
+
+    return render(request, 'core/verify_location.html', {
+        'residence': residence,
+        'distance_km': distance_km,
+    })
+
 
 def download_residence_pdf(request, pk):
     residence = get_object_or_404(Residence, pk=pk, approved=True)

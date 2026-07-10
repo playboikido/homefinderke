@@ -388,9 +388,10 @@
             <div class="ar-field">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 {{ form.description.label_tag }}
-                <button type="button" id="ai-improve-btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--c-primary); color: #fff; border: none; border-radius: 6px; cursor: pointer; display: none; align-items: center; gap: 4px; font-family: var(--font-body); font-weight: 600;">
-                  🧠 AI Improve
+                <button type="button" id="aiFixDescBtn" style="margin-top:8px; background:#0F766E; color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:600; cursor:pointer; font-size:0.85rem;">
+                  ✨ Improve with AI
                 </button>
+                <span id="aiFixDescStatus" style="font-size:0.8rem; color:#6B7280; margin-left:8px;"></span>
               </div>
               {{ form.description }}
               <div id="ai-loading" style="display: none; font-size: 0.85rem; color: var(--c-primary); margin-top: 6px; font-weight: 500;">
@@ -584,6 +585,8 @@
             {% endif %}
           </div>
         </div>
+        <input type="hidden" id="submission_latitude" name="submission_latitude">
+        <input type="hidden" id="submission_longitude" name="submission_longitude">
 
         <div class="ar-submit-bar">
           <button type="submit" class="ar-btn">
@@ -598,48 +601,47 @@
   </div><!-- /.ar-inner -->
 </div><!-- /.ar-wrap -->
 
+
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const aiBtn = document.getElementById('ai-improve-btn');
-    const descField = document.querySelector('textarea[name="description"]');
-    const loadingDiv = document.getElementById('ai-loading');
-
-    if (aiBtn && descField) {
-        aiBtn.addEventListener('click', function() {
-            const currentText = descField.value.trim();
-            if (!currentText) {
-                alert('Please type a draft description first before using AI Improve.');
-                return;
-            }
-
-            aiBtn.disabled = true;
-            loadingDiv.style.display = 'block';
-
-            fetch('{% url "ai_improve_description" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({ description: currentText })
-            })
-            .then(res => res.json())
-            .then(data => {
-                aiBtn.disabled = false;
-                loadingDiv.style.display = 'none';
-                if (data.improved_text) {
-                    descField.value = data.improved_text;
-                } else if (data.error) {
-                    alert(data.error);
-                }
-            })
-            .catch(err => {
-                aiBtn.disabled = false;
-                loadingDiv.style.display = 'none';
-                alert('An error occurred while calling the AI service.');
-            });
-        });
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(
+    function(pos) {
+      document.getElementById('submission_latitude').value = pos.coords.latitude;
+      document.getElementById('submission_longitude').value = pos.coords.longitude;
+    },
+    function(err) {
+      console.log('Location permission denied or unavailable:', err.message);
+      // Submission still proceeds fine without it — fields just stay empty
     }
+  );
+}
+</script>
+
+<script>
+document.getElementById('aiFixDescBtn')?.addEventListener('click', async function() {
+  const textarea = document.querySelector('textarea[name="description"]');
+  const status = document.getElementById('aiFixDescStatus');
+  if (!textarea || !textarea.value.trim()) {
+    status.textContent = 'Write a description first.';
+    return;
+  }
+  status.textContent = 'Improving...';
+  try {
+    const res = await fetch('/ai-fix-description/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+      body: JSON.stringify({description: textarea.value})
+    });
+    const data = await res.json();
+    if (data.improved) {
+      textarea.value = data.improved;
+      status.textContent = 'Updated ✓';
+    } else {
+      status.textContent = 'Could not improve right now.';
+    }
+  } catch (e) {
+    status.textContent = 'Connection error.';
+  }
 });
 </script>
 {% endblock %}
