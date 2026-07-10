@@ -109,8 +109,7 @@ def poll_messages(request, conversation_id):
     return JsonResponse({'messages': data})
 
 import json
-from google import genai
-from google.genai import types as genai_types
+from openai import OpenAI
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -131,17 +130,20 @@ def ai_assistant(request):
         if not user_message:
             return JsonResponse({'error': 'Empty message'}, status=400)
 
-        client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        response = client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=user_message,
-            config=genai_types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=0.7,
-                max_output_tokens=200,
-            )
+        client = OpenAI(
+            base_url="https://integrate.api.nvidia.com/v1",
+            api_key=settings.NVIDIA_API_KEY,
         )
-        return JsonResponse({'reply': response.text})
+        response = client.chat.completions.create(
+            model="z-ai/glm-5.2",
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_message},
+            ],
+            temperature=0.7,
+            max_tokens=200,
+        )
+        return JsonResponse({'reply': response.choices[0].message.content})
     except Exception as e:
         print("AI ASSISTANT ERROR:", e)
         return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
