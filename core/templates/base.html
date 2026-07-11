@@ -808,8 +808,18 @@
         .ai-msg.user { align-self: flex-end; background: var(--primary); color: #fff; }
         .ai-msg.bot { align-self: flex-start; background: var(--muted); color: var(--fg); }
         .ai-chat-input-row { display: flex; border-top: 1px solid var(--border); }
-        .ai-chat-input-row input { flex: 1; border: none; padding: 10px 12px; font-size: 0.82rem; background: transparent; color: var(--fg); }
-        .ai-chat-input-row button { border: none; background: var(--primary); color: #fff; padding: 0 16px; cursor: pointer; }
+        .ai-chat-input-row input {
+        flex: 1;
+        border: none;
+        padding: 14px 12px;
+        font-size: 0.95rem;
+        background: var(--bg-card);
+        color: var(--fg);
+        -webkit-text-fill-color: var(--fg);
+        caret-color: var(--fg);
+        }
+        .ai-chat-input-row input::placeholder { color: var(--fg-muted); opacity: 1; }
+       .ai-chat-input-row button { border: none; background: var(--primary); color: #fff; padding: 0 20px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
 
     </style>
 
