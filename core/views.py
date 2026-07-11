@@ -330,76 +330,69 @@ def staff_or_help_admin_required(view_func):
 
 
 @staff_or_help_admin_required
-def residence_viewers(request, pk):
-    residence = get_object_or_404(Residence, pk=pk)
-    viewers = residence.viewers.all().order_by('username')
-    return render(request, 'core/residence_viewers.html', {
-        'residence': residence,
-        'viewers': viewers,
-    })
 def admin_dashboard(request):
     from datetime import timedelta
-    from django.db.models import Count
+    from django.db.models import Count, Q
     now = timezone.now()
     week_ago = now - timedelta(days=7)
     month_ago = now - timedelta(days=30)
 
-    total_views        = Residence.objects.aggregate(total=Sum('views_count'))['total'] or 0
-    pending_residences = Residence.objects.filter(approved=False, is_hidden=False)
-    approved_residences = Residence.objects.filter(approved=True)
-    approved_count     = approved_residences.count()
-    pending_count      = pending_residences.count()
-    total_users        = User.objects.count()
-    reports            = ResidenceReport.objects.filter(reviewed=False).order_by('-created_at')
-    user_reports       = UserReport.objects.filter(reviewed=False).order_by('-created_at')
-    all_users = User.objects.all().order_by('-date_joined')[:100]
-    user_reports       = UserReport.objects.filter(reviewed=False).order_by('-created_at')
-    premium_residences = Residence.objects.filter(approved=True, is_premium=True)
-    premium_count      = premium_residences.count()
-    hidden_count       = Residence.objects.filter(is_hidden=True).count()
-    paused_count       = Residence.objects.filter(is_paused=True).count()
-    boost_requests     = Residence.objects.filter(boost_requested=True, is_premium=False)
-    boost_requests_count = boost_requests.count()
+    # Combine several counts on the same model into ONE query using conditional aggregation
+    residence_stats = Residence.objects.aggregate(
+        total_views=Sum('views_count'),
+        approved_count=Count('id', filter=Q(approved=True)),
+        pending_count=Count('id', filter=Q(approved=False, is_hidden=False)),
+        premium_count=Count('id', filter=Q(approved=True, is_premium=True)),
+        hidden_count=Count('id', filter=Q(is_hidden=True)),
+        paused_count=Count('id', filter=Q(is_paused=True)),
+        boost_requests_count=Count('id', filter=Q(boost_requested=True, is_premium=False)),
+        new_this_week=Count('id', filter=Q(approved=True, created_at__gte=week_ago)),
+        new_this_month=Count('id', filter=Q(approved=True, created_at__gte=month_ago)),
+    )
 
-    # Analytics: views this week and month (sum of all approved listings)
-    # We approximate by looking at residences created in that window
-    # For a more exact per-period count we'd need a separate ViewLog model
-    # Here we count new residences this week/month as a proxy metric
-    new_this_week  = Residence.objects.filter(approved=True, created_at__gte=week_ago).count()
-    new_this_month = Residence.objects.filter(approved=True, created_at__gte=month_ago).count()
+    # Annotate viewer counts directly on the querysets, so the template doesn't
+    # run a separate query per card for residence.viewers.count()
+    pending_residences  = Residence.objects.filter(approved=False, is_hidden=False).annotate(viewer_count=Count('viewers'))
+    approved_residences = Residence.objects.filter(approved=True).annotate(viewer_count=Count('viewers'))
+    premium_residences  = Residence.objects.filter(approved=True, is_premium=True)
+    boost_requests      = Residence.objects.filter(boost_requested=True, is_premium=False)
 
-    # Favorites analytics
+    total_users = User.objects.count()
+    reports = ResidenceReport.objects.filter(reviewed=False).order_by('-created_at')
+    user_reports = UserReport.objects.filter(reviewed=False).order_by('-created_at')
+
     from .models import Favorite
-    total_favorites      = Favorite.objects.count()
-    favorites_this_week  = Favorite.objects.filter(created_at__gte=week_ago).count()
-    favorites_this_month = Favorite.objects.filter(created_at__gte=month_ago).count()
+    favorite_stats = Favorite.objects.aggregate(
+        total_favorites=Count('id'),
+        favorites_this_week=Count('id', filter=Q(created_at__gte=week_ago)),
+        favorites_this_month=Count('id', filter=Q(created_at__gte=month_ago)),
+    )
 
-    # Top-viewed residences this period (top 5 by views)
     top_residences = Residence.objects.filter(approved=True).order_by('-views_count')[:5]
+    all_users = User.objects.all().order_by('-date_joined')[:100]
 
     context = {
         'pending_residences':   pending_residences,
         'approved_residences':  approved_residences,
-        'approved_count':       approved_count,
-        'pending_count':        pending_count,
+        'approved_count':       residence_stats['approved_count'],
+        'pending_count':        residence_stats['pending_count'],
         'total_users':          total_users,
         'reports':              reports,
         'user_reports':         user_reports,
-        'all_users':            all_users,
-        'user_reports':         user_reports,
-        'total_views':          total_views,
+        'total_views':          residence_stats['total_views'] or 0,
         'premium_residences':   premium_residences,
-        'premium_count':        premium_count,
-        'hidden_count':         hidden_count,
-        'paused_count':         paused_count,
+        'premium_count':        residence_stats['premium_count'],
+        'hidden_count':         residence_stats['hidden_count'],
+        'paused_count':         residence_stats['paused_count'],
         'boost_requests':       boost_requests,
-        'boost_requests_count': boost_requests_count,
-        'new_this_week':        new_this_week,
-        'new_this_month':       new_this_month,
-        'total_favorites':      total_favorites,
-        'favorites_this_week':  favorites_this_week,
-        'favorites_this_month': favorites_this_month,
+        'boost_requests_count': residence_stats['boost_requests_count'],
+        'new_this_week':        residence_stats['new_this_week'],
+        'new_this_month':       residence_stats['new_this_month'],
+        'total_favorites':      favorite_stats['total_favorites'],
+        'favorites_this_week':  favorite_stats['favorites_this_week'],
+        'favorites_this_month': favorite_stats['favorites_this_month'],
         'top_residences':       top_residences,
+        'all_users':            all_users,
     }
     return render(request, 'core/admin_dashboard.html', context)
 
