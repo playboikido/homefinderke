@@ -819,7 +819,18 @@
         caret-color: var(--fg);
         }
         .ai-chat-input-row input::placeholder { color: var(--fg-muted); opacity: 1; }
-       .ai-chat-input-row button { border: none; background: var(--primary); color: #fff; padding: 0 20px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .ai-chat-input-row button { border: none; background: var(--primary); color: #fff; padding: 0 20px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+        .ai-chat-input-row input {
+        flex: 1 1 auto;
+        width: auto !important;
+        }
+        .ai-chat-input-row button {
+            flex: 0 0 auto;
+            width: auto !important;
+          }
+        
+
+
 
     </style>
 

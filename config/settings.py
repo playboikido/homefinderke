@@ -298,5 +298,3 @@ JAZZMIN_SETTINGS = {
     "changeform_format": "horizontal_tabs",
     "changeform_format_overrides": {"auth.user": "collapsible", "auth.group": "vertical_tabs"},
 }
-ADMINS = [('homefinderke', 'homefinder.ke.help@gmail.com')]
-SERVER_EMAIL = 'homefinder.ke.help@gmail.com'
