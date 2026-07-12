@@ -5,32 +5,40 @@ import sys
 
 
 def watermark_image(uploaded_file, text="HomeFinder KE"):
-    """Takes an uploaded image file, stamps a tiled watermark over it, returns a new uploadable file."""
+    """Takes an uploaded image file, stamps ONE diagonal watermark line across
+    the center, returns a new uploadable file."""
     if not uploaded_file:
         return uploaded_file
 
     image = Image.open(uploaded_file).convert("RGBA")
-    overlay = Image.new("RGBA", image.size, (255, 255, 255, 0))
-    draw = ImageDraw.Draw(overlay)
 
+    # Draw the text on its own transparent layer first, so we can rotate it cleanly
+    font_size = max(28, image.width // 12)
     try:
-        font_size = max(18, image.width // 20)
         font = ImageFont.truetype("DejaVuSans-Bold.ttf", font_size)
     except Exception:
         font = ImageFont.load_default()
 
+    txt_layer = Image.new("RGBA", image.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(txt_layer)
     bbox = draw.textbbox((0, 0), text, font=font)
     text_w, text_h = bbox[2] - bbox[0], bbox[3] - bbox[1]
 
-    step_x, step_y = text_w + 60, text_h + 60
-    for y in range(0, image.height, step_y):
-        for x in range(0, image.width, step_x):
-            draw.text((x, y), text, font=font, fill=(255, 255, 255, 90))
+    text_img = Image.new("RGBA", (text_w + 20, text_h + 20), (255, 255, 255, 0))
+    text_draw = ImageDraw.Draw(text_img)
+    text_draw.text((10, 10), text, font=font, fill=(255, 255, 255, 130))
 
-    watermarked = Image.alpha_composite(image, overlay).convert("RGB")
+    rotated = text_img.rotate(30, expand=True, resample=Image.BICUBIC)
 
+    paste_x = (image.width - rotated.width) // 2
+    paste_y = (image.height - rotated.height) // 2
+
+    combined = image.copy()
+    combined.paste(rotated, (paste_x, paste_y), rotated)
+
+    final_img = combined.convert("RGB")
     buffer = BytesIO()
-    watermarked.save(buffer, format="JPEG", quality=88)
+    final_img.save(buffer, format="JPEG", quality=88)
     buffer.seek(0)
 
     return InMemoryUploadedFile(

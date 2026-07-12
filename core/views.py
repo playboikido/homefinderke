@@ -352,6 +352,9 @@ def add_residence(request):
                         pass
 
                 residence.save()
+
+                for gallery_photo in request.FILES.getlist('gallery_images'):
+                    ResidencePhoto.objects.create(residence=residence, image=watermark_image(gallery_photo))
                 # ── AI Analysis (non-blocking) ───────────────────────────
                 try:
                     is_fraud, reason = _ai_fraud_check(residence)
