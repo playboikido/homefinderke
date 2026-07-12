@@ -334,6 +334,16 @@ def add_residence(request):
                     residence.front_image = watermark_image(request.FILES['front_image'])
                 if 'vacancy_poster' in request.FILES:
                     residence.vacancy_poster = watermark_image(request.FILES['vacancy_poster'])
+
+                sub_lat = request.POST.get('submission_latitude')
+                sub_lng = request.POST.get('submission_longitude')
+                if sub_lat and sub_lng:
+                    try:
+                        residence.submission_latitude = float(sub_lat)
+                        residence.submission_longitude = float(sub_lng)
+                    except ValueError:
+                        pass
+
                 residence.save()
                 # ── AI Analysis (non-blocking) ───────────────────────────
                 try:
@@ -584,6 +594,20 @@ def review_report(request, pk):
     report.save()
     return redirect('admin_dashboard')
 
+@staff_or_help_admin_required
+def warn_user(request, user_id):
+    from django.core.mail import send_mail
+    user = get_object_or_404(User, pk=user_id)
+    if user.email:
+        send_mail(
+            subject='Warning from HomeFinder KE',
+            message='Your account has received a warning for violating our community guidelines. Repeated violations may result in suspension.',
+            from_email=None,
+            recipient_list=[user.email],
+            fail_silently=True,
+        )
+    messages.warning(request, f'Warning sent to {user.username}.')
+    return redirect('admin_dashboard')
 
 @staff_or_help_admin_required
 def review_user_report(request, pk):

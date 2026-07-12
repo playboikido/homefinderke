@@ -939,7 +939,13 @@
           <div class="db-report-comment">"{{ report.comment }}"</div>
           {% endif %}
 
-          <div class="db-report-footer">
+          <div class="db-report-footer" style="gap:10px;">
+            <a href="{% url 'warn_user' report.reported_user.id %}" class="db-btn-review" style="background:#FEF3C7; color:#92400E;" onclick="return confirm('Send a warning to {{ report.reported_user.username }}?');">
+              ⚠️ Warning
+            </a>
+            <a href="{% url 'suspend_user' report.reported_user.id %}" class="db-btn-review" style="background:#FEE2E2; color:#DC2626;" onclick="return confirm('Suspend {{ report.reported_user.username }}? They will be restricted from listing, messaging, and posting.');">
+              🚫 Suspend
+            </a>
             <a href="{% url 'review_user_report' report.id %}" class="db-btn-review">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               Mark Reviewed

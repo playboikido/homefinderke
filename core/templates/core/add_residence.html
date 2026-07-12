@@ -608,10 +608,14 @@ if (navigator.geolocation) {
     function(pos) {
       document.getElementById('submission_latitude').value = pos.coords.latitude;
       document.getElementById('submission_longitude').value = pos.coords.longitude;
+
+      const latField = document.getElementById('id_latitude');
+      const lngField = document.getElementById('id_longitude');
+      if (latField && !latField.value) latField.value = pos.coords.latitude.toFixed(6);
+      if (lngField && !lngField.value) lngField.value = pos.coords.longitude.toFixed(6);
     },
     function(err) {
       console.log('Location permission denied or unavailable:', err.message);
-      // Submission still proceeds fine without it — fields just stay empty
     }
   );
 }

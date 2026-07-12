@@ -27,7 +27,8 @@ def check_nearby_amenities(lat, lng, claimed_school='', claimed_hospital='', cla
         response = requests.post(
             'https://overpass-api.de/api/interpreter',
             data={'data': query},
-            timeout=15
+            timeout=15,
+            headers={'User-Agent': 'HomeFinderKE/1.0 (homefinder.ke.help@gmail.com)'}
         )
         response.raise_for_status()
         elements = response.json().get('elements', [])

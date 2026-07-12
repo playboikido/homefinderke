@@ -115,6 +115,7 @@ urlpatterns = [
         views.compare_residences,
         name='compare_residences'
     ),
+    path('warn-user/<int:user_id>/', views.warn_user, name='warn_user'),
     path('offline/', TemplateView.as_view(template_name='core/offline.html'), name='offline'),
     path('activity/', views.activity_feed, name='activity_feed'),
     path('residence/<int:pk>/generate-lease/', views.generate_lease, name='generate_lease'),
