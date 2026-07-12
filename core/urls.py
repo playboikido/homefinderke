@@ -15,6 +15,7 @@ urlpatterns = [
         views.residence_detail,
         name='residence_detail'
     ),
+    path('residence/<int:pk>/edit/', views.edit_residence, name='edit_residence'),
     path(
         'add-residence/',
         views.add_residence,

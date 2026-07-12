@@ -317,6 +317,7 @@
     gap: 10px;
     padding-top: 4px;
     border-top: 1px solid var(--c-muted);
+    flex-wrap: wrap;
   }
   .db-btn {
     display: inline-flex;
@@ -569,6 +570,7 @@
     </div>
 
   </div>
+
   <!-- ── Analytics Row ────────────────────────────────────────────── -->
   <div style="max-width:1200px; margin:20px auto 0; padding:0 24px; display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px;">
 
@@ -733,10 +735,6 @@
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               Viewers ({{ residence.viewer_count }})
             </a>
-            <a href="{% url 'residence_viewers' residence.id %}" class="db-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Viewers ({{ residence.viewer_count }})
-            </a>
             <a href="{% url 'verify_location' residence.id %}" class="db-btn" style="background:#DBEAFE; color:#0369A1; border:1px solid #BFDBFE;">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               Verify Location
@@ -814,6 +812,10 @@
             <a href="{% url 'edit_residence' residence.id %}" class="db-btn db-btn-edit">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
               Edit
+            </a>
+            <a href="{% url 'verify_location' residence.id %}" class="db-btn" style="background:#DBEAFE; color:#0369A1; border:1px solid #BFDBFE;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              Verify Location
             </a>
           </div>
         </div>
@@ -901,7 +903,6 @@
       </div>
     </div>
 
-    <!-- Community Reports -->
     <!-- User Reports -->
     <div class="db-section" style="margin-top:40px;">
       <div class="db-section-head">
@@ -1005,9 +1006,6 @@
           </tbody>
         </table>
       </div>
-    </div>
-
-    <!-- Community Reports -->
     </div>
 
   </div><!-- /.db-inner -->
