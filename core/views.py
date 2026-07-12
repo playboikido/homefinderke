@@ -29,8 +29,7 @@ from django.utils import timezone
 import json
 import base64
 from openai import OpenAI
-from django.views.decorators.http import require_POST
-
+from .watermark import watermark_image
 # ─── AI NVIDIA helpers ──────────────────────────────────────────────────────
 def _get_nvidia_client():
     return OpenAI(base_url="https://integrate.api.nvidia.com/v1", api_key=settings.NVIDIA_API_KEY)
@@ -66,6 +65,42 @@ def _ai_fraud_check(residence):
     except Exception as e:
         print("AI FRAUD CHECK ERROR:", e)
         return False, ''
+
+def _ai_image_check(image_field):
+    """Use an NVIDIA vision model to check if the image is a real property photo."""
+    try:
+        import base64
+        client = _get_nvidia_client()
+        image_bytes = image_field.read()
+        image_field.seek(0)
+        b64 = base64.b64encode(image_bytes).decode('utf-8')
+
+        response = client.chat.completions.create(
+            model="meta/llama-3.2-90b-vision-instruct",  # confirm this ID on build.nvidia.com first
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": (
+                            "You are a property image quality checker. Look at this image and determine: "
+                            "1) Is it a real photo of a house/apartment/room/exterior? "
+                            "2) Is it clear and good quality (not blurry, not a screenshot, not a cartoon/meme)? "
+                            "Respond with JSON only, no markdown: {\"status\": \"passed\" or \"failed\", \"feedback\": \"short reason\"}"
+                        )},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
+                    ]
+                }
+            ],
+            temperature=0.1,
+            max_tokens=80,
+        )
+        text = response.choices[0].message.content.strip().strip('`').replace('json', '').strip()
+        import json
+        data = json.loads(text)
+        return data.get('status', 'unchecked'), data.get('feedback', '')
+    except Exception as e:
+        print("AI IMAGE CHECK ERROR:", e)
+        return 'unchecked', ''
 
 @require_POST
 def ai_fix_description(request):
@@ -246,7 +281,7 @@ def residence_detail(request, pk):
     # Handle gallery uploads (POST only, no duplicate loop)
     if request.method == 'POST':
         for image in request.FILES.getlist('gallery_images'):
-            ResidencePhoto.objects.create(residence=residence, image=image)
+            ResidencePhoto.objects.create(residence=residence, image=watermark_image(image))
 
     related_residences = Residence.objects.filter(
         approved=True,
@@ -293,6 +328,10 @@ def add_residence(request):
             else:
                 residence.owner = request.user
                 residence.approved = False
+                if 'front_image' in request.FILES:
+                    residence.front_image = watermark_image(request.FILES['front_image'])
+                if 'vacancy_poster' in request.FILES:
+                    residence.vacancy_poster = watermark_image(request.FILES['vacancy_poster'])
                 residence.save()
                 # ── AI Analysis (non-blocking) ───────────────────────────
                 try:
@@ -587,7 +626,6 @@ def owner_profile(request, user_id):
         'residences': residences,
     }
     return render(request, 'core/owner_profile.html', context)
-
 
 @login_required
 def add_review(request, pk):
@@ -913,6 +951,15 @@ from reportlab.platypus import Image as RLImage
 
 @staff_or_help_admin_required
 def verify_location(request, pk):
+    from .amenity_check import check_nearby_amenities
+
+    amenity_result = check_nearby_amenities(
+        residence.submission_latitude or residence.latitude,
+        residence.submission_longitude or residence.longitude,
+        residence.nearby_school,
+        residence.nearby_hospital,
+        residence.nearest_stage,
+    )
     residence = get_object_or_404(Residence, pk=pk)
 
     distance_km = None
@@ -925,10 +972,15 @@ def verify_location(request, pk):
         a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
         distance_km = round(6371 * 2 * atan2(sqrt(a), sqrt(1 - a)), 2)
 
+
+
     return render(request, 'core/verify_location.html', {
         'residence': residence,
         'distance_km': distance_km,
     })
+
+
+
 
 
 def download_residence_pdf(request, pk):
