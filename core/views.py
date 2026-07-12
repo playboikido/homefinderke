@@ -953,6 +953,8 @@ from reportlab.platypus import Image as RLImage
 
 @staff_or_help_admin_required
 def verify_location(request, pk):
+    residence = get_object_or_404(Residence, pk=pk)
+
     from .amenity_check import check_nearby_amenities
 
     amenity_result = check_nearby_amenities(
@@ -962,7 +964,6 @@ def verify_location(request, pk):
         residence.nearby_hospital,
         residence.nearest_stage,
     )
-    residence = get_object_or_404(Residence, pk=pk)
 
     distance_km = None
     if (residence.latitude and residence.longitude and
@@ -974,13 +975,11 @@ def verify_location(request, pk):
         a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
         distance_km = round(6371 * 2 * atan2(sqrt(a), sqrt(1 - a)), 2)
 
-
-
     return render(request, 'core/verify_location.html', {
         'residence': residence,
         'distance_km': distance_km,
+        'amenity_result': amenity_result,
     })
-
 
 
 
