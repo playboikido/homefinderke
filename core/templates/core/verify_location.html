@@ -14,6 +14,29 @@
   .vl-distance.ok { background:#DCFCE7; color:#166534; }
   .vl-distance.warn { background:#FEF2F2; color:#DC2626; }
   .vl-missing { margin-top:14px; padding:12px 16px; border-radius:10px; background:#FFF7ED; color:#9A3412; }
+
+  .am-section { margin-top: 24px; }
+  .am-section h2 { font-size: 1rem; color: #134E4A; margin-bottom: 4px; }
+  .am-section p.am-sub { color:#6B7280; font-size:0.85rem; margin-bottom: 14px; }
+  .am-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 12px 16px; border-radius: 10px; margin-bottom: 10px;
+    border: 1px solid #E5E7EB;
+  }
+  .am-item.am-ok    { background:#DCFCE7; border-color:#BBF7D0; }
+  .am-item.am-warn  { background:#FEF2F2; border-color:#FCA5A5; }
+  .am-item.am-unknown { background:#F3F4F6; border-color:#E5E7EB; }
+  .am-badge {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 700; color: #fff;
+  }
+  .am-ok .am-badge      { background: #166534; }
+  .am-warn .am-badge    { background: #DC2626; }
+  .am-unknown .am-badge { background: #9CA3AF; }
+  .am-item-body strong { display:block; font-size:0.88rem; color:#134E4A; margin-bottom:2px; }
+  .am-item-body span { font-size:0.82rem; color:#4B5563; }
+  .am-found-list { font-size:0.78rem; color:#6B7280; margin-top:4px; }
 </style>
 
 <div class="vl-wrap">
@@ -35,6 +58,72 @@
     {% endif %}
   {% else %}
     <div class="vl-missing">This listing has no GPS snapshot on file (submitted before this feature was added, or the owner denied location permission).</div>
+  {% endif %}
+
+  {% if amenity_result %}
+    <div class="am-section">
+      <h2>Nearby Amenities Check</h2>
+      {% if amenity_result.checked %}
+        <p class="am-sub">What the owner claimed vs. what OpenStreetMap actually shows nearby (free, no API key).</p>
+
+        <!-- School -->
+        <div class="am-item {% if amenity_result.school_match == True %}am-ok{% elif amenity_result.school_match == False %}am-warn{% else %}am-unknown{% endif %}">
+          <div class="am-badge">
+            {% if amenity_result.school_match == True %}✓{% elif amenity_result.school_match == False %}!{% else %}?{% endif %}
+          </div>
+          <div class="am-item-body">
+            <strong>School — claimed: {{ residence.nearby_school|default:"not stated" }}</strong>
+            <span>
+              {% if amenity_result.school_match == True %}Matches a school found nearby.
+              {% elif amenity_result.school_match == False %}No nearby school matches this claim.
+              {% else %}Could not verify — no claim made or no OSM data here.{% endif %}
+            </span>
+            {% if amenity_result.found_schools %}
+              <div class="am-found-list">Found nearby: {{ amenity_result.found_schools|join:", " }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Hospital -->
+        <div class="am-item {% if amenity_result.hospital_match == True %}am-ok{% elif amenity_result.hospital_match == False %}am-warn{% else %}am-unknown{% endif %}">
+          <div class="am-badge">
+            {% if amenity_result.hospital_match == True %}✓{% elif amenity_result.hospital_match == False %}!{% else %}?{% endif %}
+          </div>
+          <div class="am-item-body">
+            <strong>Hospital/Clinic — claimed: {{ residence.nearby_hospital|default:"not stated" }}</strong>
+            <span>
+              {% if amenity_result.hospital_match == True %}Matches a hospital/clinic found nearby.
+              {% elif amenity_result.hospital_match == False %}No nearby hospital/clinic matches this claim.
+              {% else %}Could not verify — no claim made or no OSM data here.{% endif %}
+            </span>
+            {% if amenity_result.found_hospitals %}
+              <div class="am-found-list">Found nearby: {{ amenity_result.found_hospitals|join:", " }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Bus stage -->
+        <div class="am-item {% if amenity_result.stage_match == True %}am-ok{% elif amenity_result.stage_match == False %}am-warn{% else %}am-unknown{% endif %}">
+          <div class="am-badge">
+            {% if amenity_result.stage_match == True %}✓{% elif amenity_result.stage_match == False %}!{% else %}?{% endif %}
+          </div>
+          <div class="am-item-body">
+            <strong>Bus Stage — claimed: {{ residence.nearest_stage|default:"not stated" }}</strong>
+            <span>
+              {% if amenity_result.stage_match == True %}Matches a stage/stop found nearby.
+              {% elif amenity_result.stage_match == False %}No nearby stage matches this claim.
+              {% else %}Could not verify — no claim made or no OSM data here.{% endif %}
+            </span>
+            {% if amenity_result.found_stages %}
+              <div class="am-found-list">Found nearby: {{ amenity_result.found_stages|join:", " }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+      {% else %}
+        <div class="vl-missing">Amenity check unavailable: {{ amenity_result.reason }}</div>
+      {% endif %}
+    </div>
   {% endif %}
 </div>
 
