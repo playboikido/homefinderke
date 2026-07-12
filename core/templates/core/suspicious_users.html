@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Suspicious Activity — HomeFinder KE{% endblock %}
+{% block content %}
+<style>
+  .su-wrap { max-width: 800px; margin: 100px auto 60px; padding: 0 20px; font-family: 'Fira Sans', sans-serif; }
+  .su-wrap h1 { font-size: 1.3rem; color: #134E4A; margin-bottom: 6px; }
+  .su-back { display:inline-block; margin-bottom:20px; color:#0F766E; text-decoration:none; font-weight:600; }
+  .su-card {
+    background:#fff; border:1px solid #FCA5A5; border-radius:12px;
+    padding:18px 20px; margin-bottom:14px;
+  }
+  .su-user { font-weight:700; color:#134E4A; font-size:1rem; margin-bottom:6px; }
+  .su-stats { font-size:0.82rem; color:#6B7280; margin-bottom:10px; }
+  .su-explanation { font-size:0.88rem; color:#1C4A47; background:#FFF7ED; border-left:3px solid #D97706; padding:10px 14px; border-radius:0 8px 8px 0; margin-bottom:12px; }
+  .su-actions { display:flex; gap:10px; }
+  .su-btn { padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.82rem; }
+  .su-btn-warn { background:#FEF3C7; color:#92400E; }
+  .su-btn-suspend { background:#FEE2E2; color:#DC2626; }
+  .su-empty { text-align:center; color:#6B7280; padding:60px 20px; }
+</style>
+
+<div class="su-wrap">
+  <a href="{% url 'admin_dashboard' %}" class="su-back">&larr; Back to dashboard</a>
+  <h1>Suspicious Activity</h1>
+  <p style="color:#6B7280; font-size:0.9rem; margin-bottom:20px;">Users whose recent activity crossed an automatic threshold — AI explanation is advisory only, use your own judgment.</p>
+
+  {% if flagged %}
+    {% for entry in flagged %}
+      <div class="su-card">
+        <div class="su-user">{{ entry.user.username }} ({{ entry.user.email|default:"no email" }})</div>
+        <div class="su-stats">
+          {% if entry.stats.listings_24h %}{{ entry.stats.listings_24h }} listings in 24h · {% endif %}
+          {% if entry.stats.distinct_phones %}{{ entry.stats.distinct_phones }} different phone numbers · {% endif %}
+          {% if entry.stats.distinct_recipients_24h %}messaged {{ entry.stats.distinct_recipients_24h }} people in 24h{% endif %}
+        </div>
+        <div class="su-explanation">🤖 {{ entry.explanation }}</div>
+        <div class="su-actions">
+          <a href="{% url 'warn_user' entry.user.id %}" class="su-btn su-btn-warn" onclick="return confirm('Send a warning to {{ entry.user.username }}?');">⚠️ Warning</a>
+          <a href="{% url 'suspend_user' entry.user.id %}" class="su-btn su-btn-suspend" onclick="return confirm('Suspend {{ entry.user.username }}?');">🚫 Suspend</a>
+        </div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="su-empty">No accounts crossing suspicious thresholds right now.</div>
+  {% endif %}
+</div>
+{% endblock %}

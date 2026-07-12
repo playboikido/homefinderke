@@ -39,17 +39,24 @@ def _ai_fraud_check(residence):
     try:
         client = _get_nvidia_client()
         prompt = (
-            f"You are a fraud detection assistant for a Kenyan property rental site. "
-            f"Analyze this listing and determine if it looks fraudulent or suspicious:\n\n"
+            f"You are a fraud and quality-check assistant for a Kenyan property rental site. "
+            f"Analyze this listing and determine if it looks fraudulent, suspicious, or has "
+            f"security-claim inconsistencies:\n\n"
             f"Name: {residence.name}\n"
             f"County: {residence.county}, Town: {residence.town}\n"
             f"Rent: KSh {residence.rent_price}/month\n"
             f"Deposit: KSh {residence.deposit_amount}\n"
             f"Landmark: {residence.landmark}\n"
-            f"Description: {residence.description}\n\n"
+            f"Description: {residence.description}\n"
+            f"Claimed security features: "
+            f"Gated community = {residence.gated_community}, "
+            f"CCTV = {residence.cctv_available}, "
+            f"Security guard = {residence.security_guard}\n\n"
             f"Red flags to look for: unrealistically low rent for the area, requests for wire transfers, "
             f"Western Union, PayPal or Bitcoin payment mentions, asking to contact via WhatsApp only before viewing, "
-            f"too-good-to-be-true language, suspicious contact instructions.\n\n"
+            f"too-good-to-be-true language, suspicious contact instructions, OR a description that contradicts "
+            f"the claimed security features (e.g. description mentions no security/open compound but gated "
+            f"community is marked true, or claims 'high security' with no security features ticked at all).\n\n"
             f"Respond with JSON only, no markdown: {{\"fraud\": true/false, \"reason\": \"short explanation\"}}\n"
             f"If rent for a 1-bedroom in Nairobi is below KSh 5,000 or a bedsitter below KSh 2,000, flag it."
         )
@@ -379,6 +386,15 @@ def staff_or_help_admin_required(view_func):
         raise PermissionDenied
     return _wrapped_view
 
+@staff_or_help_admin_required
+def suspicious_users(request):
+    from .user_behavior import get_flagged_users, ai_explain_pattern
+
+    flagged = get_flagged_users()
+    for entry in flagged:
+        entry['explanation'] = ai_explain_pattern(entry['user'], entry['stats'])
+
+    return render(request, 'core/suspicious_users.html', {'flagged': flagged})
 
 @staff_or_help_admin_required
 def admin_dashboard(request):
@@ -598,15 +614,21 @@ def review_report(request, pk):
 def warn_user(request, user_id):
     from django.core.mail import send_mail
     user = get_object_or_404(User, pk=user_id)
-    if user.email:
+    if not user.email:
+        messages.error(request, f'{user.username} has no email on file — warning not sent.')
+        return redirect('admin_dashboard')
+    try:
         send_mail(
             subject='Warning from HomeFinder KE',
             message='Your account has received a warning for violating our community guidelines. Repeated violations may result in suspension.',
             from_email=None,
             recipient_list=[user.email],
-            fail_silently=True,
+            fail_silently=False,
         )
-    messages.warning(request, f'Warning sent to {user.username}.')
+        messages.warning(request, f'Warning email actually sent to {user.username} ({user.email}).')
+    except Exception as e:
+        print("WARN USER EMAIL ERROR:", e)
+        messages.error(request, f'Could not send warning to {user.username} — email failed: {e}')
     return redirect('admin_dashboard')
 
 @staff_or_help_admin_required
