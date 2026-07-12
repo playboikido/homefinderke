@@ -522,21 +522,24 @@ def approve_residence(request, pk):
             )
 
     if residence.owner and residence.owner.email:
-        send_mail(
-            subject='Your Property Has Been Approved!',
-            message=(
-                f'Hello {residence.owner.username},\n\n'
-                f'Good news! Your property:\n\n'
-                f'"{residence.name}"\n\n'
-                f'has been approved and is now live on HomeFinder KE.\n\n'
-                f'You can now receive views, reviews, and inquiries from tenants.\n\n'
-                f'Thank you for using HomeFinder KE.\n\n'
-                f'Best regards,\nHomeFinder KE Team'
-            ),
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[residence.owner.email],
-            fail_silently=False
-        )
+        try:
+            send_mail(
+                subject='Your Property Has Been Approved!',
+                message=(
+                    f'Hello {residence.owner.username},\n\n'
+                    f'Good news! Your property:\n\n'
+                    f'"{residence.name}"\n\n'
+                    f'has been approved and is now live on HomeFinder KE.\n\n'
+                    f'You can now receive views, reviews, and inquiries from tenants.\n\n'
+                    f'Thank you for using HomeFinder KE.\n\n'
+                    f'Best regards,\nHomeFinder KE Team'
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[residence.owner.email],
+                fail_silently=False
+            )
+        except Exception as e:
+            print("APPROVAL EMAIL ERROR:", e)
 
     messages.success(request, 'Residence approved successfully.')
     return redirect('admin_dashboard')
