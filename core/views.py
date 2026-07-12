@@ -102,6 +102,8 @@ def _ai_image_check(image_field):
         print("AI IMAGE CHECK ERROR:", e)
         return 'unchecked', ''
 
+from django.views.decorators.http import require_POST
+
 @require_POST
 def ai_fix_description(request):
     import json
