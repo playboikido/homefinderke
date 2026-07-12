@@ -45,7 +45,9 @@ def chat_hub(request, conversation_id=None):
         if unread_messages.exists():
             unread_messages.update(is_read=True, read_at=timezone.now())
             active_conversation.save()
-
+    if getattr(request.user.profile, 'is_suspended', False):
+            messages.error(request, 'Your account is restricted from sending messages.')
+            return redirect('chat_room', conversation_id=active_conversation.id)
     if request.method == "POST" and active_conversation:
         text_content = request.POST.get('text', '').strip()
         image_file = request.FILES.get('image')
@@ -125,6 +127,16 @@ def get_client_ip(request):
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
+def check_submission_rate_limit(request, action_name, limit=5, window_seconds=3600):
+    from django.core.cache import cache
+    ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR')
+    key = f"rate_limit_{action_name}_{ip}"
+    count = cache.get(key, 0)
+    if count >= limit:
+        return False
+    cache.set(key, count + 1, timeout=window_seconds)
+    return True
+
 
 @require_POST
 def ai_assistant(request):

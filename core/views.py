@@ -165,10 +165,15 @@ def home(request):
 
 
 def about(request):
-    form = ContactForm()
+    form = ContactForm()   
 
     if request.method == 'POST':
         form = ContactForm(request.POST)
+        
+        if not check_submission_rate_limit(request, 'contact'):
+            messages.error(request, 'Too many messages sent. Please try again in an hour.')
+            return redirect('about')
+
         if form.is_valid():
             send_mail(
                 subject=form.cleaned_data['subject'],
@@ -318,11 +323,22 @@ def residence_detail(request, pk):
     }
     return render(request, 'core/residence_detail.html', context)
 
+def check_submission_rate_limit(request, action_name, limit=5, window_seconds=3600):
+    from django.core.cache import cache
+    ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR')
+    key = f"rate_limit_{action_name}_{ip}"
+    count = cache.get(key, 0)
+    if count >= limit:
+        return False
+    cache.set(key, count + 1, timeout=window_seconds)
+    return True
 
 @login_required
 def add_residence(request):
     if request.user.email == 'homefinder.ke.help@gmail.com':
         return redirect('admin_dashboard')
+    if not check_not_suspended(request):
+        return redirect('home')
     if request.method == 'POST':
         form = ResidenceForm(request.POST, request.FILES)
         if form.is_valid():
@@ -575,6 +591,12 @@ def approve_residence(request, pk):
 
 
 @staff_or_help_admin_required
+def check_not_suspended(request):
+    """Returns True if the user is allowed to act, False (with message set) if suspended."""
+    if request.user.is_authenticated and getattr(request.user.profile, 'is_suspended', False):
+        messages.error(request, 'Your account is restricted. Contact support for help.')
+        return False
+    return True
 def reject_residence(request, pk):
     residence = get_object_or_404(Residence, pk=pk)
     residence.delete()
@@ -594,6 +616,11 @@ def report_residence(request, pk):
 
     if request.method == 'POST':
         form = ResidenceReportForm(request.POST)
+
+        if not check_submission_rate_limit(request, 'report_residence'):
+            messages.error(request, 'Too many reports submitted. Please try again in an hour.')
+            return redirect('residence_detail', pk=residence.pk)
+        
         if form.is_valid():
             report = form.save(commit=False)
             report.residence   = residence
@@ -923,6 +950,8 @@ def roommate_list(request):
 
 @login_required
 def roommate_profile_edit(request):
+    if not check_not_suspended(request):
+        return redirect('roommate_list')
     profile, created = RoommateProfile.objects.get_or_create(user=request.user, defaults={
         'budget_min': 0, 'budget_max': 0, 'preferred_county': 'Nairobi', 'bio': ''
     })
@@ -1269,6 +1298,11 @@ def report_user(request, user_id):
 
     if request.method == 'POST':
         form = UserReportForm(request.POST)
+
+        if not check_submission_rate_limit(request, 'report_user'):
+            messages.error(request, 'Too many reports submitted. Please try again in an hour.')
+            return redirect('home')
+
         if form.is_valid():
             report = form.save(commit=False)
             report.reported_user = reported_user
@@ -1344,3 +1378,24 @@ def activity_feed(request):
     events.sort(key=lambda e: e['time'], reverse=True)
 
     return render(request, 'core/activity_feed.html', {'events': events[:30]})
+
+
+import csv
+
+@staff_or_help_admin_required
+def export_residences_csv(request):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="homefinder_listings.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['ID', 'Name', 'Owner', 'County', 'Town', 'House Type', 'Rent', 'Deposit',
+                      'Approved', 'Premium', 'Views', 'Phone', 'Created At'])
+
+    for r in Residence.objects.all().select_related('owner'):
+        writer.writerow([
+            r.id, r.name, r.owner.username if r.owner else '', r.county, r.town,
+            r.get_house_type_display(), r.rent_price, r.deposit_amount,
+            r.approved, r.is_premium, r.views_count, r.phone_number, r.created_at,
+        ])
+
+    return response
