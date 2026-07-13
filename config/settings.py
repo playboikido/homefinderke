@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    "anymail",
 
 
     'allauth.socialaccount.providers.google',
@@ -161,6 +162,9 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
+ANYMAIL = {
+    "POSTMARK_SERVER_TOKEN": os.environ.get("POSTMARK_SERVER_TOKEN"),
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
@@ -205,17 +209,17 @@ LOGIN_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = "anymail.backends.postmark.EmailBackend"
 
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_TIMEOUT = 5
-EMAIL_HOST_USER = 'homefinder.ke.help@gmail.com'
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_PORT = 587
+#EMAIL_USE_TLS = True
+#EMAIL_TIMEOUT = 5
+#EMAIL_HOST_USER = 'homefinder.ke.help@gmail.com'
+#EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 
 
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+DEFAULT_FROM_EMAIL = "homefinderke@onrender.com" 
 
 SITE_ID = 3
 
