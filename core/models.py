@@ -610,6 +610,7 @@ class Mover(models.Model):
     phone_number = models.CharField(max_length=20)
     description = models.TextField()
     website = models.URLField(blank=True, null=True)
+    is_major_sponsor = models.BooleanField(default=False, help_text="Shows on every listing page, regardless of location")
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -624,6 +625,7 @@ class FurnitureVendor(models.Model):
     location = models.CharField(max_length=200)
     description = models.TextField()
     website = models.URLField(blank=True, null=True)
+    is_major_sponsor = models.BooleanField(default=False, help_text="Shows on every listing page, regardless of location")
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
