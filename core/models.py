@@ -613,6 +613,7 @@ class Mover(models.Model):
     is_major_sponsor = models.BooleanField(default=False, help_text="Shows on every listing page, regardless of location")
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    service_counties = models.CharField(max_length=500, blank=True, help_text="Comma-separated counties served, e.g. Nairobi, Kiambu")
 
     def __str__(self):
         return self.name
@@ -628,6 +629,7 @@ class FurnitureVendor(models.Model):
     is_major_sponsor = models.BooleanField(default=False, help_text="Shows on every listing page, regardless of location")
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    service_counties = models.CharField(max_length=500, blank=True, help_text="Comma-separated counties served, e.g. Nairobi, Kiambu")
 
     def __str__(self):
         return self.name
