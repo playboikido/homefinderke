@@ -219,6 +219,9 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SITE_ID = 3
 
+ACCOUNT_ADAPTER = "accounts.adapters.SafeAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "accounts.adapters.SafeSocialAccountAdapter"
+
 RECAPTCHA_PUBLIC_KEY = config('RECAPTCHA_PUBLIC_KEY')
 RECAPTCHA_PRIVATE_KEY = config('RECAPTCHA_PRIVATE_KEY')
 
