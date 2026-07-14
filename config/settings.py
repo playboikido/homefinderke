@@ -209,15 +209,14 @@ LOGIN_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-EMAIL_BACKEND = "anymail.backends.postmark.EmailBackend"
-
-#EMAIL_HOST = 'smtp.gmail.com'
-#EMAIL_PORT = 587
-#EMAIL_USE_TLS = True
-#EMAIL_TIMEOUT = 5
-#EMAIL_HOST_USER = 'homefinder.ke.help@gmail.com'
-#EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.postmarkapp.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('POSTMARK_SERVER_TOKEN')
+EMAIL_HOST_PASSWORD = os.environ.get('POSTMARK_SERVER_TOKEN')
+EMAIL_BACKEND = 'postmarker.django.EmailBackend'
+POSTMARK_SERVER_TOKEN = os.environ.get('POSTMARK_SERVER_TOKEN') # Your Server API Token
 
 DEFAULT_FROM_EMAIL = "homefinderke@onrender.com" 
 
