@@ -303,13 +303,26 @@ def residence_detail(request, pk):
         county=residence.county
     ).exclude(pk=residence.pk).order_by('-is_premium', '-views_count')[:4]
 
-    # Movers & Furniture Vendors matching this residence's county
-    movers = list(Mover.objects.filter(is_approved=True).filter(
-        Q(is_major_sponsor=True) | Q(service_counties__icontains=residence.county)
-    ).order_by('-is_major_sponsor')[:5])
-    vendors = list(FurnitureVendor.objects.filter(is_approved=True).filter(
-        Q(is_major_sponsor=True) | Q(service_counties__icontains=residence.county)
-    ).order_by('-is_major_sponsor')[:5])
+    sponsored_movers = list(
+        Mover.objects.filter(is_approved=True, is_major_sponsor=True)
+        .order_by('-created_at')[:4]
+    )
+    regular_movers = list(
+        Mover.objects.filter(is_approved=True, is_major_sponsor=False)
+        .filter(service_counties__icontains=residence.county)
+        .order_by('-created_at')[:5]
+    )
+    sponsored_vendors = list(
+        FurnitureVendor.objects.filter(is_approved=True, is_major_sponsor=True)
+        .order_by('-created_at')[:4]
+    )
+    regular_vendors = list(
+        FurnitureVendor.objects.filter(is_approved=True, is_major_sponsor=False)
+        .filter(service_counties__icontains=residence.county)
+        .order_by('-created_at')[:5]
+    )
+    movers = sponsored_movers + regular_movers
+    vendors = sponsored_vendors + regular_vendors
 
     share_url = request.build_absolute_uri()
     share_text = f"Check out {residence.name} on HomeFinder Kenya: {share_url}"
@@ -319,10 +332,10 @@ def residence_detail(request, pk):
         'related_residences': related_residences,
         'movers': movers,
         'vendors': vendors,
-        'sponsored_movers': [mover for mover in movers if mover.is_major_sponsor],
-        'regular_movers': [mover for mover in movers if not mover.is_major_sponsor],
-        'sponsored_vendors': [vendor for vendor in vendors if vendor.is_major_sponsor],
-        'regular_vendors': [vendor for vendor in vendors if not vendor.is_major_sponsor],
+        'sponsored_movers': sponsored_movers,
+        'regular_movers': regular_movers,
+        'sponsored_vendors': sponsored_vendors,
+        'regular_vendors': regular_vendors,
         'share_url': share_url,
         'share_text': share_text,
     }
