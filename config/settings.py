@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '.onrender.com']
-CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://homefinderke.onrender.com']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # In your settings.py
@@ -189,6 +189,18 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+# Tell Django it is running behind a secure proxy (Render)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+
+# Ensure cookies are only sent over HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Crucial for OAuth: Allows the session cookie to be sent on the redirect from Google
+SESSION_COOKIE_SAMESITE = 'Lax' 
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 
 MEDIA_URL = '/media/'
