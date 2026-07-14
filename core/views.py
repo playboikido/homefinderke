@@ -304,12 +304,12 @@ def residence_detail(request, pk):
     ).exclude(pk=residence.pk).order_by('-is_premium', '-views_count')[:4]
 
     # Movers & Furniture Vendors matching this residence's county
-    movers = Mover.objects.filter(is_approved=True).filter(
+    movers = list(Mover.objects.filter(is_approved=True).filter(
         Q(is_major_sponsor=True) | Q(service_counties__icontains=residence.county)
-    ).order_by('-is_major_sponsor')[:5]
-    vendors = FurnitureVendor.objects.filter(is_approved=True).filter(
+    ).order_by('-is_major_sponsor')[:5])
+    vendors = list(FurnitureVendor.objects.filter(is_approved=True).filter(
         Q(is_major_sponsor=True) | Q(service_counties__icontains=residence.county)
-    ).order_by('-is_major_sponsor')[:5]
+    ).order_by('-is_major_sponsor')[:5])
 
     share_url = request.build_absolute_uri()
     share_text = f"Check out {residence.name} on HomeFinder Kenya: {share_url}"
@@ -319,6 +319,12 @@ def residence_detail(request, pk):
         'related_residences': related_residences,
         'movers': movers,
         'vendors': vendors,
+        'sponsored_movers': [mover for mover in movers if mover.is_major_sponsor],
+        'regular_movers': [mover for mover in movers if not mover.is_major_sponsor],
+        'sponsored_vendors': [vendor for vendor in vendors if vendor.is_major_sponsor],
+        'regular_vendors': [vendor for vendor in vendors if not vendor.is_major_sponsor],
+        'share_url': share_url,
+        'share_text': share_text,
     }
     return render(request, 'core/residence_detail.html', context)
 

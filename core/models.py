@@ -120,6 +120,16 @@ RATING_CHOICES = [
     (5, '5 Stars'),
 ]
 
+def normalize_ke_whatsapp_number(value):
+    digits = ''.join(ch for ch in str(value or '') if ch.isdigit())
+    if digits.startswith('0') and len(digits) >= 10:
+        return f"254{digits[1:]}"
+    if digits.startswith('254'):
+        return digits
+    if len(digits) == 9:
+        return f"254{digits}"
+    return digits
+
 
 class Residence(models.Model):
 
@@ -252,6 +262,10 @@ class Residence(models.Model):
             return round(total / reviews.count(), 1)
 
         return 0
+
+    @property
+    def whatsapp_number(self):
+        return normalize_ke_whatsapp_number(self.phone_number)
     
     def save(self, *args, **kwargs):
         if self.front_image and hasattr(self.front_image, 'file'):
@@ -618,6 +632,10 @@ class Mover(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def whatsapp_number(self):
+        return normalize_ke_whatsapp_number(self.phone_number)
+
 
 class FurnitureVendor(models.Model):
     name = models.CharField(max_length=200)
@@ -633,3 +651,7 @@ class FurnitureVendor(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def whatsapp_number(self):
+        return normalize_ke_whatsapp_number(self.phone_number)
