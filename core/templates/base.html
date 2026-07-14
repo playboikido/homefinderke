@@ -6,6 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}HomeFinder KE{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}Find apartments, bedsits, roommates, and houses for rent in Kenya. Compare prices, check verification status, and connect directly with verified property owners on HomeFinder KE.{% endblock %}">
+    <script>
+        (function () {
+            const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            if (darkQuery.matches) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 
     <!-- ── Google Fonts (Fira Sans + Fira Code — matches dashboard) ── -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +23,8 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
     <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#0F766E">
+    <meta name="theme-color" content="#0F766E" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#071416" media="(prefers-color-scheme: dark)">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1162,8 +1171,6 @@
                      📲Install HomeFinder App
                 </button>
             </div>
-            <button id="darkModeToggle" aria-label="Toggle dark mode" style="background:none;border:none;cursor:pointer;font-size:1.2rem;">🌙</button>
-
             <!-- Contact -->
             <div class="footer-col">
                 <h4>Contact</h4>
@@ -1299,31 +1306,22 @@
 <script>
   (function() {
     const root = document.documentElement;
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') root.setAttribute('data-theme', 'dark');
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    const btn = document.getElementById('darkModeToggle');
-    function syncThemeButton() {
-      if (!btn) return;
-      const isDark = root.getAttribute('data-theme') === 'dark';
-      btn.textContent = isDark ? 'Light mode' : 'Dark mode';
-      btn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    function syncSystemTheme(event) {
+      if (event.matches) {
+        root.setAttribute('data-theme', 'dark');
+      } else {
+        root.removeAttribute('data-theme');
+      }
     }
 
-    syncThemeButton();
+    syncSystemTheme(darkQuery);
 
-    if (btn) {
-      btn.addEventListener('click', () => {
-        const isDark = root.getAttribute('data-theme') === 'dark';
-        if (isDark) {
-          root.removeAttribute('data-theme');
-          localStorage.setItem('theme', 'light');
-        } else {
-          root.setAttribute('data-theme', 'dark');
-          localStorage.setItem('theme', 'dark');
-        }
-        syncThemeButton();
-      });
+    if (typeof darkQuery.addEventListener === 'function') {
+      darkQuery.addEventListener('change', syncSystemTheme);
+    } else if (typeof darkQuery.addListener === 'function') {
+      darkQuery.addListener(syncSystemTheme);
     }
   })();
 </script>
