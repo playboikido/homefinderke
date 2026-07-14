@@ -160,6 +160,7 @@ def home(request):
         'popular_residences': popular_residences,
         'selected_county': county,
         'selected_town': town,
+        
     }
     return render(request, 'core/home.html', context)
 

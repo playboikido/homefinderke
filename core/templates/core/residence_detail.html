@@ -27,54 +27,30 @@
     --c-green-bg:    #DCFCE7;
     --c-green-text:  #166534;
     --c-wa:          #25D366;
-
     --font-body: 'Fira Sans', system-ui, sans-serif;
     --font-mono: 'Fira Code', monospace;
-
-    --r:      12px;
-    --r-lg:   18px;
-    --r-xl:   24px;
-    --r-full: 9999px;
-
+    --r: 12px; --r-lg: 18px; --r-xl: 24px; --r-full: 9999px;
     --shadow-sm: 0 1px 3px rgba(15,118,110,0.08);
-    --shadow:    0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
+    --shadow: 0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
     --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
     --ease: cubic-bezier(0.4,0,0.2,1);
   }
-  [data-theme="dark"] {
-    --c-primary:     #14B8A6;
-    --c-primary-dk:  #0F766E;
-    --c-secondary:   #2DD4BF;
-    --c-accent:      #38BDF8;
-    --c-bg:          #0F172A;
-    --c-fg:          #E2E8F0;
-    --c-surface:     #1E293B;
-    --c-muted:       #334155;
-    --c-border:      #334155;
-    --c-text:        #CBD5E1;
-    --c-subtle:      #94A3B8;
-    --c-danger:      #F87171;
-    --c-gold:        #FBBF24;
-    --c-gold-bg:     #422006;
-    --c-green-bg:    #052E1C;
-    --c-green-text: #4ADE80;
-    --c-pending-bg:  #422006;
-    --c-pending-txt: #FBBF24;
-  }
 
+  /* ── ROBUST DARK MODE FIX ───────────────────────────────────── */
+  [data-theme="dark"],
   @media (prefers-color-scheme: dark) {
     :root {
       --c-primary:     #14B8A6;
       --c-primary-dk:  #0F766E;
       --c-secondary:   #2DD4BF;
       --c-accent:      #38BDF8;
-      --c-bg:          #0B1817;
-      --c-fg:          #E6FFFA;
-      --c-surface:     #12211F;
-      --c-muted:       #1A2E2B;
-      --c-border:      #1E3B37;
-      --c-text:        #D3F5EF;
-      --c-subtle:      #7FCFC5;
+      --c-bg:          #0B1817 !important;
+      --c-fg:          #E6FFFA !important;
+      --c-surface:     #12211F !important;
+      --c-muted:       #1A2E2B !important;
+      --c-border:      #1E3B37 !important;
+      --c-text:        #D3F5EF !important;
+      --c-subtle:      #7FCFC5 !important;
       --c-danger:      #F87171;
       --c-gold:        #FBBF24;
       --c-gold-bg:     #3F2D0A;
@@ -82,14 +58,19 @@
       --c-green-text:  #86EFAC;
       --c-wa:          #25D366;
     }
+    body, .rd-wrap {
+      background-color: var(--c-bg) !important;
+      color: var(--c-text) !important;
+    }
   }
 
   /* ── Page shell ─────────────────────────────────────────────── */
   .rd-wrap {
     font-family: var(--font-body);
     background: var(--c-bg);
-    min-height: 100vh;
     color: var(--c-text);
+    min-height: 100vh;
+    width: 100%;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
@@ -101,64 +82,40 @@
     position: relative;
   }
   .rd-hero::before {
-    content: '';
-    position: absolute;
-    width: 500px; height: 500px;
-    border-radius: 50%;
+    content: ''; position: absolute; width: 500px; height: 500px; border-radius: 50%;
     background: radial-gradient(circle, rgba(20,184,166,.18), transparent 65%);
-    top: -180px; right: -120px;
-    pointer-events: none;
+    top: -180px; right: -120px; pointer-events: none;
   }
   .rd-hero-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    position: relative;
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
+    max-width: 1200px; margin: 0 auto; position: relative;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap;
   }
   .rd-hero-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 0.72rem; font-weight: 600;
-    color: var(--c-secondary);
-    text-transform: uppercase; letter-spacing: 0.1em;
-    margin-bottom: 6px;
+    font-family: var(--font-mono); font-size: 0.72rem; font-weight: 600;
+    color: var(--c-secondary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px;
   }
   .rd-hero-title {
-    font-family: var(--font-mono);
-    font-size: clamp(1.5rem, 3vw, 2.2rem);
-    font-weight: 700; color: #FFFFFF;
-    line-height: 1.15; margin-bottom: 10px;
+    font-family: var(--font-mono); font-size: clamp(1.5rem, 3vw, 2.2rem);
+    font-weight: 700; color: #FFFFFF; line-height: 1.15; margin-bottom: 10px;
   }
   .rd-hero-meta { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
   .rd-hero-meta-item {
     display: flex; align-items: center; gap: 6px;
-    color: rgba(255,255,255,0.72); font-size: 0.85rem;
+    color: rgba(255,255,255,0.85); font-size: 0.85rem;
   }
   .rd-hero-meta-item svg { width: 14px; height: 14px; }
   .rd-hero-price {
-    font-family: var(--font-mono);
-    font-size: 1.5rem; font-weight: 700; color: #FFFFFF;
-    background: rgba(255,255,255,0.12);
-    border: 1px solid rgba(255,255,255,0.2);
-    padding: 6px 18px; border-radius: var(--r-full);
-    white-space: nowrap;
+    font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; color: #FFFFFF;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+    padding: 6px 18px; border-radius: var(--r-full); white-space: nowrap;
   }
   .rd-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 
   /* ── Buttons ─────────────────────────────────────────────────── */
   .rd-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    gap: 7px; padding: 10px 20px;
-    border-radius: var(--r);
-    font-size: 0.85rem; font-weight: 600;
-    font-family: var(--font-body);
-    border: none; cursor: pointer;
-    text-decoration: none;
-    transition: all 200ms var(--ease);
-    white-space: nowrap;
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 10px 20px;
+    border-radius: var(--r); font-size: 0.85rem; font-weight: 600; font-family: var(--font-body);
+    border: none; cursor: pointer; text-decoration: none; transition: all 200ms var(--ease); white-space: nowrap;
   }
   .rd-btn svg { width: 15px; height: 15px; }
   .rd-btn-white  { background: #FFF; color: var(--c-fg); box-shadow: var(--shadow); }
@@ -169,53 +126,44 @@
   .rd-btn-teal:hover   { background: var(--c-primary-dk); transform: translateY(-1px); box-shadow: var(--shadow); }
   .rd-btn-call   { background: var(--c-green-bg); color: var(--c-green-text); border: 1.5px solid #BBF7D0; }
   .rd-btn-call:hover   { background: var(--c-primary); color: #FFF; border-color: var(--c-primary); }
-  .rd-share-menu { display:none; position:absolute; top:110%; right:0; background:var(--c-surface); border:1px solid var(--c-border); border-radius:10px; box-shadow:var(--shadow-lg); min-width:160px; z-index:20; overflow:hidden; }
+  .rd-share-menu { 
+    display:none; position:absolute; top:110%; right:0; background:var(--c-surface); 
+    border:1px solid var(--c-border); border-radius:10px; box-shadow:var(--shadow-lg); 
+    min-width:160px; z-index:1000; overflow:hidden; 
+  }
   .rd-share-menu.open { display:flex; flex-direction:column; }
-  .rd-share-menu a, .rd-share-menu button { padding:10px 16px; text-align:left; background:none; border:none; font-family:inherit; font-size:0.85rem; color:var(--c-text); text-decoration:none; cursor:pointer; }
+  .rd-share-menu a, .rd-share-menu button { 
+    padding:10px 16px; text-align:left; background:none; border:none; 
+    font-family:inherit; font-size:0.85rem; color:var(--c-text); text-decoration:none; cursor:pointer; 
+  }
   .rd-share-menu a:hover, .rd-share-menu button:hover { background:var(--c-muted); }
   .rd-btn-wa     { background: #D1FAE5; color: #065F46; border: 1.5px solid #A7F3D0; }
   .rd-btn-wa:hover     { background: var(--c-wa); color: #FFF; border-color: var(--c-wa); }
   .rd-btn-maps   { background: #DBEAFE; color: var(--c-accent); border: 1.5px solid #BFDBFE; }
   .rd-btn-maps:hover   { background: var(--c-accent); color: #FFF; border-color: var(--c-accent); }
-  .rd-btn-fav    { background: #FFE4E6; color: #9F1239; border: 1.5px solid #FECDD3; }
-  .rd-btn-fav:hover    { background: #E11D48; color: #FFF; border-color: #E11D48; }
-  .rd-btn-report { background: #FEE2E2; color: var(--c-danger); border: 1.5px solid #FECACA; }
-  .rd-btn-report:hover { background: var(--c-danger); color: #FFF; }
   .rd-btn-review { background: var(--c-accent); color: #FFF; }
   .rd-btn-review:hover { background: #025584; transform: translateY(-1px); }
   .rd-btn-sm { padding: 7px 14px; font-size: 0.78rem; }
   .rd-btn-sm svg { width: 13px; height: 13px; }
-
-  /* ── Stars ───────────────────────────────────────────────────── */
-  .rd-stars { display: flex; gap: 2px; }
-  .rd-star-on  { color: #F59E0B; font-size: 0.9rem; }
-  .rd-star-off { color: #D1FAE5; font-size: 0.9rem; }
 
   /* ── Inner layout ────────────────────────────────────────────── */
   .rd-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px 64px; }
 
   /* ── Stats bar ───────────────────────────────────────────────── */
   .rd-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-top: -26px;
-    position: relative; z-index: 10;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    margin-top: -26px; position: relative; z-index: 10;
   }
   .rd-stat {
-    background: var(--c-surface);
-    border-radius: var(--r-lg);
-    padding: 18px 20px;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(153,246,228,0.4);
+    background: var(--c-surface); border-radius: var(--r-lg); padding: 18px 20px;
+    box-shadow: var(--shadow); border: 1px solid rgba(153,246,228,0.4);
     display: flex; align-items: center; gap: 14px;
     transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
   }
   .rd-stat:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
   .rd-stat-icon {
     width: 42px; height: 42px; border-radius: var(--r);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .rd-stat-icon svg { width: 20px; height: 20px; }
   .rd-stat-icon--teal  { background: #CCFBF1; color: var(--c-primary); }
@@ -225,99 +173,71 @@
   .rd-stat-val   { font-family: var(--font-mono); font-size: 1.4rem; font-weight: 700; color: var(--c-fg); line-height: 1; }
   .rd-stat-label { font-size: 0.7rem; color: var(--c-subtle); font-weight: 500; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
 
-  /* ── Section ─────────────────────────────────────────────────── */
+  /* ── Section & Card ──────────────────────────────────────────── */
   .rd-section { margin-top: 36px; }
   .rd-section-head {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 18px; padding-bottom: 12px;
-    border-bottom: 1.5px solid var(--c-border);
+    margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1.5px solid var(--c-border);
   }
   .rd-section-title {
-    font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700;
-    color: var(--c-fg);
+    font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: var(--c-fg);
     display: flex; align-items: center; gap: 10px;
   }
   .rd-section-title::before {
-    content: ''; width: 4px; height: 16px;
-    background: var(--c-primary); border-radius: 2px; display: block;
+    content: ''; width: 4px; height: 16px; background: var(--c-primary); border-radius: 2px; display: block;
   }
-
-  /* ── Card ────────────────────────────────────────────────────── */
   .rd-card {
-    background: var(--c-surface);
-    border-radius: var(--r-xl);
-    border: 1px solid rgba(153,246,228,0.35);
-    box-shadow: var(--shadow-sm);
-    padding: 24px 28px;
+    background: var(--c-surface); border-radius: var(--r-xl);
+    border: 1px solid rgba(153,246,228,0.35); box-shadow: var(--shadow-sm); padding: 24px 28px;
   }
 
-  /* ── Gallery ─────────────────────────────────────────────────── */
+  /* ── Gallery & LIGHTBOX ──────────────────────────────────────── */
   .rd-gallery-hero {
-    border-radius: var(--r-xl); overflow: hidden;
-    height: 420px; position: relative;
-    box-shadow: var(--shadow-lg); background: var(--c-muted); cursor: pointer;
-  }
-  .rd-gallery-hero { position: relative; touch-action: pan-y; }
-  .rd-swipe-dots {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 5px;
-    z-index: 5;
-  }
-  .rd-swipe-dots span {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.5);
-    transition: var(--transition);
-  }
-  .rd-swipe-dots span.active {
-    background: #fff;
-    width: 16px;
-    border-radius: 4px;
+    border-radius: var(--r-xl); overflow: hidden; height: 420px; position: relative;
+    box-shadow: var(--shadow-lg); background: var(--c-muted); cursor: zoom-in;
   }
   .rd-gallery-hero img { width: 100%; height: 100%; object-fit: cover; transition: transform 400ms var(--ease); }
   .rd-gallery-hero:hover img { transform: scale(1.03); }
   .rd-gallery-hero-placeholder {
-    width: 100%; height: 100%;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 12px; color: var(--c-subtle);
-    background: linear-gradient(135deg, #E8F8F6, #D4F0EC);
+    width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; color: var(--c-subtle); background: linear-gradient(135deg, #E8F8F6, #D4F0EC);
   }
-  .rd-gallery-hero-placeholder svg { width: 48px; height: 48px; opacity: 0.4; }
-  .rd-thumbs {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 10px; margin-top: 12px;
-  }
+  .rd-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 12px; }
   .rd-thumb {
     border-radius: var(--r); overflow: hidden; height: 88px; cursor: pointer;
-    border: 2px solid transparent; transition: border-color 180ms, transform 180ms;
+    border: 2px solid transparent; transition: border-color 180ms, transform 180ms; opacity: 0.7;
   }
-  .rd-thumb:hover { transform: translateY(-2px); border-color: var(--c-secondary); }
-  .rd-thumb.active { border-color: var(--c-primary); }
+  .rd-thumb:hover, .rd-thumb.active { opacity: 1; transform: translateY(-2px); border-color: var(--c-primary); }
   .rd-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  /* ── Info grid ───────────────────────────────────────────────── */
-  .rd-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .rd-info-row {
-    display: flex; flex-direction: column;
-    padding: 12px 0; border-bottom: 1px solid var(--c-border);
+  /* Lightbox Modal */
+  .rd-lightbox {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9999;
+    align-items: center; justify-content: center; flex-direction: column;
   }
+  .rd-lightbox.active { display: flex; }
+  .rd-lightbox-img { max-width: 90vw; max-height: 80vh; object-fit: contain; border-radius: 8px; }
+  .rd-lightbox-close {
+    position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.2); border: none;
+    color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer;
+  }
+  .rd-lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2);
+    border: none; color: #fff; width: 50px; height: 50px; border-radius: 50%; font-size: 1.5rem; cursor: pointer;
+  }
+  .rd-lightbox-prev { left: 20px; }
+  .rd-lightbox-next { right: 20px; }
+
+  /* ── Info grid & Amenities ───────────────────────────────────── */
+  .rd-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .rd-info-row { display: flex; flex-direction: column; padding: 12px 0; border-bottom: 1px solid var(--c-border); }
   .rd-info-row:nth-last-child(-n+2) { border-bottom: none; }
   .rd-info-label { font-size: 0.7rem; font-weight: 700; color: var(--c-subtle); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 3px; }
   .rd-info-value { font-family: var(--font-mono); font-size: 0.9rem; font-weight: 600; color: var(--c-fg); }
-
-  /* ── Amenities ───────────────────────────────────────────────── */
   .rd-amenities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
   .rd-amenity {
-    display: flex; align-items: center; gap: 10px;
-    padding: 12px 14px; border-radius: var(--r);
-    border: 1.5px solid var(--c-border);
-    font-size: 0.82rem; font-weight: 600; color: var(--c-text);
+    display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: var(--r);
+    border: 1.5px solid var(--c-border); font-size: 0.82rem; font-weight: 600; color: var(--c-text);
     transition: all 180ms var(--ease);
   }
   .rd-amenity svg { width: 18px; height: 18px; flex-shrink: 0; }
@@ -328,8 +248,7 @@
   .rd-contact-strip {
     background: linear-gradient(135deg, var(--c-fg), var(--c-primary));
     border-radius: var(--r-xl); padding: 28px 32px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 20px; flex-wrap: wrap;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
     box-shadow: var(--shadow-lg); position: relative; overflow: hidden;
   }
   .rd-contact-strip::before {
@@ -342,26 +261,17 @@
   .rd-contact-btns   { display: flex; gap: 10px; flex-wrap: wrap; }
 
   /* ── Map ─────────────────────────────────────────────────────── */
-  #rd-map {
-    height: 360px; width: 100%;
-    border-radius: var(--r-lg); overflow: hidden;
-    box-shadow: var(--shadow); border: 1.5px solid var(--c-border);
-  }
+  #rd-map { height: 360px; width: 100%; border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow); border: 1.5px solid var(--c-border); }
 
   /* ── Reviews ─────────────────────────────────────────────────── */
   .rd-review {
-    background: var(--c-surface); border-radius: var(--r-lg);
-    border: 1px solid rgba(153,246,228,0.4);
-    padding: 20px 22px; box-shadow: var(--shadow-sm);
-    display: flex; flex-direction: column; gap: 10px;
-    transition: box-shadow 180ms;
+    background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid rgba(153,246,228,0.4);
+    padding: 20px 22px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 10px;
   }
-  .rd-review:hover { box-shadow: var(--shadow); }
   .rd-review-header { display: flex; align-items: center; justify-content: space-between; }
   .rd-review-user   { display: flex; align-items: center; gap: 10px; }
   .rd-review-avatar {
-    width: 36px; height: 36px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--c-primary), var(--c-secondary));
+    width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--c-primary), var(--c-secondary));
     color: #FFF; font-family: var(--font-mono); font-size: 0.85rem; font-weight: 700;
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
@@ -369,15 +279,16 @@
   .rd-review-date   { font-size: 0.72rem; color: var(--c-subtle); }
   .rd-review-rating { display: flex; align-items: center; gap: 6px; }
   .rd-review-body   { font-size: 0.875rem; color: var(--c-text); line-height: 1.65; }
+  .rd-stars { display: flex; gap: 2px; }
+  .rd-star-on  { color: #F59E0B; font-size: 0.9rem; }
+  .rd-star-off { color: #D1FAE5; font-size: 0.9rem; }
 
   /* ── Related listings ────────────────────────────────────────── */
   .rd-related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
   .rd-related-card {
-    background: var(--c-surface); border-radius: var(--r-lg);
-    border: 1px solid rgba(153,246,228,0.35);
-    overflow: hidden; box-shadow: var(--shadow-sm);
+    background: var(--c-surface); border-radius: var(--r-lg); border: 1px solid rgba(153,246,228,0.35);
+    overflow: hidden; box-shadow: var(--shadow-sm); text-decoration: none; color: inherit; display: block;
     transition: transform 220ms var(--ease), box-shadow 220ms var(--ease);
-    text-decoration: none; color: inherit; display: block;
   }
   .rd-related-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
   .rd-related-img { height: 160px; overflow: hidden; background: var(--c-muted); }
@@ -388,61 +299,17 @@
   .rd-related-name  { font-family: var(--font-mono); font-size: 0.9rem; font-weight: 700; color: var(--c-fg); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .rd-related-price { font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--c-primary); }
 
-  /* ── Nairobi estate background section ──────────────────────── */
-  .rd-section--nairobi-bg {
-    position: relative;
-    border-radius: var(--r-xl);
-    padding: 28px 28px 24px;
-    overflow: hidden;
+  /* ── Sponsors Section ────────────────────────────────────────── */
+  .rd-sponsors-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-top: 16px;
   }
-  .rd-section--nairobi-bg::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url('https://images.unsplash.com/photo-1611348586804-61bf6c080437?w=1400&q=80');
-    background-size: cover;
-    background-position: center;
-    opacity: 0.08;
-    border-radius: var(--r-xl);
-    pointer-events: none;
-    z-index: 0;
+  .rd-sponsor-card {
+    background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--r);
+    padding: 16px; display: flex; align-items: center; justify-content: center;
+    text-align: center; font-family: var(--font-mono); font-weight: 600; color: var(--c-subtle);
+    transition: all 200ms var(--ease);
   }
-  .rd-section--nairobi-bg::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg,
-      rgba(240,253,250,0.85) 0%,
-      rgba(240,253,250,0.75) 50%,
-      rgba(204,251,241,0.8) 100%);
-    border-radius: var(--r-xl);
-    pointer-events: none;
-    z-index: 0;
-  }
-  .rd-section--nairobi-bg > * {
-    position: relative;
-    z-index: 1;
-  }
-  .rd-section--nairobi-bg .rd-nairobi-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: var(--font-mono);
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: var(--c-subtle);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    background: rgba(255,255,255,0.7);
-    border: 1px solid var(--c-border);
-    padding: 3px 10px;
-    border-radius: var(--r-full);
-    margin-bottom: 10px;
-  }
-
-  /* ── Poster ──────────────────────────────────────────────────── */
-  .rd-poster { border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow); max-width: 420px; }
-  .rd-poster img { width: 100%; display: block; }
+  .rd-sponsor-card:hover { border-color: var(--c-primary); color: var(--c-primary); transform: translateY(-2px); box-shadow: var(--shadow); }
 
   /* ── Responsive ──────────────────────────────────────────────── */
   @media (max-width: 900px) {
@@ -452,7 +319,6 @@
     .rd-contact-strip { flex-direction: column; align-items: flex-start; }
     .rd-gallery-hero { height: 280px; }
     .rd-two-col { grid-template-columns: 1fr !important; }
-    .rd-movers-vendors-grid { grid-template-columns: 1fr !important; }
   }
   @media (max-width: 600px) {
     .rd-stats { grid-template-columns: 1fr 1fr; }
@@ -462,22 +328,18 @@
     .rd-contact-strip  { padding: 22px 18px; }
     .rd-amenities-grid { grid-template-columns: 1fr 1fr; }
   }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { transition-duration: 0.01ms !important; }
-  }
-  
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="rd-wrap">
 
-  <!-- ── Hero Banner ─────────────────────────────────────────── -->
   {% if residence.is_paused %}
   <div style="background: linear-gradient(135deg, #EA580C, #F97316); color: #fff; padding: 14px 24px; font-weight: 700; font-family: var(--font-body); font-size: 0.95rem; text-align: center; border-radius: var(--r-xl); margin: 20px 24px 0; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: var(--shadow);">
-    ⏸ This listing is currently paused by the owner or administrator and may not be actively renting.
+    ⏸ This listing is currently paused by the owner or administrator.
   </div>
   {% endif %}
+
   <div class="rd-hero">
     <div class="rd-hero-inner">
       <div>
@@ -494,7 +356,7 @@
           {% if residence.owner %}
           <span class="rd-hero-meta-item">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <a href="{% url 'owner_profile' residence.owner.id %}" style="color:rgba(255,255,255,.72);text-decoration:none;">{{ residence.owner.username }}</a>
+            <a href="{% url 'owner_profile' residence.owner.id %}" style="color:rgba(255,255,255,.85);text-decoration:none;">{{ residence.owner.username }}</a>
           </span>
           {% endif %}
         </div>
@@ -511,22 +373,20 @@
             Save
           </a>
           {% endif %}
-          <a href="{% url 'report_residence' residence.id %}" class="rd-btn rd-btn-ghost">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            Report
-          </a>
+          
+          <!-- FIXED SHARE BUTTON -->
           <div class="rd-share-wrap" style="position:relative;">
-            <button type="button" id="shareToggleBtn" class="rd-btn rd-btn-ghost" onclick="document.getElementById('shareMenu').classList.toggle('open')">
+            <button type="button" id="shareToggleBtn" class="rd-btn rd-btn-ghost" onclick="toggleShareMenu(event)">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
               Share
             </button>
             <div id="shareMenu" class="rd-share-menu">
               <a href="https://wa.me/?text={{ share_text|urlencode }}" target="_blank" rel="noopener">WhatsApp</a>
               <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" rel="noopener">Facebook</a>
-              <a href="https://www.instagram.com/" target="_blank" rel="noopener" onclick="copyShareLink(); alert('Link copied! Open Instagram to paste it.');">Instagram</a>
               <a href="https://t.me/share/url?url={{ share_url|urlencode }}&text={{ residence.name|urlencode }}" target="_blank" rel="noopener">Telegram</a>
               <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ residence.name|urlencode }}" target="_blank" rel="noopener">X</a>
-              <button type="button" onclick="copyShareLink()">Copy Link</button>
+              <button type="button" onclick="copyShareLink()">📋 Copy Link</button>
+            </div>
           </div>
         </div>
       </div>
@@ -534,56 +394,46 @@
   </div>
 
   <div class="rd-inner">
-
-    <!-- ── Stats bar ─────────────────────────────────────────── -->
+    <!-- Stats bar -->
     <div class="rd-stats">
       <div class="rd-stat">
         <div class="rd-stat-icon rd-stat-icon--teal">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </div>
-        <div>
-          <div class="rd-stat-val">{{ residence.get_house_type_display }}</div>
-          <div class="rd-stat-label">House Type</div>
-        </div>
+        <div><div class="rd-stat-val">{{ residence.get_house_type_display }}</div><div class="rd-stat-label">House Type</div></div>
       </div>
       <div class="rd-stat">
         <div class="rd-stat-icon rd-stat-icon--gold">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-        <div>
-          <div class="rd-stat-val">{{ residence.average_rating }}</div>
-          <div class="rd-stat-label">Avg Rating / 5</div>
-        </div>
+        <div><div class="rd-stat-val">{{ residence.average_rating|default:"0.0" }}</div><div class="rd-stat-label">Avg Rating / 5</div></div>
       </div>
       <div class="rd-stat">
         <div class="rd-stat-icon rd-stat-icon--blue">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </div>
-        <div>
-          <div class="rd-stat-val">{{ residence.views_count }}</div>
-          <div class="rd-stat-label">Total Views</div>
-        </div>
+        <div><div class="rd-stat-val">{{ residence.views_count }}</div><div class="rd-stat-label">Total Views</div></div>
       </div>
       <div class="rd-stat">
         <div class="rd-stat-icon rd-stat-icon--green">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
-        <div>
-          <div class="rd-stat-val">{{ residence.reviews.count }}</div>
-          <div class="rd-stat-label">Reviews</div>
-        </div>
+        <div><div class="rd-stat-val">{{ residence.reviews.count }}</div><div class="rd-stat-label">Reviews</div></div>
       </div>
     </div>
 
-    <!-- ── Contact Strip ─────────────────────────────────────── -->
+    <!-- Contact Strip with MASKED NUMBER -->
     {% if residence.phone_number %}
     <div class="rd-section">
       <div class="rd-contact-strip">
         <div style="position:relative;">
           <div class="rd-contact-label">Caretaker Contact</div>
-          <div class="rd-contact-number">{{ residence.phone_number }}</div>
+          <div class="rd-contact-number" id="maskedPhone">07** *** ***</div>
         </div>        
         <div class="rd-contact-btns">
+          <button class="rd-btn rd-btn-sm rd-btn-white" onclick="revealPhone('{{ residence.phone_number }}')" style="color:var(--c-primary);">
+            👁️ Reveal Number
+          </button>
           <a href="tel:{{ residence.phone_number }}" class="rd-btn rd-btn-call">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.18 6.18l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             Call
@@ -592,35 +442,24 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             WhatsApp
           </a>
-            {% if request.user.is_authenticated and residence.owner and request.user != residence.owner %}
-            <a href="{% url 'start_conversation' residence.owner.id %}" class="rd-btn rd-btn-call" style="background:#0F766E;">
-                💬 Message
-           </a>
-          {% endif %}
-          {% if residence.latitude and residence.longitude %}
-          <a href="https://www.google.com/maps?q={{ residence.latitude }},{{ residence.longitude }}" target="_blank" class="rd-btn rd-btn-maps">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-            Google Maps
-          </a>
+          {% if request.user.is_authenticated and residence.owner and request.user != residence.owner %}
+          <a href="{% url 'start_conversation' residence.owner.id %}" class="rd-btn rd-btn-call" style="background:#0F766E;">💬 Message</a>
           {% endif %}
         </div>
       </div>
     </div>
     {% endif %}
 
-    <!-- ── Photo Gallery ─────────────────────────────────────── -->
-    <div class="rd-section rd-section--nairobi-bg">
-      <div class="rd-nairobi-badge">
-        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        Nairobi Estates
-      </div>
+    <!-- Photo Gallery with LIGHTBOX -->
+    <div class="rd-section">
       <div class="rd-section-head">
         <h2 class="rd-section-title">Photo Gallery</h2>
         {% if residence.photos.count %}
         <span style="font-size:0.78rem;color:var(--c-subtle);font-family:var(--font-mono);">{{ residence.photos.count }} photo{{ residence.photos.count|pluralize }}</span>
         {% endif %}
       </div>
-      <div class="rd-gallery-hero" id="gallery-main">
+      
+      <div class="rd-gallery-hero" id="gallery-main" onclick="openLightbox(0)">
         {% if residence.front_image %}
           <img id="gallery-main-img" src="{{ residence.front_image.url }}" alt="{{ residence.name }}">
         {% else %}
@@ -629,19 +468,17 @@
             <span style="font-size:0.85rem;font-weight:500;">No photos uploaded yet</span>
           </div>
         {% endif %}
-        {% if residence.photos.count %}
-        <div class="rd-swipe-dots" id="galleryDots"></div>
-        {% endif %}
       </div>
+      
       {% if residence.photos.count %}
       <div class="rd-thumbs">
         {% if residence.front_image %}
-        <div class="rd-thumb active" onclick="setMainImg('{{ residence.front_image.url }}', this)">
+        <div class="rd-thumb active" onclick="setMainImg('{{ residence.front_image.url }}', this, 0)">
           <img src="{{ residence.front_image.url }}" alt="Front">
         </div>
         {% endif %}
         {% for photo in residence.photos.all %}
-        <div class="rd-thumb" onclick="setMainImg('{{ photo.image.url }}', this)">
+        <div class="rd-thumb" onclick="setMainImg('{{ photo.image.url }}', this, {{ forloop.counter }})">
           <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:'Gallery photo' }}">
         </div>
         {% endfor %}
@@ -649,64 +486,31 @@
       {% endif %}
     </div>
 
-    <!-- ── Two-column layout ─────────────────────────────────── -->
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="rd-lightbox" onclick="closeLightbox(event)">
+      <button class="rd-lightbox-close" onclick="closeLightbox(event)">×</button>
+      <button class="rd-lightbox-nav rd-lightbox-prev" onclick="changeLightboxImage(-1, event)">❮</button>
+      <img id="lightbox-img" class="rd-lightbox-img" src="" alt="Full screen">
+      <button class="rd-lightbox-nav rd-lightbox-next" onclick="changeLightboxImage(1, event)">❯</button>
+    </div>
+
+    <!-- Two-column layout -->
     <div style="display:grid;grid-template-columns:1fr 340px;gap:24px;margin-top:36px;" class="rd-two-col">
-
-      <!-- LEFT ──────────────────────────────────────────────── -->
+      <!-- LEFT -->
       <div style="display:flex;flex-direction:column;gap:24px;">
-
-        <!-- Location details -->
         <div class="rd-card">
-          <div class="rd-section-head" style="margin-bottom:14px;">
-            <h2 class="rd-section-title">Location Details</h2>
-          </div>
+          <div class="rd-section-head" style="margin-bottom:14px;"><h2 class="rd-section-title">Location Details</h2></div>
           <div class="rd-info-grid">
-            <div class="rd-info-row">
-              <span class="rd-info-label">County</span>
-              <span class="rd-info-value">{{ residence.county|default:"—" }}</span>
-            </div>
-            <div class="rd-info-row">
-              <span class="rd-info-label">Town / Area</span>
-              <span class="rd-info-value">{{ residence.town|default:"—" }}</span>
-            </div>
-            {% if residence.plot_number %}
-            <div class="rd-info-row">
-              <span class="rd-info-label">Plot Number</span>
-              <span class="rd-info-value">{{ residence.plot_number }}</span>
-            </div>
-            {% endif %}
-            {% if residence.landmark %}
-            <div class="rd-info-row">
-              <span class="rd-info-label">Landmark</span>
-              <span class="rd-info-value">{{ residence.landmark }}</span>
-            </div>
-            {% endif %}
-            {% if residence.nearest_stage %}
-            <div class="rd-info-row">
-              <span class="rd-info-label">Nearest Stage</span>
-              <span class="rd-info-value">{{ residence.nearest_stage }}</span>
-            </div>
-            {% endif %}
-            {% if residence.nearby_school %}
-            <div class="rd-info-row">
-              <span class="rd-info-label">Nearby School</span>
-              <span class="rd-info-value">{{ residence.nearby_school }}</span>
-            </div>
-            {% endif %}
-            {% if residence.nearby_hospital %}
-            <div class="rd-info-row">
-              <span class="rd-info-label">Nearby Hospital</span>
-              <span class="rd-info-value">{{ residence.nearby_hospital }}</span>
-            </div>
-            {% endif %}
+            <div class="rd-info-row"><span class="rd-info-label">County</span><span class="rd-info-value">{{ residence.county|default:"—" }}</span></div>
+            <div class="rd-info-row"><span class="rd-info-label">Town / Area</span><span class="rd-info-value">{{ residence.town|default:"—" }}</span></div>
+            {% if residence.plot_number %}<div class="rd-info-row"><span class="rd-info-label">Plot Number</span><span class="rd-info-value">{{ residence.plot_number }}</span></div>{% endif %}
+            {% if residence.landmark %}<div class="rd-info-row"><span class="rd-info-label">Landmark</span><span class="rd-info-value">{{ residence.landmark }}</span></div>{% endif %}
+            {% if residence.nearest_stage %}<div class="rd-info-row"><span class="rd-info-label">Nearest Stage</span><span class="rd-info-value">{{ residence.nearest_stage }}</span></div>{% endif %}
           </div>
         </div>
 
-        <!-- Amenities -->
         <div class="rd-card">
-          <div class="rd-section-head" style="margin-bottom:14px;">
-            <h2 class="rd-section-title">Utilities & Security</h2>
-          </div>
+          <div class="rd-section-head" style="margin-bottom:14px;"><h2 class="rd-section-title">Utilities & Security</h2></div>
           <div class="rd-amenities-grid">
             <div class="rd-amenity {% if residence.water_available %}rd-amenity--on{% else %}rd-amenity--off{% endif %}">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
@@ -731,22 +535,16 @@
           </div>
         </div>
 
-        <!-- Description -->
         {% if residence.description %}
         <div class="rd-card">
-          <div class="rd-section-head" style="margin-bottom:14px;">
-            <h2 class="rd-section-title">About This Property</h2>
-          </div>
+          <div class="rd-section-head" style="margin-bottom:14px;"><h2 class="rd-section-title">About This Property</h2></div>
           <p style="font-size:0.9rem;line-height:1.75;color:var(--c-text);">{{ residence.description }}</p>
         </div>
         {% endif %}
-
       </div>
 
-      <!-- RIGHT sidebar ─────────────────────────────────────── -->
+      <!-- RIGHT sidebar -->
       <div style="display:flex;flex-direction:column;gap:16px;">
-
-        <!-- Price card -->
         <div class="rd-card" style="text-align:center;padding:28px 20px;">
           <div style="font-size:0.7rem;font-weight:700;color:var(--c-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;">Monthly Rent</div>
           <div style="font-family:var(--font-mono);font-size:2rem;font-weight:700;color:var(--c-primary);line-height:1;">KSh {{ residence.rent_price|floatformat:"0" }}</div>
@@ -754,72 +552,23 @@
           {% if residence.deposit_amount %}
           <div style="font-size:0.85rem;color:var(--c-fg);font-weight:600;margin-top:10px;">Deposit: <span style="font-family:var(--font-mono);color:var(--c-primary);">KSh {{ residence.deposit_amount|floatformat:"0" }}</span></div>
           {% endif %}
-          <div style="margin-top:18px;padding-top:18px;border-top:1px solid var(--c-border);">
-            <div class="rd-stars" style="justify-content:center;margin-bottom:6px;">
-              {% with r=residence.average_rating %}
-              {% for i in "12345" %}
-                {% if forloop.counter <= r %}<span class="rd-star-on">★</span>{% else %}<span class="rd-star-off">★</span>{% endif %}
-              {% endfor %}
-              {% endwith %}
-            </div>
-            <div style="font-family:var(--font-mono);font-size:0.9rem;font-weight:700;color:var(--c-fg);">{{ residence.average_rating }}/5</div>
-            <div style="font-size:0.72rem;color:var(--c-subtle);">{{ residence.reviews.count }} review{{ residence.reviews.count|pluralize }}</div>
-          </div>
         </div>
+
         <!-- Affordability Checker -->
         <div class="rd-card" style="padding:22px 20px;">
           <div style="font-size:0.7rem;font-weight:700;color:var(--c-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">💰 Rent Affordability Checker</div>
           <input type="number" id="affordIncomeInput" placeholder="Your monthly income (KSh)"
-                 style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid var(--c-border); font-family:var(--font-body); font-size:0.85rem; margin-bottom:10px; box-sizing:border-box;">
+                 style="width:100%; padding:10px 14px; border-radius:10px; border:1.5px solid var(--c-border); font-family:var(--font-body); font-size:0.85rem; margin-bottom:10px; box-sizing:border-box; background:var(--c-surface); color:var(--c-text);">
           <button type="button" id="affordCheckBtn"
                   style="width:100%; background:var(--c-primary); color:#fff; border:none; padding:10px; border-radius:10px; font-weight:600; cursor:pointer; font-size:0.85rem;">
             Check Affordability
           </button>
           <div id="affordResult" style="margin-top:12px; font-size:0.82rem;"></div>
         </div>
-
-
-        <!-- Contact card -->
-        <div class="rd-card" style="padding:22px 20px;">
-          <div style="font-size:0.7rem;font-weight:700;color:var(--c-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Caretaker Contact</div>
-          <div style="font-family:var(--font-mono);font-size:1.25rem;font-weight:700;color:var(--c-fg);margin-bottom:16px;">{{ residence.phone_number }}</div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="tel:{{ residence.phone_number }}" class="rd-btn rd-btn-call" style="width:100%;justify-content:center;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.18 6.18l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              Call Caretaker
-            </a>
-            <a href="https://wa.me/254{{ residence.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20your%20residence%20on%20HomeFinder%20KE%20and%20I%20am%20interested." target="_blank" class="rd-btn rd-btn-wa" style="width:100%;justify-content:center;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              WhatsApp
-            </a>
-              {% if request.user.is_authenticated and residence.owner and request.user != residence.owner %}
-                <a href="{% url 'start_conversation' residence.owner.id %}" class="rd-btn rd-btn-call" style="background:#0F766E;">
-                  💬 Message
-                </a>
-              {% endif %}
-            {% if residence.latitude and residence.longitude %}
-            <a href="https://www.google.com/maps?q={{ residence.latitude }},{{ residence.longitude }}" target="_blank" class="rd-btn rd-btn-maps" style="width:100%;justify-content:center;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-              View on Google Maps
-            </a>
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- Vacancy poster -->
-        {% if residence.vacancy_poster %}
-        <div class="rd-card" style="padding:16px;">
-          <div style="font-size:0.7rem;font-weight:700;color:var(--c-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;">Vacancy Poster</div>
-          <div class="rd-poster">
-            <img src="{{ residence.vacancy_poster.url }}" alt="Vacancy Poster">
-          </div>
-        </div>
-        {% endif %}
-
       </div>
     </div>
 
-    <!-- ── Map ───────────────────────────────────────────────── -->
+    <!-- Map -->
     {% if residence.latitude and residence.longitude %}
     <div class="rd-section">
       <div class="rd-section-head">
@@ -830,36 +579,90 @@
     </div>
     {% endif %}
 
-    <!-- ── Related Listings ──────────────────────────────────── -->
-    {% if related_residences %}
+    <!-- Movers & Furniture Vendors -->
     <div class="rd-section">
       <div class="rd-section-head">
-        <h2 class="rd-section-title">You May Also Like</h2>
+        <h2 class="rd-section-title">🚚 Moving & Furnishing Partners</h2>
       </div>
-      <div class="rd-related-grid">
-        {% for related in related_residences %}
-        <a href="{% url 'residence_detail' related.id %}" class="rd-related-card">
-          <div class="rd-related-img">
-            {% if related.front_image %}
-              <img src="{{ related.front_image.url }}" alt="{{ related.name }}">
-            {% else %}
-              <div style="width:100%;height:100%;background:linear-gradient(135deg,#E8F8F6,#D4F0EC);display:flex;align-items:center;justify-content:center;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#5EAFA8" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      
+      {% if movers or vendors %}
+      <div class="rd-card" style="padding:28px;">
+        <div style="display:grid; grid-template-columns:{% if movers and vendors %}1fr 1fr{% else %}1fr{% endif %}; gap:28px;" class="rd-movers-vendors-grid">
+          {% if movers %}
+          <div>
+            <div style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--c-fg); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#CCFBF1; color:var(--c-primary);">🚚</span>
+              Verified Movers
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              {% for mover in movers %}
+              <div style="display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--r); border:1.5px solid var(--c-border);">
+                <div style="width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,var(--c-primary),var(--c-secondary)); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-family:var(--font-mono); font-weight:700; font-size:1.1rem;">
+                  {{ mover.name|slice:":1"|upper }}
+                </div>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700; color:var(--c-fg); margin-bottom:3px;">{{ mover.name }}</div>
+                  <p style="font-size:0.78rem; color:var(--c-subtle); line-height:1.5; margin:0 0 8px;">{{ mover.description|truncatewords:15 }}</p>
+                  <a href="https://wa.me/254{{ mover.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20need%20moving%20services." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="width:100%; justify-content:center;">WhatsApp</a>
+                </div>
               </div>
-            {% endif %}
+              {% endfor %}
+            </div>
           </div>
-          <div class="rd-related-body">
-            <div class="rd-related-loc">{{ related.town }}{% if related.county %}, {{ related.county }}{% endif %}</div>
-            <div class="rd-related-name">{{ related.name }}</div>
-            <div class="rd-related-price">KSh {{ related.rent_price|floatformat:"0" }}<span style="font-size:0.7rem;font-weight:400;color:var(--c-subtle);"> / mo</span></div>
+          {% endif %}
+
+          {% if vendors %}
+          <div>
+            <div style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--c-fg); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:var(--c-gold-bg); color:var(--c-gold);">🛋️</span>
+              Furniture Vendors
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              {% for vendor in vendors %}
+              <div style="display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--r); border:1.5px solid var(--c-border);">
+                <div style="width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,var(--c-gold),#F59E0B); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-family:var(--font-mono); font-weight:700; font-size:1.1rem;">
+                  {{ vendor.name|slice:":1"|upper }}
+                </div>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700; color:var(--c-fg); margin-bottom:3px;">{{ vendor.name }}</div>
+                  <p style="font-size:0.78rem; color:var(--c-subtle); line-height:1.5; margin:0 0 8px;">{{ vendor.description|truncatewords:15 }}</p>
+                  <a href="https://wa.me/254{{ vendor.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20am%20interested%20in%20your%20furniture." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="width:100%; justify-content:center;">WhatsApp</a>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
           </div>
-        </a>
-        {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <!-- FALLBACK IF MOVERS/VENDORS AREN'T SHOWING -->
+      <div class="rd-card" style="text-align:center; padding: 32px;">
+        <p style="color: var(--c-subtle); font-size: 0.9rem;">No verified movers or furniture vendors are currently listed for this area. Check back soon!</p>
+        <p style="color: var(--c-danger); font-size: 0.75rem; margin-top: 8px;">(Dev Note: Ensure 'movers' and 'vendors' are passed in the views.py context)</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- NEW: Trusted Sponsors Section -->
+    <div class="rd-section">
+      <div class="rd-section-head">
+        <h2 class="rd-section-title">🤝 Trusted Partners & Sponsors</h2>
+      </div>
+      <div class="rd-card" style="padding: 24px;">
+        <div class="rd-sponsors-grid">
+          <!-- Replace these with actual sponsor names/logos from your database or hardcoded -->
+          <div class="rd-sponsor-card">Safaricom PLC</div>
+          <div class="rd-sponsor-card">KCB Bank</div>
+          <div class="rd-sponsor-card">Britam Insurance</div>
+          <div class="rd-sponsor-card">Nairobi Water</div>
+          <div class="rd-sponsor-card">Kenya Power</div>
+          <div class="rd-sponsor-card">Your Sponsor Here</div>
+        </div>
       </div>
     </div>
-    {% endif %}
 
-    <!-- ── Reviews ───────────────────────────────────────────── -->
+    <!-- Reviews -->
     <div class="rd-section">
       <div class="rd-section-head">
         <h2 class="rd-section-title">Tenant Reviews</h2>
@@ -897,170 +700,99 @@
           <div style="font-size:2rem;margin-bottom:8px;">💬</div>
           <div style="font-family:var(--font-mono);font-size:0.95rem;font-weight:700;color:var(--c-fg);margin-bottom:6px;">No reviews yet</div>
           <p style="font-size:0.85rem;color:var(--c-subtle);">Be the first to share your experience with this property.</p>
-          {% if user.is_authenticated %}
-          <a href="{% url 'add_review' residence.id %}" class="rd-btn rd-btn-review" style="margin-top:16px;display:inline-flex;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-            Write the First Review
-          </a>
-          {% endif %}
         </div>
         {% endfor %}
       </div>
     </div>
 
-    <!-- ── Movers & Furniture Vendors ──────────────────────────── -->
-    {% if movers or vendors %}
-    <div class="rd-section">
-      <div class="rd-section-head">
-        <h2 class="rd-section-title">🚚 Moving & Furnishing</h2>
-      </div>
-      <div class="rd-card" style="padding:28px;">
-        <div style="display:grid; grid-template-columns:{% if movers and vendors %}1fr 1fr{% else %}1fr{% endif %}; gap:28px;" class="rd-movers-vendors-grid">
-
-          <!-- Left: Movers -->
-          {% if movers %}
-          <div>
-            <div style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--c-fg); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#CCFBF1; color:var(--c-primary);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              </span>
-              Verified Movers
-            </div>
-            <div style="display:flex; flex-direction:column; gap:12px;">
-              {% for mover in movers %}
-              <div style="display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--r); border:1.5px solid var(--c-border); transition:all 180ms var(--ease);"
-                   onmouseover="this.style.boxShadow='var(--shadow)';this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.boxShadow='none';this.style.transform='none'">
-                {% if mover.logo %}
-                <img src="{{ mover.logo.url }}" alt="{{ mover.name }}"
-                     style="width:48px; height:48px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid var(--c-border);">
-                {% else %}
-                <div style="width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,var(--c-primary),var(--c-secondary)); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-family:var(--font-mono); font-weight:700; font-size:1.1rem;">
-                  {{ mover.name|slice:":1"|upper }}
-                </div>
-                {% endif %}
-                <div style="flex:1; min-width:0;">
-                  <div style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700; color:var(--c-fg); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    {{ mover.name }}
-                    {% if mover.is_major_sponsor %}
-                    <span style="background:var(--c-gold-bg); color:var(--c-gold); font-size:0.62rem; font-weight:700; padding:2px 7px; border-radius:999px; margin-left:6px; text-transform:uppercase; letter-spacing:0.04em; vertical-align:middle;">⭐ Sponsor</span>
-                    {% endif %}
-                  </div>
-                  <p style="font-size:0.78rem; color:var(--c-subtle); line-height:1.5; margin:0 0 8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ mover.description|truncatewords:18 }}</p>
-                  <div style="font-size:0.72rem; color:var(--c-subtle); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {{ residence.county }}
-                  </div>
-                  <a href="https://wa.me/254{{ mover.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20need%20moving%20services." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="width:100%; justify-content:center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    WhatsApp
-                  </a>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          <!-- Right: Furniture Vendors -->
-          {% if vendors %}
-          <div>
-            <div style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--c-fg); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:var(--c-gold-bg); color:var(--c-gold);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3z"/><path d="M4 18v2"/><path d="M20 18v2"/></svg>
-              </span>
-              Furniture Vendors
-            </div>
-            <div style="display:flex; flex-direction:column; gap:12px;">
-              {% for vendor in vendors %}
-              <div style="display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--r); border:1.5px solid var(--c-border); transition:all 180ms var(--ease);"
-                   onmouseover="this.style.boxShadow='var(--shadow)';this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.boxShadow='none';this.style.transform='none'">
-                {% if vendor.image %}
-                <img src="{{ vendor.image.url }}" alt="{{ vendor.name }}"
-                     style="width:48px; height:48px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid var(--c-border);">
-                {% else %}
-                <div style="width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,var(--c-gold),#F59E0B); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-family:var(--font-mono); font-weight:700; font-size:1.1rem;">
-                  {{ vendor.name|slice:":1"|upper }}
-                </div>
-                {% endif %}
-                <div style="flex:1; min-width:0;">
-                  <div style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700; color:var(--c-fg); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    {{ vendor.name }}
-                    {% if vendor.is_major_sponsor %}
-                    <span style="background:var(--c-gold-bg); color:var(--c-gold); font-size:0.62rem; font-weight:700; padding:2px 7px; border-radius:999px; margin-left:6px; text-transform:uppercase; letter-spacing:0.04em; vertical-align:middle;">⭐ Sponsor</span>
-                    {% endif %}
-                  </div>
-                  <p style="font-size:0.78rem; color:var(--c-subtle); line-height:1.5; margin:0 0 8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ vendor.description|truncatewords:18 }}</p>
-                  <div style="font-size:0.72rem; color:var(--c-subtle); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {{ vendor.location }}
-                  </div>
-                  <a href="https://wa.me/254{{ vendor.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20am%20interested%20in%20your%20furniture." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="width:100%; justify-content:center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    WhatsApp
-                  </a>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-        </div>
-      </div>
+    <div style="display:flex; gap:12px; margin-top: 36px; flex-wrap: wrap;">
+      <a href="{% url 'generate_lease' residence.id %}" class="rd-btn rd-btn-ghost">📑 Generate Lease Agreement</a>
+      <a href="{% url 'download_residence_pdf' residence.id %}" class="rd-btn rd-btn-ghost">📥 Download PDF</a>
     </div>
-    {% endif %}
-
-    <a href="{% url 'generate_lease' residence.id %}" class="rd-btn rd-btn-ghost">
-  📑 Generate Lease Agreement
-  </a>
-  <a href="{% url 'download_residence_pdf' residence.id %}" class="rd-btn rd-btn-ghost">
-  📥 Download PDF
-  </a>
 
   </div><!-- /.rd-inner -->
 </div><!-- /.rd-wrap -->
-<!-- ── Commute Time Estimator ────────────────────────────── -->
-    {% if residence.latitude and residence.longitude %}
-    <div class="rd-section">
-      <div class="rd-section-head">
-        <h2 class="rd-section-title">📍 Commute Time Estimator</h2>
-      </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
-        <input type="text" id="commuteDestInput" placeholder="e.g. Nairobi CBD, Westlands, my office..."
-               style="flex:1; min-width:200px; padding:10px 14px; border-radius:10px; border:1.5px solid var(--c-border); font-family:var(--font-body); font-size:0.85rem;">
-        <button type="button" id="commuteEstimateBtn"
-                style="background:var(--c-primary); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:600; cursor:pointer; font-size:0.85rem;">
-          Estimate
-        </button>
-      </div>
-      <div id="commuteResult" style="font-size:0.88rem; color:var(--c-text);"></div>
-    </div>
-    {% endif %}
 
 <!-- ── Scripts ──────────────────────────────────────────────── -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
-{% if residence.latitude and residence.longitude %}
 <script>
+  // 1. PHONE REVEAL LOGIC
+  function revealPhone(realNumber) {
+    document.getElementById('maskedPhone').textContent = realNumber;
+    // Optional: You can also hide the reveal button after clicking
+    event.target.style.display = 'none';
+  }
+
+  // 2. FIXED SHARE MENU LOGIC
+  function toggleShareMenu(e) {
+    e.stopPropagation();
+    document.getElementById('shareMenu').classList.toggle('open');
+  }
+  function copyShareLink() {
+    navigator.clipboard.writeText("{{ share_url|escapejs }}").then(() => {
+      alert("Link copied to clipboard!");
+      document.getElementById('shareMenu').classList.remove('open');
+    });
+  }
+  // Close share menu when clicking outside
+  document.addEventListener('click', function(e) {
+    const menu = document.getElementById('shareMenu');
+    const btn = document.getElementById('shareToggleBtn');
+    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+      menu.classList.remove('open');
+    }
+  });
+
+  // 3. LIGHTBOX GALLERY LOGIC
+  let currentImageIndex = 0;
+  const galleryImages = [
+    {% if residence.front_image %}"{{ residence.front_image.url }}",{% endif %}
+    {% for photo in residence.photos.all %}"{{ photo.image.url }}"{% if not forloop.last %},{% endif %}{% endfor %}
+  ];
+
+  function setMainImg(url, thumbEl, index) {
+    document.getElementById('gallery-main-img').src = url;
+    document.querySelectorAll('.rd-thumb').forEach(t => t.classList.remove('active'));
+    thumbEl.classList.add('active');
+    currentImageIndex = index;
+  }
+
+  function openLightbox(index) {
+    currentImageIndex = index;
+    document.getElementById('lightbox-img').src = galleryImages[currentImageIndex];
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+  }
+
+  function closeLightbox(e) {
+    if (e.target.id === 'lightbox' || e.target.classList.contains('rd-lightbox-close')) {
+      document.getElementById('lightbox').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function changeLightboxImage(direction, e) {
+    e.stopPropagation();
+    currentImageIndex += direction;
+    if (currentImageIndex < 0) currentImageIndex = galleryImages.length - 1;
+    if (currentImageIndex >= galleryImages.length) currentImageIndex = 0;
+    document.getElementById('lightbox-img').src = galleryImages[currentImageIndex];
+  }
+
+  // 4. AFFORDABILITY CHECKER
   const affordBtn = document.getElementById('affordCheckBtn');
   if (affordBtn) {
     const rentPrice = {{ residence.rent_price|default:0 }};
-
     affordBtn.addEventListener('click', () => {
       const incomeInput = document.getElementById('affordIncomeInput');
       const resultEl = document.getElementById('affordResult');
       const income = parseFloat(incomeInput.value);
-
       if (!income || income <= 0) {
         resultEl.innerHTML = '<span style="color:var(--c-danger);">Please enter your monthly income.</span>';
         return;
       }
-
       const percentage = (rentPrice / income) * 100;
       let message, color, bg;
-
       if (percentage <= 30) {
         message = `✅ Comfortable — this rent is ${percentage.toFixed(0)}% of your income (recommended: under 30%).`;
         color = 'var(--c-green-text)'; bg = 'var(--c-green-bg)';
@@ -1071,155 +803,24 @@
         message = `❌ This may stretch your budget — rent is ${percentage.toFixed(0)}% of your income (recommended: under 30%).`;
         color = 'var(--c-danger)'; bg = '#FEE2E2';
       }
-
       resultEl.innerHTML = `<div style="padding:10px 12px; border-radius:8px; background:${bg}; color:${color}; font-weight:600;">${message}</div>`;
     });
   }
 
-
+  // 5. MAP INITIALIZATION
+  {% if residence.latitude and residence.longitude %}
   const lat = parseFloat("{{ residence.latitude|default:'0' }}");
   const lng = parseFloat("{{ residence.longitude|default:'0' }}");
-
   const map = L.map('rd-map', { scrollWheelZoom: false }).setView([lat, lng], 16);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
-
   const icon = L.divIcon({
     className: '',
-    html: `<div style="
-      background:#0F766E;color:#fff;
-      width:36px;height:36px;border-radius:50% 50% 50% 0;
-      transform:rotate(-45deg);
-      display:flex;align-items:center;justify-content:center;
-      box-shadow:0 4px 12px rgba(15,118,110,0.4);
-      border:2px solid #fff;
-    "><span style="transform:rotate(45deg);font-size:14px;">🏠</span></div>`,
+    html: `<div style="background:#0F766E;color:#fff;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(15,118,110,0.4);border:2px solid #fff;"><span style="transform:rotate(45deg);font-size:14px;">🏠</span></div>`,
     iconSize: [36, 36], iconAnchor: [18, 36], popupAnchor: [0, -40],
   });
-
-  L.marker([lat, lng], { icon })
-    .addTo(map)
-    .bindPopup(`<strong style="font-family:monospace;">{{ residence.name|escapejs }}</strong><br><small>{{ residence.town|escapejs }}</small>`)
-    .openPopup();
-</script>
-{% endif %}
-
-<script>
-  const commuteBtn = document.getElementById('commuteEstimateBtn');
-  if (commuteBtn) {
-    commuteBtn.addEventListener('click', async () => {
-      const destInput = document.getElementById('commuteDestInput');
-      const resultEl = document.getElementById('commuteResult');
-      const destination = destInput.value.trim();
-
-      if (!destination) {
-        resultEl.innerHTML = '<span style="color:var(--c-danger);">Please enter a destination.</span>';
-        return;
-      }
-
-      resultEl.textContent = 'Calculating...';
-      commuteBtn.disabled = true;
-
-      try {
-        // Step 1: geocode the destination text into coordinates (free, no API key)
-        const geoRes = await fetch(
-          `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(destination + ', Kenya')}`
-        );
-        const geoData = await geoRes.json();
-
-        if (!geoData.length) {
-          resultEl.innerHTML = '<span style="color:var(--c-danger);">Could not find that location. Try being more specific.</span>';
-          commuteBtn.disabled = false;
-          return;
-        }
-
-        const destLat = parseFloat(geoData[0].lat);
-        const destLng = parseFloat(geoData[0].lon);
-        const originLat = {{ residence.latitude }};
-        const originLng = {{ residence.longitude }};
-
-        // Step 2: get driving route duration (free, no API key)
-        const routeRes = await fetch(
-          `https://router.project-osrm.org/route/v1/driving/${originLng},${originLat};${destLng},${destLat}?overview=false`
-        );
-        const routeData = await routeRes.json();
-
-        if (routeData.code !== 'Ok' || !routeData.routes.length) {
-          resultEl.innerHTML = '<span style="color:var(--c-danger);">Could not calculate a route to that destination.</span>';
-          commuteBtn.disabled = false;
-          return;
-        }
-
-        const minutes = Math.round(routeData.routes[0].duration / 60);
-        const km = (routeData.routes[0].distance / 1000).toFixed(1);
-
-        resultEl.innerHTML = `🚗 Approximately <strong>${minutes} minutes</strong> (${km} km) driving to <strong>${geoData[0].display_name.split(',')[0]}</strong>.`;
-      } catch (err) {
-        resultEl.innerHTML = '<span style="color:var(--c-danger);">Something went wrong. Please try again.</span>';
-      }
-
-      commuteBtn.disabled = false;
-    });
-  }
-
-
-  function copyShareLink() {
-    navigator.clipboard.writeText("{{ share_url|escapejs }}").then(() => {
-      alert("Link copied to clipboard!");
-    });
-  }
-
-  document.addEventListener('click', function(e) {
-    const menu = document.getElementById('shareMenu');
-    const btn = document.getElementById('shareToggleBtn');
-    if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
-      menu.classList.remove('open');
-    }
-  });
-  const mainImg = document.getElementById('gallery-main-img');
-  if (mainImg) mainImg.style.transition = 'opacity 150ms ease';
-
-  // ── Swipe photos ──────────────────────────────────────────
-  const thumbs = Array.from(document.querySelectorAll('.rd-thumb'));
-  const dotsWrap = document.getElementById('galleryDots');
-
-  if (dotsWrap && thumbs.length > 1) {
-    thumbs.forEach((t, i) => {
-      const dot = document.createElement('span');
-      if (t.classList.contains('active')) dot.classList.add('active');
-      dotsWrap.appendChild(dot);
-    });
-  }
-
-  function updateDots() {
-    if (!dotsWrap) return;
-    const idx = thumbs.findIndex(t => t.classList.contains('active'));
-    dotsWrap.querySelectorAll('span').forEach((d, i) => {
-      d.classList.toggle('active', i === idx);
-    });
-  }
-
-  const galleryEl = document.getElementById('gallery-main');
-  if (galleryEl && thumbs.length > 1) {
-    let touchStartX = 0;
-
-    galleryEl.addEventListener('touchstart', e => {
-      touchStartX = e.touches[0].clientX;
-    }, { passive: true });
-
-    galleryEl.addEventListener('touchend', e => {
-      const diff = e.changedTouches[0].clientX - touchStartX;
-      if (Math.abs(diff) < 40) return;
-      const currentIdx = thumbs.findIndex(t => t.classList.contains('active'));
-      let nextIdx;
-      if (diff < 0) {
-        nextIdx = (currentIdx + 1) % thumbs.length;
-      } else {
-        nextIdx = (currentIdx - 1 + thumbs.length) % thumbs.length;
-      }
-      thumbs[nextIdx].click();
-    }, { passive: true });
-  }
+  L.marker([lat, lng], { icon }).addTo(map).bindPopup(`<strong style="font-family:monospace;">{{ residence.name|escapejs }}</strong><br><small>{{ residence.town|escapejs }}</small>`).openPopup();
+  {% endif %}
 </script>
 {% endblock %}
