@@ -118,9 +118,74 @@
     max-width: 460px;
   }
 
+  /* ── Step progress bar ───────────────────────────────────────── */
+  .ar-progress-wrap {
+    max-width: 760px;
+    margin: -20px auto 0;
+    position: relative;
+    z-index: 10;
+    padding: 0 24px;
+  }
+  .ar-progress-track {
+    background: var(--c-surface);
+    border-radius: var(--r-full);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(153,246,228,0.4);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+  }
+  .ar-progress-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .ar-progress-dot {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--c-muted);
+    color: var(--c-subtle);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 200ms var(--ease);
+  }
+  .ar-progress-step.is-active .ar-progress-dot {
+    background: var(--c-primary);
+    color: #fff;
+  }
+  .ar-progress-step.is-done .ar-progress-dot {
+    background: #CCFBF1;
+    color: var(--c-primary);
+  }
+  .ar-progress-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--c-subtle);
+    white-space: nowrap;
+    display: none;
+  }
+  .ar-progress-step.is-active .ar-progress-label {
+    color: var(--c-fg);
+    display: inline;
+  }
+  .ar-progress-line {
+    width: 16px;
+    height: 2px;
+    background: var(--c-border);
+    flex-shrink: 0;
+  }
+
   /* ── Form Layout ──────────────────────────────────────────────── */
   .ar-section {
-    margin-top: -28px;
+    margin-top: 20px;
     position: relative;
     z-index: 10;
   }
@@ -132,6 +197,14 @@
     border: 1px solid rgba(153,246,228,0.4);
     margin-bottom: 20px;
     overflow: hidden;
+  }
+
+  /* Only the active step is visible */
+  .ar-step { display: none; }
+  .ar-step.is-active { display: block; animation: arFadeIn 220ms var(--ease); }
+  @keyframes arFadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   .ar-card-head {
@@ -306,7 +379,7 @@
     color: var(--c-danger);
     border-radius: var(--r-lg);
     padding: 16px 20px;
-    margin: -8px 24px 24px;
+    margin: 0 0 20px;
     font-size: 0.85rem;
     line-height: 1.6;
   }
@@ -316,19 +389,22 @@
     margin-top: 5px;
   }
 
-  /* ── Submit bar ───────────────────────────────────────────────── */
-  .ar-submit-bar {
+  /* ── Step nav bar ─────────────────────────────────────────────── */
+  .ar-step-nav {
     display: flex;
-    justify-content: flex-end;
-    margin-top: 8px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 28px;
+    border-top: 1.5px solid var(--c-border);
+    background: var(--c-bg);
   }
   .ar-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 13px 28px;
+    padding: 12px 26px;
     border-radius: var(--r);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 600;
     font-family: var(--font-body);
     border: none;
@@ -342,12 +418,30 @@
     transform: translateY(-1px);
     box-shadow: var(--shadow);
   }
+  .ar-btn-back {
+    background: transparent;
+    color: var(--c-subtle);
+    border: 1.5px solid var(--c-border);
+  }
+  .ar-btn-back:hover {
+    background: var(--c-muted);
+    color: var(--c-fg);
+    transform: none;
+    box-shadow: none;
+  }
+  .ar-step-count {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--c-subtle);
+  }
 
   @media (max-width: 600px) {
     .ar-card-body { padding: 20px 20px 24px; }
     .ar-card-head { padding: 18px 20px; }
     .ar-row, .ar-toggle-grid { grid-template-columns: 1fr; }
     .ar-hero { padding: 40px 20px 48px; }
+    .ar-step-nav { padding: 16px 20px; flex-wrap: wrap; gap: 10px; }
+    .ar-progress-label { display: none !important; }
   }
 </style>
 
@@ -358,14 +452,59 @@
     <div class="ar-hero-inner">
       <div class="ar-hero-eyebrow">New Listing</div>
       <h1 class="ar-hero-title">Add a Residence</h1>
-      <p class="ar-hero-sub">Help someone find a home by contributing residence information.</p>
+      <p class="ar-hero-sub">Help someone find a home by contributing residence information. We'll walk you through it step by step.</p>
+    </div>
+  </div>
+
+  <!-- Step progress -->
+  <div class="ar-progress-wrap">
+    <div class="ar-progress-track" id="arProgressTrack">
+      <div class="ar-progress-step is-active" data-step-indicator="1">
+        <div class="ar-progress-dot">1</div>
+        <span class="ar-progress-label">Basic Info</span>
+      </div>
+      <div class="ar-progress-line"></div>
+      <div class="ar-progress-step" data-step-indicator="2">
+        <div class="ar-progress-dot">2</div>
+        <span class="ar-progress-label">Location</span>
+      </div>
+      <div class="ar-progress-line"></div>
+      <div class="ar-progress-step" data-step-indicator="3">
+        <div class="ar-progress-dot">3</div>
+        <span class="ar-progress-label">Nearby Places</span>
+      </div>
+      <div class="ar-progress-line"></div>
+      <div class="ar-progress-step" data-step-indicator="4">
+        <div class="ar-progress-dot">4</div>
+        <span class="ar-progress-label">Contact &amp; Rent</span>
+      </div>
+      <div class="ar-progress-line"></div>
+      <div class="ar-progress-step" data-step-indicator="5">
+        <div class="ar-progress-dot">5</div>
+        <span class="ar-progress-label">GPS</span>
+      </div>
+      <div class="ar-progress-line"></div>
+      <div class="ar-progress-step" data-step-indicator="6">
+        <div class="ar-progress-dot">6</div>
+        <span class="ar-progress-label">Utilities</span>
+      </div>
+      <div class="ar-progress-line"></div>
+      <div class="ar-progress-step" data-step-indicator="7">
+        <div class="ar-progress-dot">7</div>
+        <span class="ar-progress-label">Security</span>
+      </div>
+      <div class="ar-progress-line"></div>
+      <div class="ar-progress-step" data-step-indicator="8">
+        <div class="ar-progress-dot">8</div>
+        <span class="ar-progress-label">Photos</span>
+      </div>
     </div>
   </div>
 
   <div class="ar-inner">
     <div class="ar-section">
 
-      <form method="POST" enctype="multipart/form-data">
+      <form method="POST" enctype="multipart/form-data" id="arForm">
         {% csrf_token %}
 
         {% if form.errors %}
@@ -375,7 +514,7 @@
         {% endif %}
 
         <!-- 1. Basic Information -->
-        <div class="ar-card">
+        <div class="ar-card ar-step is-active" data-step="1">
           <div class="ar-card-head">
             <div class="ar-card-num">1</div>
             <div class="ar-card-title">Basic Information</div>
@@ -399,10 +538,14 @@
               </div>
             </div>
           </div>
+          <div class="ar-step-nav">
+            <span class="ar-step-count">Step 1 of 8</span>
+            <button type="button" class="ar-btn ar-next-btn">Next →</button>
+          </div>
         </div>
 
         <!-- 2. Location Information -->
-        <div class="ar-card">
+        <div class="ar-card ar-step" data-step="2">
           <div class="ar-card-head">
             <div class="ar-card-num">2</div>
             <div class="ar-card-title">Location Information</div>
@@ -427,10 +570,15 @@
               {{ form.landmark }}
             </div>
           </div>
+          <div class="ar-step-nav">
+            <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
+            <span class="ar-step-count">Step 2 of 8</span>
+            <button type="button" class="ar-btn ar-next-btn">Next →</button>
+          </div>
         </div>
 
         <!-- 3. Nearby Places -->
-        <div class="ar-card">
+        <div class="ar-card ar-step" data-step="3">
           <div class="ar-card-head">
             <div class="ar-card-num">3</div>
             <div class="ar-card-title">Nearby Places</div>
@@ -451,10 +599,15 @@
               </div>
             </div>
           </div>
+          <div class="ar-step-nav">
+            <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
+            <span class="ar-step-count">Step 3 of 8</span>
+            <button type="button" class="ar-btn ar-next-btn">Next →</button>
+          </div>
         </div>
 
         <!-- 4. Contact, Rent & Deposit -->
-        <div class="ar-card">
+        <div class="ar-card ar-step" data-step="4">
           <div class="ar-card-head">
             <div class="ar-card-num">4</div>
             <div class="ar-card-title">Contact, Rent &amp; Deposit</div>
@@ -493,10 +646,15 @@
               {% endif %}
             </div>
           </div>
+          <div class="ar-step-nav">
+            <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
+            <span class="ar-step-count">Step 4 of 8</span>
+            <button type="button" class="ar-btn ar-next-btn">Next →</button>
+          </div>
         </div>
 
         <!-- 5. GPS Coordinates -->
-        <div class="ar-card">
+        <div class="ar-card ar-step" data-step="5">
           <div class="ar-card-head">
             <div class="ar-card-num">5</div>
             <div class="ar-card-title">GPS Coordinates</div>
@@ -512,11 +670,17 @@
                 {{ form.longitude }}
               </div>
             </div>
+            <div class="ar-hint">These are usually pre-filled automatically once you allow location access — you can still edit them if needed.</div>
+          </div>
+          <div class="ar-step-nav">
+            <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
+            <span class="ar-step-count">Step 5 of 8</span>
+            <button type="button" class="ar-btn ar-next-btn">Next →</button>
           </div>
         </div>
 
         <!-- 6. Utilities -->
-        <div class="ar-card">
+        <div class="ar-card ar-step" data-step="6">
           <div class="ar-card-head">
             <div class="ar-card-num">6</div>
             <div class="ar-card-title">Utilities</div>
@@ -533,10 +697,15 @@
               </div>
             </div>
           </div>
+          <div class="ar-step-nav">
+            <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
+            <span class="ar-step-count">Step 6 of 8</span>
+            <button type="button" class="ar-btn ar-next-btn">Next →</button>
+          </div>
         </div>
 
         <!-- 7. Security -->
-        <div class="ar-card">
+        <div class="ar-card ar-step" data-step="7">
           <div class="ar-card-head">
             <div class="ar-card-num">7</div>
             <div class="ar-card-title">Security</div>
@@ -557,10 +726,15 @@
               </div>
             </div>
           </div>
+          <div class="ar-step-nav">
+            <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
+            <span class="ar-step-count">Step 7 of 8</span>
+            <button type="button" class="ar-btn ar-next-btn">Next →</button>
+          </div>
         </div>
 
         <!-- 8. Residence Photos -->
-        <div class="ar-card">
+        <div class="ar-card ar-step" data-step="8">
           <div class="ar-card-head">
             <div class="ar-card-num">8</div>
             <div class="ar-card-title">Residence Photos</div>
@@ -584,16 +758,18 @@
               <div class="ar-field-error">{{ form.non_field_errors }}</div>
             {% endif %}
           </div>
+          <div class="ar-step-nav">
+            <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
+            <span class="ar-step-count">Step 8 of 8</span>
+            <button type="submit" class="ar-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+              Submit Residence
+            </button>
+          </div>
         </div>
+
         <input type="hidden" id="submission_latitude" name="submission_latitude">
         <input type="hidden" id="submission_longitude" name="submission_longitude">
-
-        <div class="ar-submit-bar">
-          <button type="submit" class="ar-btn">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
-            Submit Residence
-          </button>
-        </div>
 
       </form>
 
@@ -647,5 +823,63 @@ document.getElementById('aiFixDescBtn')?.addEventListener('click', async functio
     status.textContent = 'Connection error.';
   }
 });
+</script>
+
+<!-- ── Step wizard navigation ─────────────────────────────────── -->
+<script>
+(function() {
+  const steps = Array.from(document.querySelectorAll('.ar-step'));
+  const progressSteps = Array.from(document.querySelectorAll('.ar-progress-step'));
+  let currentStep = 1;
+
+  function showStep(n) {
+    steps.forEach(step => {
+      step.classList.toggle('is-active', parseInt(step.dataset.step) === n);
+    });
+    progressSteps.forEach(p => {
+      const stepNum = parseInt(p.dataset.stepIndicator);
+      p.classList.toggle('is-active', stepNum === n);
+      p.classList.toggle('is-done', stepNum < n);
+    });
+    currentStep = n;
+    window.scrollTo({ top: document.querySelector('.ar-progress-wrap').offsetTop - 20, behavior: 'smooth' });
+  }
+
+  function validateStep(stepEl) {
+    const inputs = stepEl.querySelectorAll('input, textarea, select');
+    for (const input of inputs) {
+      if (!input.checkValidity()) {
+        input.reportValidity();
+        return false;
+      }
+    }
+    return true;
+  }
+
+  document.querySelectorAll('.ar-next-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const activeStep = document.querySelector('.ar-step.is-active');
+      if (!validateStep(activeStep)) return;
+      const stepNum = parseInt(activeStep.dataset.step);
+      if (stepNum < steps.length) showStep(stepNum + 1);
+    });
+  });
+
+  document.querySelectorAll('.ar-back-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const activeStep = document.querySelector('.ar-step.is-active');
+      const stepNum = parseInt(activeStep.dataset.step);
+      if (stepNum > 1) showStep(stepNum - 1);
+    });
+  });
+
+  progressSteps.forEach(p => {
+    p.addEventListener('click', function() {
+      const stepNum = parseInt(p.dataset.stepIndicator);
+      showStep(stepNum);
+    });
+    p.style.cursor = 'pointer';
+  });
+})();
 </script>
 {% endblock %}
