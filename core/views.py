@@ -341,6 +341,7 @@ def residence_detail(request, pk):
     }
     return render(request, 'core/residence_detail.html', context)
 
+@login_required
 def check_submission_rate_limit(request, action_name, limit=5, window_seconds=3600):
     from django.core.cache import cache
     ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR')
@@ -608,7 +609,6 @@ def approve_residence(request, pk):
     return redirect('admin_dashboard')
 
 
-@staff_or_help_admin_required
 def check_not_suspended(request):
     """Returns True if the user is allowed to act, False (with message set) if suspended."""
     if request.user.is_authenticated and getattr(request.user.profile, 'is_suspended', False):
