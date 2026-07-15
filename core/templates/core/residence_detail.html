@@ -477,6 +477,40 @@
   }
   .rd-extra-image img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+  /* ── Lightbox ────────────────────────────────────────────────── */
+  .rd-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(4,22,20,0.92);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+  }
+  .rd-lightbox.open { display: flex; }
+  .rd-lightbox img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-lg);
+    object-fit: contain;
+  }
+  .rd-lightbox-close {
+    position: absolute;
+    top: 20px; right: 24px;
+    background: rgba(255,255,255,0.14);
+    border: 1.5px solid rgba(255,255,255,0.3);
+    color: #fff;
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .rd-lightbox-close:hover { background: rgba(255,255,255,0.28); }
+
   /* ── Info grid ───────────────────────────────────────────────── */
   .rd-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .rd-info-row {
@@ -874,7 +908,7 @@
       </div>
       <div class="rd-extra-images">
         {% for photo in residence.photos.all %}
-        <button type="button" class="rd-extra-image" onclick="setMainImg('{{ photo.image.url }}', document.querySelector('.rd-hero-thumb.active'))" aria-label="Show additional image at top">
+        <button type="button" class="rd-extra-image" onclick="openLightbox('{{ photo.image.url }}')" aria-label="View full size image">
           <img src="{{ photo.image.url }}" alt="{{ photo.caption|default:'Gallery photo' }}">
         </button>
         {% endfor %}
@@ -1002,29 +1036,6 @@
             Check Affordability
           </button>
           <div id="affordResult" style="margin-top:12px; font-size:0.82rem;"></div>
-        </div>
-
-
-        <!-- Contact card -->
-        <div class="rd-card" style="padding:22px 20px;">
-          <div style="font-size:0.7rem;font-weight:700;color:var(--c-subtle);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;">Caretaker Contact</div>
-          <div style="font-family:var(--font-mono);font-size:1rem;font-weight:700;color:var(--c-fg);margin-bottom:16px;">Use a secure contact link below</div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <a href="https://wa.me/{{ residence.whatsapp_number }}?text=Hello,%20I%20found%20your%20residence%20on%20HomeFinder%20KE%20and%20I%20am%20interested." target="_blank" rel="noopener noreferrer" class="rd-btn rd-btn-wa" style="width:100%;justify-content:center;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-              WhatsApp
-            </a>
-            {% if request.user.is_authenticated and residence.owner and request.user != residence.owner %}
-            <a href="{% url 'start_conversation' residence.owner.id %}" class="rd-btn rd-btn-call" style="width:100%;justify-content:center;">Message</a>
-            {% endif %}
-            <button type="button" class="rd-btn rd-btn-ghost" onclick="shareNative()" style="width:100%;justify-content:center;">Share</button>
-            {% if residence.latitude and residence.longitude %}
-            <a href="https://www.google.com/maps?q={{ residence.latitude }},{{ residence.longitude }}" target="_blank" class="rd-btn rd-btn-maps" style="width:100%;justify-content:center;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-              View on Google Maps
-            </a>
-            {% endif %}
-          </div>
         </div>
         <!-- Vacancy poster -->
         {% if residence.vacancy_poster %}
@@ -1232,12 +1243,14 @@
     </div>
     {% endif %}
 
-    <a href="{% url 'generate_lease' residence.id %}" class="rd-btn rd-btn-ghost">
-  📑 Generate Lease Agreement
-  </a>
-  <a href="{% url 'download_residence_pdf' residence.id %}" class="rd-btn rd-btn-ghost">
-  📥 Download PDF
-  </a>
+    <div class="rd-section" style="display:flex; gap:12px; flex-wrap:wrap;">
+      <a href="{% url 'generate_lease' residence.id %}" class="rd-btn rd-btn-teal">
+        📑 Generate Lease Agreement
+      </a>
+      <a href="{% url 'download_residence_pdf' residence.id %}" class="rd-btn rd-btn-maps">
+        📥 Download PDF
+      </a>
+    </div>
 
     {% if residence.latitude and residence.longitude %}
     <div class="rd-section">
@@ -1257,6 +1270,10 @@
     {% endif %}
 
   </div><!-- /.rd-inner -->
+  <div class="rd-lightbox" id="rdLightbox" onclick="if(event.target===this) closeLightbox()">
+    <button type="button" class="rd-lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+    <img id="rdLightboxImg" src="" alt="Full size photo">
+  </div>
 </div><!-- /.rd-wrap -->
 
 <!-- ── Scripts ──────────────────────────────────────────────── -->
@@ -1298,6 +1315,16 @@
 
 {% if residence.latitude and residence.longitude %}
 <script>
+  function openLightbox(url) {
+    document.getElementById('rdLightboxImg').src = url;
+    document.getElementById('rdLightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    document.getElementById('rdLightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
   const lat = parseFloat("{{ residence.latitude|default:'0' }}");
   const lng = parseFloat("{{ residence.longitude|default:'0' }}");
 
@@ -1321,7 +1348,16 @@
 
   L.marker([lat, lng], { icon })
     .addTo(map)
-    .bindPopup(`<strong style="font-family:monospace;">{{ residence.name|escapejs }}</strong><br><small>{{ residence.town|escapejs }}</small>`)
+    .bindPopup(`
+      <div style="font-family:var(--font-body); text-align:center; min-width:160px;">
+        <strong style="font-family:monospace; font-size:0.85rem;">{{ residence.name|escapejs }}</strong><br>
+        <small>{{ residence.town|escapejs }}</small><br>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" rel="noopener noreferrer"
+           style="display:inline-block;margin-top:8px;padding:6px 14px;background:#0F766E;color:#fff;border-radius:8px;font-size:0.75rem;font-weight:600;text-decoration:none;">
+          Get Directions →
+        </a>
+      </div>
+    `)
     .openPopup();
 </script>
 {% endif %}
