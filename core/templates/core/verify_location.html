@@ -63,6 +63,29 @@
         {{ distance_km }} km apart
         {% if distance_km > 5 %} — worth a closer look{% else %} — looks consistent{% endif %}
       </div>
+      {% if geocode_result %}
+    <div class="am-section">
+      <h2>Does the Pin Match the Stated Town/County?</h2>
+      <p class="am-sub">Cross-checking the claimed GPS pin against where "{{ residence.town }}, {{ residence.county }}" actually is on the map (OpenStreetMap).</p>
+      <div class="am-item {% if town_county_distance_km is None %}am-unknown{% elif town_county_distance_km > 20 %}am-warn{% else %}am-ok{% endif %}">
+        <div class="am-badge">
+          {% if town_county_distance_km is None %}?{% elif town_county_distance_km > 20 %}!{% else %}✓{% endif %}
+        </div>
+        <div class="am-item-body">
+          <strong>{{ geocode_result.display_name|truncatechars:80 }}</strong>
+          <span>
+            {% if town_county_distance_km is None %}
+              No claimed GPS pin to compare against.
+            {% elif town_county_distance_km > 20 %}
+              The claimed pin is {{ town_county_distance_km }} km from where "{{ residence.town }}" actually is — worth checking.
+            {% else %}
+              The claimed pin is {{ town_county_distance_km }} km from "{{ residence.town }}" — consistent.
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+  {% endif %}
     {% endif %}
   {% else %}
     <div class="vl-missing">This listing has no GPS snapshot on file (submitted before this feature was added, or the owner denied location permission).</div>

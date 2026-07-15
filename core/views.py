@@ -1073,29 +1073,66 @@ def verify_location(request, pk):
     residence = get_object_or_404(Residence, pk=pk)
 
     from .amenity_check import check_nearby_amenities
+    import requests
+    from math import radians, sin, cos, sqrt, atan2
 
+    def haversine_km(lat1, lon1, lat2, lon2):
+        lat1, lon1, lat2, lon2 = map(radians, [float(lat1), float(lon1), float(lat2), float(lon2)])
+        dlat, dlon = lat2 - lat1, lon2 - lon1
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        return round(6371 * 2 * atan2(sqrt(a), sqrt(1 - a)), 2)
+
+    # ── Geocode the claimed town/county to find where it should actually be ──
+    geocode_result = None
+    town_county_distance_km = None
+    if residence.town or residence.county:
+        try:
+            query = f"{residence.town}, {residence.county}, Kenya"
+            resp = requests.get(
+                'https://nominatim.openstreetmap.org/search',
+                params={'q': query, 'format': 'json', 'limit': 1},
+                headers={'User-Agent': 'HomeFinderKE/1.0 (homefinder.ke.help@gmail.com)'},
+                timeout=10,
+            )
+            data = resp.json()
+            if data:
+                geocode_result = {
+                    'lat': float(data[0]['lat']),
+                    'lng': float(data[0]['lon']),
+                    'display_name': data[0].get('display_name', query),
+                }
+                if residence.latitude and residence.longitude:
+                    town_county_distance_km = haversine_km(
+                        residence.latitude, residence.longitude,
+                        geocode_result['lat'], geocode_result['lng']
+                    )
+        except Exception as e:
+            print("GEOCODE CHECK ERROR:", e)
+
+    # ── GPS-snapshot vs claimed (existing check) ──
+    distance_km = None
+    if (residence.latitude and residence.longitude and
+            residence.submission_latitude and residence.submission_longitude):
+        distance_km = haversine_km(
+            residence.latitude, residence.longitude,
+            residence.submission_latitude, residence.submission_longitude
+        )
+
+    # ── Amenities checked against the CLAIMED coordinates specifically ──
     amenity_result = check_nearby_amenities(
-        residence.submission_latitude or residence.latitude,
-        residence.submission_longitude or residence.longitude,
+        residence.latitude,
+        residence.longitude,
         residence.nearby_school,
         residence.nearby_hospital,
         residence.nearest_stage,
     )
 
-    distance_km = None
-    if (residence.latitude and residence.longitude and
-            residence.submission_latitude and residence.submission_longitude):
-        from math import radians, sin, cos, sqrt, atan2
-        lat1, lon1 = radians(float(residence.latitude)), radians(float(residence.longitude))
-        lat2, lon2 = radians(float(residence.submission_latitude)), radians(float(residence.submission_longitude))
-        dlat, dlon = lat2 - lat1, lon2 - lon1
-        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
-        distance_km = round(6371 * 2 * atan2(sqrt(a), sqrt(1 - a)), 2)
-
     return render(request, 'core/verify_location.html', {
         'residence': residence,
         'distance_km': distance_km,
         'amenity_result': amenity_result,
+        'geocode_result': geocode_result,
+        'town_county_distance_km': town_county_distance_km,
     })
 
 
