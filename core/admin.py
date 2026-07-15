@@ -1,4 +1,5 @@
 from django.contrib import admin
+from .models import Mover, FurnitureVendor, MoverProduct, FurnitureProduct
 from .models import (
     Residence,
     ResidencePhoto,
@@ -28,6 +29,15 @@ class MoverAdmin(admin.ModelAdmin):
     list_editable = ('is_approved',)
     ordering = ('-created_at',)
 
+@admin.register(MoverProduct)
+class MoverProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'mover', 'price', 'source', 'is_active', 'updated_at')
+    list_filter = ('source', 'is_active')
+
+@admin.register(FurnitureProduct)
+class FurnitureProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'vendor', 'price', 'source', 'is_active', 'updated_at')
+    list_filter = ('source', 'is_active')
 
 @admin.register(FurnitureVendor)
 class FurnitureVendorAdmin(admin.ModelAdmin):

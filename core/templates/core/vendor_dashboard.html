@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}Vendor Dashboard — HomeFinder Kenya{% endblock %}
+{% block content %}
+<div style="max-width:900px; margin:0 auto; padding:32px 24px;">
+  <h1 style="font-family:monospace; margin-bottom:8px;">Vendor Dashboard</h1>
+  <p style="color:#5EAFA8; margin-bottom:24px;">{{ failed_count }} vendor(s) with a failed scrape — check these manually.</p>
+
+  <h2 style="font-family:monospace; font-size:1rem; margin-bottom:12px;">Movers</h2>
+  <table style="width:100%; border-collapse:collapse; margin-bottom:32px;">
+    <tr style="text-align:left; border-bottom:2px solid #99F6E4;">
+      <th style="padding:8px;">Name</th><th>Sponsor</th><th>Data Source</th><th>Scrape Status</th><th>Last Scraped</th>
+    </tr>
+    {% for mover in movers %}
+    <tr style="border-bottom:1px solid #E8F0F3;">
+      <td style="padding:8px;">{{ mover.name }}</td>
+      <td>{% if mover.is_major_sponsor %}⭐{% endif %}</td>
+      <td>{{ mover.get_data_source_display }}</td>
+      <td style="color:{% if mover.scrape_status == 'failed' %}#DC2626{% elif mover.scrape_status == 'ok' %}#0F766E{% else %}#94A3B8{% endif %};">
+        {{ mover.get_scrape_status_display }}
+      </td>
+      <td>{{ mover.last_scraped_at|date:"d M Y H:i"|default:"—" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h2 style="font-family:monospace; font-size:1rem; margin-bottom:12px;">Furniture Vendors</h2>
+  <table style="width:100%; border-collapse:collapse;">
+    <tr style="text-align:left; border-bottom:2px solid #99F6E4;">
+      <th style="padding:8px;">Name</th><th>Sponsor</th><th>Data Source</th><th>Scrape Status</th><th>Last Scraped</th>
+    </tr>
+    {% for vendor in furniture_vendors %}
+    <tr style="border-bottom:1px solid #E8F0F3;">
+      <td style="padding:8px;">{{ vendor.name }}</td>
+      <td>{% if vendor.is_major_sponsor %}⭐{% endif %}</td>
+      <td>{{ vendor.get_data_source_display }}</td>
+      <td style="color:{% if vendor.scrape_status == 'failed' %}#DC2626{% elif vendor.scrape_status == 'ok' %}#0F766E{% else %}#94A3B8{% endif %};">
+        {{ vendor.get_scrape_status_display }}
+      </td>
+      <td>{{ vendor.last_scraped_at|date:"d M Y H:i"|default:"—" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

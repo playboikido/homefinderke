@@ -692,6 +692,36 @@
     *, *::before, *::after { transition-duration: 0.01ms !important; }
   }
   
+  .rd-ticker-wrap {
+  margin-top: 8px;
+  overflow: hidden;
+  width: 100%;
+  border-top: 1px dashed var(--c-border);
+  padding-top: 6px;
+}
+.rd-ticker-track {
+  display: flex;
+  gap: 14px;
+  width: max-content;
+  animation: rd-ticker-scroll 18s linear infinite;
+}
+.rd-ticker-wrap:hover .rd-ticker-track { animation-play-state: paused; }
+.rd-ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: var(--c-subtle);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.rd-ticker-item img { width: 20px; height: 20px; border-radius: 4px; object-fit: cover; }
+.rd-ticker-price { font-family: var(--font-mono); font-weight: 700; color: var(--c-primary); }
+@keyframes rd-ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 </style>
 {% endblock %}
 
@@ -895,6 +925,26 @@
           <span style="min-width:0;">
             <span class="rd-sponsored-title">{{ mover.name }}</span>
             <span class="rd-sponsored-meta">Sponsored mover ad</span>
+            {% if mover.products.all %}
+            <div class="rd-ticker-wrap">
+              <div class="rd-ticker-track">
+                {% for product in mover.products.all|slice:":10" %}
+                  <span class="rd-ticker-item">
+                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+                    {{ product.name|truncatechars:22 }}
+                    {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+                  </span>
+                {% endfor %}
+                {% for product in mover.products.all|slice:":10" %}
+                  <span class="rd-ticker-item" aria-hidden="true">
+                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+                    {{ product.name|truncatechars:22 }}
+                    {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
           </span>
           <span class="rd-sponsored-badge">Sponsor</span>
         </a>
@@ -907,6 +957,26 @@
           <span style="min-width:0;">
             <span class="rd-sponsored-title">{{ vendor.name }}</span>
             <span class="rd-sponsored-meta">Sponsored furniture ad</span>
+            {% if mover.products.all %}
+            <div class="rd-ticker-wrap">
+              <div class="rd-ticker-track">
+                {% for product in mover.products.all|slice:":10" %}
+                  <span class="rd-ticker-item">
+                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+                    {{ product.name|truncatechars:22 }}
+                    {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+                  </span>
+                {% endfor %}
+                {% for product in mover.products.all|slice:":10" %}
+                  <span class="rd-ticker-item" aria-hidden="true">
+                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+                    {{ product.name|truncatechars:22 }}
+                    {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+                  </span>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
           </span>
           <span class="rd-sponsored-badge">Sponsor</span>
         </a>

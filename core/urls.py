@@ -15,6 +15,8 @@ urlpatterns = [
         views.residence_detail,
         name='residence_detail'
     ),
+    path('control-panel-2947/vendors/', views.vendor_dashboard, name='vendor_dashboard'),
+    path('admin/vendors/', views.vendor_dashboard, name='vendor_dashboard'),
     path('residence/<int:pk>/edit/', views.edit_residence, name='edit_residence'),
     path(
         'add-residence/',

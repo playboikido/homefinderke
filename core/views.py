@@ -12,12 +12,13 @@ from django.db.models import Sum
 from django.contrib.auth.models import User
 from .models import Review
 from .forms import ReviewForm
+from django.db.models import Sum, Prefetch
 from django.core.paginator import Paginator
 from .forms import ProfileForm
 from .models import Residence, Profile
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import ResidencePhoto, Mover, FurnitureVendor
+from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct
 from django.contrib import messages
 from .forms import ContactForm
 from django.contrib.auth.decorators import login_required
@@ -305,6 +306,9 @@ def residence_detail(request, pk):
 
     sponsored_movers = list(
         Mover.objects.filter(is_approved=True, is_major_sponsor=True)
+        .prefetch_related(
+            Prefetch('products', queryset=MoverProduct.objects.filter(is_active=True))
+        )
         .order_by('-created_at')[:4]
     )
     regular_movers = list(
@@ -314,6 +318,9 @@ def residence_detail(request, pk):
     )
     sponsored_vendors = list(
         FurnitureVendor.objects.filter(is_approved=True, is_major_sponsor=True)
+        .prefetch_related(
+            Prefetch('products', queryset=FurnitureProduct.objects.filter(is_active=True))
+        )
         .order_by('-created_at')[:4]
     )
     regular_vendors = list(
@@ -1472,3 +1479,25 @@ def export_residences_csv(request):
         ])
 
     return response
+
+@staff_or_help_admin_required
+def vendor_dashboard(request):
+    """
+    Shows all Movers and FurnitureVendors with their scrape status — lets a
+    staff account or the help-admin account spot failed scrapes and manually
+    update products for them.
+    """
+    movers = Mover.objects.all().order_by('-is_major_sponsor', 'name')
+    furniture_vendors = FurnitureVendor.objects.all().order_by('-is_major_sponsor', 'name')
+
+    failed_count = (
+        movers.filter(scrape_status='failed').count()
+        + furniture_vendors.filter(scrape_status='failed').count()
+    )
+
+    context = {
+        'movers': movers,
+        'furniture_vendors': furniture_vendors,
+        'failed_count': failed_count,
+    }
+    return render(request, 'core/vendor_dashboard.html', context)

@@ -616,7 +616,16 @@ class Donation(models.Model):
 
     def __str__(self):
         return f"KSh {self.amount} - {self.phone_number} ({self.status})"     
-
+DATA_SOURCE_CHOICES = [
+    ('scraped', 'Scraped'),
+    ('manual', 'Manual'),
+    ('mixed', 'Mixed'),
+]
+SCRAPE_STATUS_CHOICES = [
+    ('ok', 'OK'),
+    ('failed', 'Failed'),
+    ('never_run', 'Never Run'),
+]
 
 class Mover(models.Model):
     name = models.CharField(max_length=200)
@@ -629,6 +638,16 @@ class Mover(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     service_counties = models.CharField(max_length=500, blank=True, help_text="Comma-separated counties served, e.g. Nairobi, Kiambu")
 
+    # --- NEW: live product data ---
+    data_source = models.CharField(max_length=10, choices=DATA_SOURCE_CHOICES, default='manual')
+    scrape_config = models.JSONField(blank=True, null=True, help_text=(
+        "e.g. {'product_page_url': 'https://vendor.com/shop', "
+        "'item_selector': '.product-card', 'name_selector': '.product-title', "
+        "'price_selector': '.price', 'image_selector': 'img'}"
+    ))
+    last_scraped_at = models.DateTimeField(blank=True, null=True)
+    scrape_status = models.CharField(max_length=10, choices=SCRAPE_STATUS_CHOICES, default='never_run')
+
     def __str__(self):
         return self.name
 
@@ -636,6 +655,20 @@ class Mover(models.Model):
     def whatsapp_number(self):
         return normalize_ke_whatsapp_number(self.phone_number)
 
+
+class MoverProduct(models.Model):
+    SOURCE_CHOICES = [('scraped', 'Scraped'), ('manual', 'Manual')]
+
+    mover = models.ForeignKey(Mover, on_delete=models.CASCADE, related_name='products')
+    name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    image_url = models.URLField(blank=True)
+    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default='manual')
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['mover', 'is_active'])]
 
 class FurnitureVendor(models.Model):
     name = models.CharField(max_length=200)
@@ -649,9 +682,34 @@ class FurnitureVendor(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     service_counties = models.CharField(max_length=500, blank=True, help_text="Comma-separated counties served, e.g. Nairobi, Kiambu")
 
+    # --- NEW: live product data ---
+    data_source = models.CharField(max_length=10, choices=DATA_SOURCE_CHOICES, default='manual')
+    scrape_config = models.JSONField(blank=True, null=True, help_text=(
+        "e.g. {'product_page_url': 'https://vendor.com/shop', "
+        "'item_selector': '.product-card', 'name_selector': '.product-title', "
+        "'price_selector': '.price', 'image_selector': 'img'}"
+    ))
+    last_scraped_at = models.DateTimeField(blank=True, null=True)
+    scrape_status = models.CharField(max_length=10, choices=SCRAPE_STATUS_CHOICES, default='never_run')
+
     def __str__(self):
         return self.name
 
     @property
     def whatsapp_number(self):
         return normalize_ke_whatsapp_number(self.phone_number)
+
+
+class FurnitureProduct(models.Model):
+    SOURCE_CHOICES = [('scraped', 'Scraped'), ('manual', 'Manual')]
+
+    vendor = models.ForeignKey(FurnitureVendor, on_delete=models.CASCADE, related_name='products')
+    name = models.CharField(max_length=200)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    image_url = models.URLField(blank=True)
+    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default='manual')
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['vendor', 'is_active'])]
