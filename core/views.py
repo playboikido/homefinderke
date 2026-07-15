@@ -620,13 +620,6 @@ def reject_residence(request, pk):
     residence.delete()
     return redirect('admin_dashboard')
 
-@staff_or_help_admin_required
-def unsuspend_user(request, user_id):
-    user = get_object_or_404(User, pk=user_id)
-    user.profile.is_suspended = False
-    user.profile.save()
-    messages.success(request, f'{user.username} has been unsuspended and can now list, message, and post again.')
-    return redirect('admin_dashboard')
 
 @login_required
 def report_residence(request, pk):
@@ -732,6 +725,20 @@ def owner_profile(request, user_id):
         'residences': residences,
     }
     return render(request, 'core/owner_profile.html', context)
+
+@staff_or_help_admin_required
+def suspended_users(request):
+    from core.models import Profile
+    suspended = Profile.objects.filter(is_suspended=True).select_related('user')
+    return render(request, 'core/suspended_users.html', {'suspended': suspended})
+
+@staff_or_help_admin_required
+def unsuspend_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    user.profile.is_suspended = False
+    user.profile.save()
+    messages.success(request, f'{user.username} has been unsuspended and can now list, message, and post again.')
+    return redirect('admin_dashboard')
 
 @login_required
 def add_review(request, pk):
