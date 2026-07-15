@@ -701,6 +701,10 @@ def suspend_user(request, user_id):
     messages.success(request, f'{user.username} has been suspended.')
     return redirect('admin_dashboard')
 
+@staff_or_help_admin_required
+def suspended_users(request):
+    suspended = Profile.objects.filter(is_suspended=True).select_related('user')
+    return render(request, 'suspended_accounts.html', {'suspended': suspended})
 @login_required
 def save_favorite(request, pk):
     residence = get_object_or_404(Residence, pk=pk, approved=True)
