@@ -262,6 +262,9 @@
   .rd-btn-wa:hover     { background: var(--c-wa); color: #FFF; border-color: var(--c-wa); }
   .rd-btn-maps   { background: #DBEAFE; color: var(--c-accent); border: 1.5px solid #BFDBFE; }
   .rd-btn-maps:hover   { background: var(--c-accent); color: #FFF; border-color: var(--c-accent); }
+  .rd-btn-phone { background: #DBEAFE; color: var(--c-accent); border: 1.5px solid #BFDBFE; }
+  .rd-btn-phone:hover { background: var(--c-accent); color: #FFF; border-color: var(--c-accent); }
+  [data-theme="dark"] .rd-btn-phone { background: #0C4A6E; color: #7DD3FC; border-color: #075985; }
   .rd-btn-fav    { background: #FFE4E6; color: #9F1239; border: 1.5px solid #FECDD3; }
   .rd-btn-fav:hover    { background: #E11D48; color: #FFF; border-color: #E11D48; }
   .rd-btn-report { background: #FEE2E2; color: var(--c-danger); border: 1.5px solid #FECACA; }
@@ -753,6 +756,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 WhatsApp
               </a>
+              {% if residence.phone_number %}
+              <a href="tel:{{ residence.phone_number }}" class="rd-btn rd-btn-phone">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Call
+              </a>
+              {% endif %}
               {% if request.user.is_authenticated and residence.owner and request.user != residence.owner %}
               <a href="{% url 'start_conversation' residence.owner.id %}" class="rd-btn rd-btn-white">Message</a>
               {% endif %}
@@ -855,6 +864,12 @@
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             WhatsApp
           </a>
+          {% if residence.phone_number %}
+          <a href="tel:{{ residence.phone_number }}" class="rd-btn rd-btn-phone">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Call
+          </a>
+          {% endif %}
           {% if request.user.is_authenticated and residence.owner and request.user != residence.owner %}
           <a href="{% url 'start_conversation' residence.owner.id %}" class="rd-btn rd-btn-call">Message</a>
           {% endif %}
@@ -1227,10 +1242,16 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
                     {{ vendor.location }}
                   </div>
-                  <a href="https://wa.me/254{{ vendor.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20am%20interested%20in%20your%20furniture." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="width:100%; justify-content:center;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    WhatsApp
-                  </a>
+                  <div style="display:flex; gap:6px;">
+                    <a href="https://wa.me/254{{ vendor.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20am%20interested%20in%20your%20furniture." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="flex:1; justify-content:center;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      WhatsApp
+                    </a>
+                    <a href="tel:{{ vendor.phone_number }}" class="rd-btn rd-btn-phone rd-btn-sm" style="flex:1; justify-content:center;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      Call
+                    </a>
+                  </div>
                 </div>
               </div>
               {% endfor %}
