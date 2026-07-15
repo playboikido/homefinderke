@@ -620,6 +620,13 @@ def reject_residence(request, pk):
     residence.delete()
     return redirect('admin_dashboard')
 
+@staff_or_help_admin_required
+def unsuspend_user(request, user_id):
+    user = get_object_or_404(User, pk=user_id)
+    user.profile.is_suspended = False
+    user.profile.save()
+    messages.success(request, f'{user.username} has been unsuspended and can now list, message, and post again.')
+    return redirect('admin_dashboard')
 
 @login_required
 def report_residence(request, pk):

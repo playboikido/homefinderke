@@ -21,6 +21,7 @@ urlpatterns = [
         views.add_residence,
         name='add_residence'
     ),
+    path('unsuspend-user/<int:user_id>/', views.unsuspend_user, name='unsuspend_user'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path(
         'admin-dashboard/',
