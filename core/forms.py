@@ -238,6 +238,45 @@ class FurnitureVendorForm(forms.ModelForm):
             'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
         }
 
+
+class MoverSponsorForm(forms.ModelForm):
+    """Sponsor-tier mover — adds service_counties and scrape config on top of the base fields."""
+    class Meta:
+        model = Mover
+        fields = ['name', 'logo', 'phone_number', 'description', 'website', 'service_counties',
+                   'data_source', 'scrape_config']
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'Example: Peak Movers'}),
+            'phone_number': forms.TextInput(attrs={'placeholder': 'e.g. 0712345678'}),
+            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe services, pricing, areas of operation...'}),
+            'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
+            'service_counties': forms.TextInput(attrs={'placeholder': 'e.g. Nairobi, Kiambu'}),
+            'scrape_config': forms.Textarea(attrs={'rows': 5, 'placeholder':
+                '{"product_page_url": "https://vendor.com/shop", "item_selector": ".product-card", '
+                '"name_selector": ".product-title", "price_selector": ".price", "image_selector": "img"}'
+            }),
+        }
+
+
+class FurnitureVendorSponsorForm(forms.ModelForm):
+    """Sponsor-tier furniture vendor — adds service_counties and scrape config on top of the base fields."""
+    class Meta:
+        model = FurnitureVendor
+        fields = ['name', 'image', 'phone_number', 'location', 'description', 'website', 'service_counties',
+                   'data_source', 'scrape_config']
+        widgets = {
+            'name': forms.TextInput(attrs={'placeholder': 'Example: Elegant Sofa World'}),
+            'phone_number': forms.TextInput(attrs={'placeholder': 'e.g. 0712345678'}),
+            'location': forms.TextInput(attrs={'placeholder': 'e.g. Kasarani, Nairobi'}),
+            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe types of furniture, custom work, delivery options...'}),
+            'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
+            'service_counties': forms.TextInput(attrs={'placeholder': 'e.g. Nairobi, Kiambu'}),
+            'scrape_config': forms.Textarea(attrs={'rows': 5, 'placeholder':
+                '{"product_page_url": "https://vendor.com/shop", "item_selector": ".product-card", '
+                '"name_selector": ".product-title", "price_selector": ".price", "image_selector": "img"}'
+            }),
+        }
+
 from .models import UserReport
 
 class UserReportForm(forms.ModelForm):

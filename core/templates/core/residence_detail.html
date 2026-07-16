@@ -909,82 +909,6 @@
     </div>
     {% endif %}
 
-    <!-- ── Photo Gallery ─────────────────────────────────────── -->
-    {% if sponsored_movers or sponsored_vendors %}
-    <div class="rd-section rd-sponsored-section">
-      <div class="rd-section-head">
-        <h2 class="rd-section-title">Sponsored Services</h2>
-        <span style="font-size:0.72rem;color:var(--c-subtle);font-family:var(--font-mono);">Shown on every residence page</span>
-      </div>
-      <div class="rd-sponsored-strip">
-        {% for mover in sponsored_movers %}
-        <a href="https://wa.me/{{ mover.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20need%20moving%20services." target="_blank" rel="noopener noreferrer" class="rd-sponsored-card" style="text-decoration:none;">
-          <span class="rd-sponsored-logo">
-            {% if mover.logo %}<img src="{{ mover.logo.url }}" alt="{{ mover.name }}">{% else %}{{ mover.name|slice:":1"|upper }}{% endif %}
-          </span>
-          <span style="min-width:0;">
-            <span class="rd-sponsored-title">{{ mover.name }}</span>
-            <span class="rd-sponsored-meta">Sponsored mover ad</span>
-            {% if mover.products.all %}
-            <div class="rd-ticker-wrap">
-              <div class="rd-ticker-track">
-                {% for product in mover.products.all|slice:":10" %}
-                  <span class="rd-ticker-item">
-                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
-                    {{ product.name|truncatechars:22 }}
-                    {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
-                  </span>
-                {% endfor %}
-                {% for product in mover.products.all|slice:":10" %}
-                  <span class="rd-ticker-item" aria-hidden="true">
-                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
-                    {{ product.name|truncatechars:22 }}
-                    {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
-                  </span>
-                {% endfor %}
-              </div>
-            </div>
-            {% endif %}
-          </span>
-          <span class="rd-sponsored-badge">Sponsor</span>
-        </a>
-        {% endfor %}
-        {% for vendor in sponsored_vendors %}
-        <a href="https://wa.me/{{ vendor.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20am%20interested%20in%20your%20furniture." target="_blank" rel="noopener noreferrer" class="rd-sponsored-card" style="text-decoration:none;">
-          <span class="rd-sponsored-logo">
-            {% if vendor.image %}<img src="{{ vendor.image.url }}" alt="{{ vendor.name }}">{% else %}{{ vendor.name|slice:":1"|upper }}{% endif %}
-          </span>
-          <span style="min-width:0;">
-            <span class="rd-sponsored-title">{{ vendor.name }}</span>
-            <span class="rd-sponsored-meta">Sponsored furniture ad</span>
-            {% if mover.products.all %}
-            <div class="rd-ticker-wrap">
-              <div class="rd-ticker-track">
-                {% for product in mover.products.all|slice:":10" %}
-                  <span class="rd-ticker-item">
-                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
-                    {{ product.name|truncatechars:22 }}
-                    {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
-                  </span>
-                {% endfor %}
-                {% for product in mover.products.all|slice:":10" %}
-                  <span class="rd-ticker-item" aria-hidden="true">
-                    {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
-                    {{ product.name|truncatechars:22 }}
-                    {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
-                  </span>
-                {% endfor %}
-              </div>
-            </div>
-            {% endif %}
-          </span>
-          <span class="rd-sponsored-badge">Sponsor</span>
-        </a>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
     {% if residence.photos.count %}
     <div class="rd-section">
       <div class="rd-section-head">
@@ -1146,6 +1070,161 @@
     </div>
     {% endif %}
 
+    <!-- ── Movers & Furniture Vendors (Sponsors first, then Directory) ─── -->
+    {% if movers or vendors %}
+    <div class="rd-section">
+      <div class="rd-section-head">
+        <h2 class="rd-section-title">🚚 Moving & Furnishing</h2>
+      </div>
+      <div class="rd-card" style="padding:28px;">
+        <div style="display:grid; grid-template-columns:{% if movers and vendors %}1fr 1fr{% else %}1fr{% endif %}; gap:28px;" class="rd-movers-vendors-grid">
+
+          {% if movers %}
+          <div>
+            <div style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--c-fg); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#CCFBF1; color:var(--c-primary);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              </span>
+              Verified Movers
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              {% for mover in movers %}
+              <div style="display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--r); border:1.5px solid var(--c-border); transition:all 180ms var(--ease);"
+                   onmouseover="this.style.boxShadow='var(--shadow)';this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+                {% if mover.logo %}
+                <img src="{{ mover.logo.url }}" alt="{{ mover.name }}"
+                     style="width:48px; height:48px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid var(--c-border);">
+                {% else %}
+                <div style="width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,var(--c-primary),var(--c-secondary)); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-family:var(--font-mono); font-weight:700; font-size:1.1rem;">
+                  {{ mover.name|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <div style="flex:1; min-width:0;">
+                  <div style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700; color:var(--c-fg); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    {{ mover.name }}
+                    {% if mover.is_major_sponsor %}
+                    <span style="background:var(--c-gold-bg); color:var(--c-gold); font-size:0.62rem; font-weight:700; padding:2px 7px; border-radius:999px; margin-left:6px; text-transform:uppercase; letter-spacing:0.04em; vertical-align:middle;">⭐ Sponsor</span>
+                    {% endif %}
+                  </div>
+                  <p style="font-size:0.78rem; color:var(--c-subtle); line-height:1.5; margin:0 0 8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ mover.description|truncatewords:18 }}</p>
+                  <div style="font-size:0.72rem; color:var(--c-subtle); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {{ residence.county }}
+                  </div>
+                  {% if mover.is_major_sponsor and mover.products.all %}
+                  <div class="rd-ticker-wrap">
+                    <div class="rd-ticker-track">
+                      {% for product in mover.products.all|slice:":10" %}
+                        <span class="rd-ticker-item">
+                          {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+                          {{ product.name|truncatechars:22 }}
+                          {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+                        </span>
+                      {% endfor %}
+                      {% for product in mover.products.all|slice:":10" %}
+                        <span class="rd-ticker-item" aria-hidden="true">
+                          {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+                          {{ product.name|truncatechars:22 }}
+                          {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+                        </span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  {% endif %}
+                  <div style="display:flex; gap:6px; margin-top:8px;">
+                    <a href="https://wa.me/254{{ mover.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20need%20moving%20services." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="flex:1; justify-content:center;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      WhatsApp
+                    </a>
+                    <a href="tel:{{ mover.phone_number }}" class="rd-btn rd-btn-phone rd-btn-sm" style="flex:1; justify-content:center;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      Call
+                    </a>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {% if vendors %}
+          <div>
+            <div style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--c-fg); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:var(--c-gold-bg); color:var(--c-gold);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3z"/><path d="M4 18v2"/><path d="M20 18v2"/></svg>
+              </span>
+              Furniture Vendors
+            </div>
+            <div style="display:flex; flex-direction:column; gap:12px;">
+              {% for vendor in vendors %}
+              <div style="display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--r); border:1.5px solid var(--c-border); transition:all 180ms var(--ease);"
+                   onmouseover="this.style.boxShadow='var(--shadow)';this.style.transform='translateY(-2px)'"
+                   onmouseout="this.style.boxShadow='none';this.style.transform='none'">
+                {% if vendor.image %}
+                <img src="{{ vendor.image.url }}" alt="{{ vendor.name }}"
+                     style="width:48px; height:48px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid var(--c-border);">
+                {% else %}
+                <div style="width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,var(--c-gold),#F59E0B); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-family:var(--font-mono); font-weight:700; font-size:1.1rem;">
+                  {{ vendor.name|slice:":1"|upper }}
+                </div>
+                {% endif %}
+                <div style="flex:1; min-width:0;">
+                  <div style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700; color:var(--c-fg); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                    {{ vendor.name }}
+                    {% if vendor.is_major_sponsor %}
+                    <span style="background:var(--c-gold-bg); color:var(--c-gold); font-size:0.62rem; font-weight:700; padding:2px 7px; border-radius:999px; margin-left:6px; text-transform:uppercase; letter-spacing:0.04em; vertical-align:middle;">⭐ Sponsor</span>
+                    {% endif %}
+                  </div>
+                  <p style="font-size:0.78rem; color:var(--c-subtle); line-height:1.5; margin:0 0 8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ vendor.description|truncatewords:18 }}</p>
+                  <div style="font-size:0.72rem; color:var(--c-subtle); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    {{ vendor.location }}
+                  </div>
+                  {% if vendor.is_major_sponsor and vendor.products.all %}
+                  <div class="rd-ticker-wrap">
+                    <div class="rd-ticker-track">
+                      {% for product in vendor.products.all|slice:":10" %}
+                        <span class="rd-ticker-item">
+                          {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+                          {{ product.name|truncatechars:22 }}
+                          {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+                        </span>
+                      {% endfor %}
+                      {% for product in vendor.products.all|slice:":10" %}
+                        <span class="rd-ticker-item" aria-hidden="true">
+                          {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+                          {{ product.name|truncatechars:22 }}
+                          {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+                        </span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  {% endif %}
+                  <div style="display:flex; gap:6px; margin-top:8px;">
+                    <a href="https://wa.me/254{{ vendor.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20am%20interested%20in%20your%20furniture." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="flex:1; justify-content:center;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                      WhatsApp
+                    </a>
+                    <a href="tel:{{ vendor.phone_number }}" class="rd-btn rd-btn-phone rd-btn-sm" style="flex:1; justify-content:center;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      Call
+                    </a>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    
     <!-- ── Related Listings ──────────────────────────────────── -->
     {% if related_residences %}
     <div class="rd-section">
@@ -1223,122 +1302,6 @@
         {% endfor %}
       </div>
     </div>
-
-    <!-- ── Movers & Furniture Vendors ──────────────────────────── -->
-    {% if regular_movers or regular_vendors %}
-    <div class="rd-section">
-      <div class="rd-section-head">
-        <h2 class="rd-section-title">🚚 Moving & Furnishing</h2>
-      </div>
-      <div class="rd-card" style="padding:28px;">
-        <div style="display:grid; grid-template-columns:{% if regular_movers and regular_vendors %}1fr 1fr{% else %}1fr{% endif %}; gap:28px;" class="rd-movers-vendors-grid">
-
-          <!-- Left: Movers -->
-          {% if regular_movers %}
-          <div>
-            <div style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--c-fg); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:#CCFBF1; color:var(--c-primary);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-              </span>
-              Verified Movers
-            </div>
-            <div style="display:flex; flex-direction:column; gap:12px;">
-              {% for mover in regular_movers %}
-              <div style="display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--r); border:1.5px solid var(--c-border); transition:all 180ms var(--ease);"
-                   onmouseover="this.style.boxShadow='var(--shadow)';this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.boxShadow='none';this.style.transform='none'">
-                {% if mover.logo %}
-                <img src="{{ mover.logo.url }}" alt="{{ mover.name }}"
-                     style="width:48px; height:48px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid var(--c-border);">
-                {% else %}
-                <div style="width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,var(--c-primary),var(--c-secondary)); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-family:var(--font-mono); font-weight:700; font-size:1.1rem;">
-                  {{ mover.name|slice:":1"|upper }}
-                </div>
-                {% endif %}
-                <div style="flex:1; min-width:0;">
-                  <div style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700; color:var(--c-fg); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    {{ mover.name }}
-                    {% if mover.is_major_sponsor %}
-                    <span style="background:var(--c-gold-bg); color:var(--c-gold); font-size:0.62rem; font-weight:700; padding:2px 7px; border-radius:999px; margin-left:6px; text-transform:uppercase; letter-spacing:0.04em; vertical-align:middle;">⭐ Sponsor</span>
-                    {% endif %}
-                  </div>
-                  <p style="font-size:0.78rem; color:var(--c-subtle); line-height:1.5; margin:0 0 8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ mover.description|truncatewords:18 }}</p>
-                  <div style="font-size:0.72rem; color:var(--c-subtle); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {{ residence.county }}
-                  </div>
-                  <div style="display:flex; gap:6px;">
-                    <a href="https://wa.me/254{{ mover.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20need%20moving%20services." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="flex:1; justify-content:center;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      WhatsApp
-                    </a>
-                    <a href="tel:{{ mover.phone_number }}" class="rd-btn rd-btn-phone rd-btn-sm" style="flex:1; justify-content:center;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                      Call
-                    </a>
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-          <!-- Right: Furniture Vendors -->
-          {% if regular_vendors %}
-          <div>
-            <div style="font-family:var(--font-mono); font-size:0.82rem; font-weight:700; color:var(--c-fg); margin-bottom:14px; display:flex; align-items:center; gap:8px;">
-              <span style="display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:8px; background:var(--c-gold-bg); color:var(--c-gold);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 9V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M2 11v5a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3z"/><path d="M4 18v2"/><path d="M20 18v2"/></svg>
-              </span>
-              Furniture Vendors
-            </div>
-            <div style="display:flex; flex-direction:column; gap:12px;">
-              {% for vendor in regular_vendors %}
-              <div style="display:flex; align-items:flex-start; gap:12px; padding:14px; border-radius:var(--r); border:1.5px solid var(--c-border); transition:all 180ms var(--ease);"
-                   onmouseover="this.style.boxShadow='var(--shadow)';this.style.transform='translateY(-2px)'"
-                   onmouseout="this.style.boxShadow='none';this.style.transform='none'">
-                {% if vendor.image %}
-                <img src="{{ vendor.image.url }}" alt="{{ vendor.name }}"
-                     style="width:48px; height:48px; border-radius:10px; object-fit:cover; flex-shrink:0; border:1px solid var(--c-border);">
-                {% else %}
-                <div style="width:48px; height:48px; border-radius:10px; background:linear-gradient(135deg,var(--c-gold),#F59E0B); display:flex; align-items:center; justify-content:center; flex-shrink:0; color:#fff; font-family:var(--font-mono); font-weight:700; font-size:1.1rem;">
-                  {{ vendor.name|slice:":1"|upper }}
-                </div>
-                {% endif %}
-                <div style="flex:1; min-width:0;">
-                  <div style="font-family:var(--font-mono); font-size:0.85rem; font-weight:700; color:var(--c-fg); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                    {{ vendor.name }}
-                    {% if vendor.is_major_sponsor %}
-                    <span style="background:var(--c-gold-bg); color:var(--c-gold); font-size:0.62rem; font-weight:700; padding:2px 7px; border-radius:999px; margin-left:6px; text-transform:uppercase; letter-spacing:0.04em; vertical-align:middle;">⭐ Sponsor</span>
-                    {% endif %}
-                  </div>
-                  <p style="font-size:0.78rem; color:var(--c-subtle); line-height:1.5; margin:0 0 8px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">{{ vendor.description|truncatewords:18 }}</p>
-                  <div style="font-size:0.72rem; color:var(--c-subtle); margin-bottom:8px; display:flex; align-items:center; gap:4px;">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {{ vendor.location }}
-                  </div>
-                  <div style="display:flex; gap:6px;">
-                    <a href="https://wa.me/254{{ vendor.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20am%20interested%20in%20your%20furniture." target="_blank" class="rd-btn rd-btn-wa rd-btn-sm" style="flex:1; justify-content:center;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                      WhatsApp
-                    </a>
-                    <a href="tel:{{ vendor.phone_number }}" class="rd-btn rd-btn-phone rd-btn-sm" style="flex:1; justify-content:center;">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                      Call
-                    </a>
-                  </div>
-                </div>
-              </div>
-              {% endfor %}
-            </div>
-          </div>
-          {% endif %}
-
-        </div>
-      </div>
-    </div>
-    {% endif %}
 
     <div class="rd-section" style="display:flex; gap:12px; flex-wrap:wrap;">
       <a href="{% url 'generate_lease' residence.id %}" class="rd-btn rd-btn-teal">

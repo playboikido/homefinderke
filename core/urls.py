@@ -16,7 +16,6 @@ urlpatterns = [
         name='residence_detail'
     ),
     path('control-panel-2947/vendors/', views.vendor_dashboard, name='vendor_dashboard'),
-    path('admin/vendors/', views.vendor_dashboard, name='vendor_dashboard'),
     path('residence/<int:pk>/edit/', views.edit_residence, name='edit_residence'),
     path(
         'add-residence/',
@@ -113,7 +112,9 @@ urlpatterns = [
 
     path('admin-dashboard-redirect/', views.admin_dashboard, name='admin_dashboard_view'),
     path('add-mover/', views.add_mover, name='add_mover'),
+    path('add-mover-sponsor/', views.add_mover_sponsor, name='add_mover_sponsor'),
     path('add-furniture-vendor/', views.add_furniture_vendor, name='add_furniture_vendor'),
+    path('add-furniture-vendor-sponsor/', views.add_furniture_vendor_sponsor, name='add_furniture_vendor_sponsor'),
     path(
         'compare/',
         views.compare_residences,

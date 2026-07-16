@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
 from .models import Residence, ResidenceReport, UserReport
 from .models import Residence, ResidenceReport, ResidenceView
-from .forms import ResidenceForm, ResidenceReportForm, MoverForm, FurnitureVendorForm
+from .forms import ResidenceForm, ResidenceReportForm, MoverForm, FurnitureVendorForm, MoverSponsorForm, FurnitureVendorSponsorForm
 from django.contrib import messages
 from .models import Residence, ResidenceReport, Favorite
 from django.db.models import Sum
@@ -1240,12 +1240,14 @@ def residence_viewers(request, pk):
         'residence': residence,
         'viewers': viewers,
     })
+@staff_or_help_admin_required
 def add_mover(request):
     if request.method == 'POST':
         form = MoverForm(request.POST, request.FILES)
         if form.is_valid():
             mover = form.save(commit=False)
             mover.is_approved = True
+            mover.is_major_sponsor = False
             mover.save()
             messages.success(request, f'Mover "{mover.name}" has been added successfully.')
             return redirect('admin_dashboard')
@@ -1255,18 +1257,51 @@ def add_mover(request):
 
 
 @staff_or_help_admin_required
+def add_mover_sponsor(request):
+    if request.method == 'POST':
+        form = MoverSponsorForm(request.POST, request.FILES)
+        if form.is_valid():
+            mover = form.save(commit=False)
+            mover.is_approved = True
+            mover.is_major_sponsor = True
+            mover.save()
+            messages.success(request, f'Sponsored mover "{mover.name}" has been added successfully.')
+            return redirect('admin_dashboard')
+    else:
+        form = MoverSponsorForm()
+    return render(request, 'core/add_mover_sponsor.html', {'form': form})
+
+
+@staff_or_help_admin_required
 def add_furniture_vendor(request):
     if request.method == 'POST':
         form = FurnitureVendorForm(request.POST, request.FILES)
         if form.is_valid():
             vendor = form.save(commit=False)
             vendor.is_approved = True
+            vendor.is_major_sponsor = False
             vendor.save()
             messages.success(request, f'Furniture Vendor "{vendor.name}" has been added successfully.')
             return redirect('admin_dashboard')
     else:
         form = FurnitureVendorForm()
     return render(request, 'core/add_furniture_vendor.html', {'form': form})
+
+
+@staff_or_help_admin_required
+def add_furniture_vendor_sponsor(request):
+    if request.method == 'POST':
+        form = FurnitureVendorSponsorForm(request.POST, request.FILES)
+        if form.is_valid():
+            vendor = form.save(commit=False)
+            vendor.is_approved = True
+            vendor.is_major_sponsor = True
+            vendor.save()
+            messages.success(request, f'Sponsored furniture vendor "{vendor.name}" has been added successfully.')
+            return redirect('admin_dashboard')
+    else:
+        form = FurnitureVendorSponsorForm()
+    return render(request, 'core/add_furniture_vendor_sponsor.html', {'form': form})
 
 
 def robots_txt(request):
