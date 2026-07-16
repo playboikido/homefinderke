@@ -647,6 +647,7 @@ class Mover(models.Model):
     ))
     last_scraped_at = models.DateTimeField(blank=True, null=True)
     scrape_status = models.CharField(max_length=10, choices=SCRAPE_STATUS_CHOICES, default='never_run')
+    contract_expires_at = models.DateField(blank=True, null=True, help_text="Sponsorship/listing contract end date")
 
     def __str__(self):
         return self.name
@@ -654,6 +655,11 @@ class Mover(models.Model):
     @property
     def whatsapp_number(self):
         return normalize_ke_whatsapp_number(self.phone_number)
+
+    @property
+    def is_expired(self):
+        from django.utils import timezone
+        return bool(self.contract_expires_at and self.contract_expires_at < timezone.now().date())
 
 
 class MoverProduct(models.Model):

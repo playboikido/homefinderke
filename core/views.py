@@ -1532,6 +1532,113 @@ def export_residences_csv(request):
 @staff_or_help_admin_required
 def vendor_dashboard(request):
     """
+    Shows all Movers and FurnitureVendors with scrape status and contract
+    expiry — lets a staff account or the help-admin account spot failed
+    scrapes, edit listings, and remove expired ones.
+    """
+    from django.utils import timezone
+    today = timezone.now().date()
+
+    movers = Mover.objects.all().order_by('-is_major_sponsor', 'name')
+    furniture_vendors = FurnitureVendor.objects.all().order_by('-is_major_sponsor', 'name')
+
+    failed_count = (
+        movers.filter(scrape_status='failed').count()
+        + furniture_vendors.filter(scrape_status='failed').count()
+    )
+    expired_count = (
+        movers.filter(contract_expires_at__lt=today).count()
+        + furniture_vendors.filter(contract_expires_at__lt=today).count()
+    )
+
+    context = {
+        'movers': movers,
+        'furniture_vendors': furniture_vendors,
+        'failed_count': failed_count,
+        'expired_count': expired_count,
+        'today': today,
+    }
+    return render(request, 'core/vendor_dashboard.html', context)
+
+
+@staff_or_help_admin_required
+def edit_mover(request, pk):
+    mover = get_object_or_404(Mover, pk=pk)
+    FormClass = MoverSponsorForm if mover.is_major_sponsor else MoverForm
+    if request.method == 'POST':
+        form = FormClass(request.POST, request.FILES, instance=mover)
+        if form.is_valid():
+            form.save()
+            expires_at = request.POST.get('contract_expires_at')
+            if expires_at:
+                mover.contract_expires_at = expires_at
+                mover.save(update_fields=['contract_expires_at'])
+            for photo in request.FILES.getlist('gallery_images'):
+                MoverGalleryImage.objects.create(mover=mover, image=photo)
+            messages.success(request, f'Mover "{mover.name}" updated.')
+            return redirect('vendor_dashboard')
+    else:
+        form = FormClass(instance=mover)
+    return render(request, 'core/edit_mover.html', {'form': form, 'mover': mover})
+
+
+@staff_or_help_admin_required
+def delete_mover(request, pk):
+    mover = get_object_or_404(Mover, pk=pk)
+    if request.method == 'POST':
+        name = mover.name
+        mover.delete()
+        messages.success(request, f'Mover "{name}" removed.')
+        return redirect('vendor_dashboard')
+    return render(request, 'core/confirm_delete.html', {'object': mover, 'object_type': 'Mover'})
+
+
+@staff_or_help_admin_required
+def edit_furniture_vendor(request, pk):
+    vendor = get_object_or_404(FurnitureVendor, pk=pk)
+    FormClass = FurnitureVendorSponsorForm if vendor.is_major_sponsor else FurnitureVendorForm
+    if request.method == 'POST':
+        form = FormClass(request.POST, request.FILES, instance=vendor)
+        if form.is_valid():
+            form.save()
+            expires_at = request.POST.get('contract_expires_at')
+            if expires_at:
+                vendor.contract_expires_at = expires_at
+                vendor.save(update_fields=['contract_expires_at'])
+            for photo in request.FILES.getlist('gallery_images'):
+                FurnitureGalleryImage.objects.create(vendor=vendor, image=photo)
+            messages.success(request, f'Furniture vendor "{vendor.name}" updated.')
+            return redirect('vendor_dashboard')
+    else:
+        form = FormClass(instance=vendor)
+    return render(request, 'core/edit_furniture_vendor.html', {'form': form, 'vendor': vendor})
+
+
+@staff_or_help_admin_required
+def delete_furniture_vendor(request, pk):
+    vendor = get_object_or_404(FurnitureVendor, pk=pk)
+    if request.method == 'POST':
+        name = vendor.name
+        vendor.delete()
+        messages.success(request, f'Furniture vendor "{name}" removed.')
+        return redirect('vendor_dashboard')
+    return render(request, 'core/confirm_delete.html', {'object': vendor, 'object_type': 'FurnitureVendor'})
+
+
+@staff_or_help_admin_required
+def remove_expired_vendors(request):
+    """One-click cleanup: deletes every Mover/FurnitureVendor whose contract has expired."""
+    from django.utils import timezone
+    today = timezone.now().date()
+    if request.method == 'POST':
+        expired_movers = Mover.objects.filter(contract_expires_at__lt=today)
+        expired_vendors = FurnitureVendor.objects.filter(contract_expires_at__lt=today)
+        count = expired_movers.count() + expired_vendors.count()
+        expired_movers.delete()
+        expired_vendors.delete()
+        messages.success(request, f'Removed {count} expired vendor listing(s).')
+    return redirect('vendor_dashboard')
+    """
     Shows all Movers and FurnitureVendors with their scrape status — lets a
     staff account or the help-admin account spot failed scrapes and manually
     update products for them.

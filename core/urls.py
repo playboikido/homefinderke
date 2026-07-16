@@ -117,6 +117,11 @@ urlpatterns = [
     path('add-furniture-vendor-sponsor/', views.add_furniture_vendor_sponsor, name='add_furniture_vendor_sponsor'),
     path('mover/<int:pk>/', views.mover_detail, name='mover_detail'),
     path('furniture-vendor/<int:pk>/', views.furniture_vendor_detail, name='furniture_vendor_detail'),
+    path('control-panel-2947/vendors/mover/<int:pk>/edit/', views.edit_mover, name='edit_mover'),
+    path('control-panel-2947/vendors/mover/<int:pk>/delete/', views.delete_mover, name='delete_mover'),
+    path('control-panel-2947/vendors/furniture/<int:pk>/edit/', views.edit_furniture_vendor, name='edit_furniture_vendor'),
+    path('control-panel-2947/vendors/furniture/<int:pk>/delete/', views.delete_furniture_vendor, name='delete_furniture_vendor'),
+    path('control-panel-2947/vendors/remove-expired/', views.remove_expired_vendors, name='remove_expired_vendors'),
     path(
         'compare/',
         views.compare_residences,
