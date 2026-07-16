@@ -1,97 +1,50 @@
+<!-- core/templates/core/mover_detail.html -->
 {% extends 'base.html' %}
 {% block title %}{{ mover.name }} — HomeFinder Kenya{% endblock %}
 
 {% block content %}
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
-  :root {
-    --c-primary: #0F766E; --c-primary-dk: #0D5E58; --c-secondary: #14B8A6;
-    --c-bg: #F0FDFA; --c-fg: #134E4A; --c-surface: #FFFFFF; --c-muted: #E8F0F3;
-    --c-border: #99F6E4; --c-text: #1C4A47; --c-subtle: #5EAFA8;
-    --font-body: 'Fira Sans', system-ui, sans-serif; --font-mono: 'Fira Code', monospace;
-    --r: 12px; --r-lg: 18px; --shadow: 0 4px 12px rgba(15,118,110,0.10);
-  }
-  .mv-wrap { font-family: var(--font-body); background: var(--c-bg); min-height: 100vh; color: var(--c-text); }
-  .mv-inner { max-width: 760px; margin: 0 auto; padding: 40px 24px 64px; }
-  .mv-hero { background: linear-gradient(135deg, var(--c-fg), var(--c-primary)); border-radius: var(--r-lg); padding: 32px; display:flex; align-items:center; gap:20px; box-shadow: var(--shadow); }
-  .mv-logo { width:72px; height:72px; border-radius:14px; object-fit:cover; border:2px solid rgba(255,255,255,0.3); flex-shrink:0; }
-  .mv-logo-fallback { width:72px; height:72px; border-radius:14px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-mono); font-size:1.8rem; font-weight:700; flex-shrink:0; }
-  .mv-name { font-family: var(--font-mono); font-size: 1.4rem; font-weight:700; color:#fff; }
-  .mv-meta { color: rgba(255,255,255,0.75); font-size:0.85rem; margin-top:4px; }
-  .mv-card { background: var(--c-surface); border-radius: var(--r-lg); border:1.5px solid var(--c-border); box-shadow: var(--shadow); padding: 24px; margin-top: 20px; }
-  .mv-section-title { font-family: var(--font-mono); font-size: 0.9rem; font-weight:700; color: var(--c-fg); margin-bottom: 14px; }
-  .mv-gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
-  .mv-gallery img { width:100%; height:120px; object-fit:cover; border-radius: var(--r); border:1.5px solid var(--c-border); }
-  .mv-btn { display:inline-flex; align-items:center; gap:8px; padding:11px 22px; border-radius:var(--r); font-size:0.88rem; font-weight:600; border:none; cursor:pointer; text-decoration:none; }
-  .mv-btn-wa { background:#D1FAE5; color:#065F46; }
-  .mv-btn-phone { background:#DBEAFE; color:#0369A1; }
-  .mv-btn-web { background:var(--c-muted); color:var(--c-fg); border:1.5px solid var(--c-border); }
-  /* Ticker (matches residence_detail.html) */
-  .rd-ticker-wrap { margin-top: 14px; overflow: hidden; width: 100%; border-top: 1px dashed var(--c-border); padding-top: 10px; }
-  .rd-ticker-track { display: flex; gap: 14px; width: max-content; animation: rd-ticker-scroll 18s linear infinite; }
-  .rd-ticker-wrap:hover .rd-ticker-track { animation-play-state: paused; }
-  .rd-ticker-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--c-subtle); white-space: nowrap; flex-shrink: 0; }
-  .rd-ticker-item img { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; }
-  .rd-ticker-price { font-family: var(--font-mono); font-weight: 700; color: var(--c-primary); }
-  @keyframes rd-ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-</style>
-
-<div class="mv-wrap">
-  <div class="mv-inner">
-    <div class="mv-hero">
-      {% if mover.logo %}
-        <img src="{{ mover.logo.url }}" alt="{{ mover.name }}" class="mv-logo">
-      {% else %}
-        <div class="mv-logo-fallback">{{ mover.name|slice:":1"|upper }}</div>
-      {% endif %}
-      <div>
-        <div class="mv-name">{{ mover.name }}</div>
-        <div class="mv-meta">Moving Services{% if mover.service_counties %} · Serving {{ mover.service_counties }}{% endif %}</div>
-      </div>
-    </div>
-
-    <div class="mv-card">
-      <div class="mv-section-title">About</div>
-      <p style="font-size:0.9rem; line-height:1.7;">{{ mover.description }}</p>
-
-      {% if mover.is_major_sponsor and mover.products.all %}
-      <div class="rd-ticker-wrap">
-        <div class="rd-ticker-track">
-          {% for product in mover.products.all|slice:":15" %}
-            <span class="rd-ticker-item">
-              {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
-              {{ product.name|truncatechars:26 }}
-              {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
-            </span>
-          {% endfor %}
-          {% for product in mover.products.all|slice:":15" %}
-            <span class="rd-ticker-item" aria-hidden="true">
-              {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
-              {{ product.name|truncatechars:26 }}
-              {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
-            </span>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-
-      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
-        <a href="https://wa.me/254{{ mover.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20need%20moving%20services." target="_blank" class="mv-btn mv-btn-wa">WhatsApp</a>
-        <a href="tel:{{ mover.phone_number }}" class="mv-btn mv-btn-phone">Call</a>
-        {% if mover.website %}<a href="{{ mover.website }}" target="_blank" rel="noopener noreferrer" class="mv-btn mv-btn-web">Visit Website ↗</a>{% endif %}
-      </div>
-    </div>
-
-    {% if mover.gallery_images.all %}
-    <div class="mv-card">
-      <div class="mv-section-title">Photos</div>
-      <div class="mv-gallery">
-        {% for photo in mover.gallery_images.all %}
-          <img src="{{ photo.image.url }}" alt="{{ mover.name }} photo">
-        {% endfor %}
-      </div>
-    </div>
+<div style="max-width:900px;margin:40px auto;padding:0 20px;">
+  <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
+    {% if mover.logo %}
+      <img src="{{ mover.logo.url }}" alt="{{ mover.name }}" style="width:70px;height:70px;border-radius:14px;object-fit:cover;">
     {% endif %}
+    <div>
+      <h1 style="margin:0;font-size:1.4rem;">{{ mover.name }}</h1>
+      {% if mover.is_major_sponsor %}
+        <span style="background:#FEF3C7;color:#D97706;font-size:0.7rem;font-weight:700;padding:3px 10px;border-radius:999px;">⭐ Sponsored</span>
+      {% endif %}
+    </div>
   </div>
+
+  <p style="line-height:1.7;color:#333;">{{ mover.description }}</p>
+
+  <div style="display:flex;gap:10px;margin:20px 0;">
+    <a href="https://wa.me/254{{ mover.phone_number|slice:'1:' }}" target="_blank"
+       style="background:#D1FAE5;color:#065F46;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:600;">WhatsApp</a>
+    <a href="tel:{{ mover.phone_number }}"
+       style="background:#DBEAFE;color:#0369A1;padding:10px 18px;border-radius:10px;text-decoration:none;font-weight:600;">Call</a>
+  </div>
+
+  {% if mover.products.all %}
+  <h2 style="font-size:1.1rem;margin-top:30px;">Services / Products</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:12px;">
+    {% for product in mover.products.all %}
+    <div style="border:1px solid #eee;border-radius:10px;padding:10px;text-align:center;">
+      {% if product.image_url %}<img src="{{ product.image_url }}" style="width:100%;height:100px;object-fit:cover;border-radius:8px;">{% endif %}
+      <div style="font-weight:600;margin-top:6px;">{{ product.name }}</div>
+      {% if product.price %}<div style="color:#0F766E;">KSh {{ product.price|floatformat:"0" }}</div>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if mover.gallery_images.all %}
+  <h2 style="font-size:1.1rem;margin-top:30px;">Gallery</h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px;">
+    {% for photo in mover.gallery_images.all %}
+      <img src="{{ photo.image.url }}" style="width:100%;height:110px;object-fit:cover;border-radius:8px;">
+    {% endfor %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
