@@ -1368,6 +1368,9 @@ def remove_expired_vendors(request):
     messages.success(request, f'Removed {count} expired contract(s).')
     return redirect('vendor_dashboard')
 
+def mover_detail(request, pk):
+    mover = get_object_or_404(Mover, pk=pk, is_approved=True)
+    return render(request, 'core/mover_detail.html', {'mover': mover})
 
 def furniture_vendor_detail(request, pk):
     vendor = get_object_or_404(FurnitureVendor, pk=pk, is_approved=True)
