@@ -218,24 +218,26 @@ from .models import Mover, FurnitureVendor
 class MoverForm(forms.ModelForm):
     class Meta:
         model = Mover
-        fields = ['name', 'logo', 'phone_number', 'description', 'website']
+        fields = ['name', 'logo', 'phone_number', 'description', 'website', 'service_counties']
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Example: Peak Movers'}),
             'phone_number': forms.TextInput(attrs={'placeholder': 'e.g. 0712345678'}),
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe services, pricing, areas of operation...'}),
             'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
+            'service_counties': forms.TextInput(attrs={'placeholder': 'e.g. Nairobi, Kiambu — which counties this mover serves'}),
         }
-
+        
 class FurnitureVendorForm(forms.ModelForm):
     class Meta:
         model = FurnitureVendor
-        fields = ['name', 'image', 'phone_number', 'location', 'description', 'website']
+        fields = ['name', 'image', 'phone_number', 'location', 'description', 'website', 'service_counties']
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Example: Elegant Sofa World'}),
             'phone_number': forms.TextInput(attrs={'placeholder': 'e.g. 0712345678'}),
             'location': forms.TextInput(attrs={'placeholder': 'e.g. Kasarani, Nairobi'}),
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe types of furniture, custom work, delivery options...'}),
             'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
+            'service_counties': forms.TextInput(attrs={'placeholder': 'e.g. Nairobi, Kiambu — which counties this vendor serves'}),
         }
 
 
