@@ -1309,9 +1309,64 @@ def add_furniture_vendor_sponsor(request):
         form = FurnitureVendorSponsorForm()
     return render(request, 'core/add_furniture_vendor_sponsor.html', {'form': form})
 
-def mover_detail(request, pk):
-    mover = get_object_or_404(Mover, pk=pk, is_approved=True)
-    return render(request, 'core/mover_detail.html', {'mover': mover})
+@staff_or_help_admin_required
+def edit_mover(request, pk):
+    mover = get_object_or_404(Mover, pk=pk)
+    if request.method == 'POST':
+        form = (MoverSponsorForm if mover.is_major_sponsor else MoverForm)(request.POST, request.FILES, instance=mover)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Mover "{mover.name}" updated.')
+            return redirect('vendor_dashboard')
+    else:
+        form = (MoverSponsorForm if mover.is_major_sponsor else MoverForm)(instance=mover)
+    return render(request, 'core/edit_mover.html', {'form': form, 'mover': mover})
+
+
+@staff_or_help_admin_required
+def delete_mover(request, pk):
+    mover = get_object_or_404(Mover, pk=pk)
+    name = mover.name
+    mover.delete()
+    messages.success(request, f'Mover "{name}" removed.')
+    return redirect('vendor_dashboard')
+
+
+@staff_or_help_admin_required
+def edit_furniture_vendor(request, pk):
+    vendor = get_object_or_404(FurnitureVendor, pk=pk)
+    if request.method == 'POST':
+        form = (FurnitureVendorSponsorForm if vendor.is_major_sponsor else FurnitureVendorForm)(request.POST, request.FILES, instance=vendor)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Furniture vendor "{vendor.name}" updated.')
+            return redirect('vendor_dashboard')
+    else:
+        form = (FurnitureVendorSponsorForm if vendor.is_major_sponsor else FurnitureVendorForm)(instance=vendor)
+    return render(request, 'core/edit_furniture_vendor.html', {'form': form, 'vendor': vendor})
+
+
+@staff_or_help_admin_required
+def delete_furniture_vendor(request, pk):
+    vendor = get_object_or_404(FurnitureVendor, pk=pk)
+    name = vendor.name
+    vendor.delete()
+    messages.success(request, f'Furniture vendor "{name}" removed.')
+    return redirect('vendor_dashboard')
+
+
+@staff_or_help_admin_required
+def remove_expired_vendors(request):
+    """Deletes any Mover/FurnitureVendor whose contract_end_date has passed.
+    Ones with no contract_end_date set are left alone — only explicit expiries are removed."""
+    today = timezone.now().date()
+    expired_movers = Mover.objects.filter(contract_end_date__lt=today)
+    expired_vendors = FurnitureVendor.objects.filter(contract_end_date__lt=today)
+    count = expired_movers.count() + expired_vendors.count()
+    expired_movers.delete()
+    expired_vendors.delete()
+    messages.success(request, f'Removed {count} expired contract(s).')
+    return redirect('vendor_dashboard')
 
 
 def furniture_vendor_detail(request, pk):
@@ -1655,5 +1710,33 @@ def remove_expired_vendors(request):
         'movers': movers,
         'furniture_vendors': furniture_vendors,
         'failed_count': failed_count,
+    }
+    return render(request, 'core/vendor_dashboard.html', context)
+
+@staff_or_help_admin_required
+def vendor_dashboard(request):
+    """
+    Shows all Movers and FurnitureVendors with their scrape status, lets a
+    staff account or help-admin edit/remove them, and flags expired contracts.
+    """
+    today = timezone.now().date()
+    movers = Mover.objects.all().order_by('-is_major_sponsor', 'name')
+    furniture_vendors = FurnitureVendor.objects.all().order_by('-is_major_sponsor', 'name')
+
+    failed_count = (
+        movers.filter(scrape_status='failed').count()
+        + furniture_vendors.filter(scrape_status='failed').count()
+    )
+    expired_count = (
+        movers.filter(contract_end_date__lt=today).count()
+        + furniture_vendors.filter(contract_end_date__lt=today).count()
+    )
+
+    context = {
+        'movers': movers,
+        'furniture_vendors': furniture_vendors,
+        'failed_count': failed_count,
+        'expired_count': expired_count,
+        'today': today,
     }
     return render(request, 'core/vendor_dashboard.html', context)

@@ -225,8 +225,9 @@ class MoverForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe services, pricing, areas of operation...'}),
             'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
             'service_counties': forms.TextInput(attrs={'placeholder': 'e.g. Nairobi, Kiambu — which counties this mover serves'}),
+            'contract_end_date': forms.DateInput(attrs={'type': 'date'}),
         }
-        
+
 class FurnitureVendorForm(forms.ModelForm):
     class Meta:
         model = FurnitureVendor
@@ -238,6 +239,7 @@ class FurnitureVendorForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Describe types of furniture, custom work, delivery options...'}),
             'website': forms.URLInput(attrs={'placeholder': 'https://example.com (optional)'}),
             'service_counties': forms.TextInput(attrs={'placeholder': 'e.g. Nairobi, Kiambu — which counties this vendor serves'}),
+            'contract_end_date': forms.DateInput(attrs={'type': 'date'}),
         }
 
 

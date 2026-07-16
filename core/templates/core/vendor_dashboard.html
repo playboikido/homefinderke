@@ -1,44 +1,367 @@
 {% extends 'base.html' %}
-{% block title %}Vendor Dashboard — HomeFinder Kenya{% endblock %}
+
+{% block title %}Vendor Dashboard — HomeFinder KE{% endblock %}
+
+{% block extra_head %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+  :root {
+    --c-primary:     #0F766E;
+    --c-primary-dk:  #0D5E58;
+    --c-secondary:   #14B8A6;
+    --c-accent:      #0369A1;
+    --c-bg:          #F0FDFA;
+    --c-fg:          #134E4A;
+    --c-surface:     #FFFFFF;
+    --c-muted:       #E8F0F3;
+    --c-border:      #99F6E4;
+    --c-text:        #1C4A47;
+    --c-subtle:      #5EAFA8;
+    --c-danger:      #DC2626;
+    --c-gold:        #D97706;
+    --c-gold-bg:     #FEF3C7;
+    --c-green-bg:    #DCFCE7;
+    --c-green-text:  #166534;
+
+    --font-body: 'Fira Sans', system-ui, sans-serif;
+    --font-mono: 'Fira Code', monospace;
+
+    --r:      12px;
+    --r-lg:   18px;
+    --r-xl:   24px;
+    --r-full: 9999px;
+
+    --shadow-sm: 0 1px 3px rgba(15,118,110,0.08);
+    --shadow:    0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
+    --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
+    --ease: cubic-bezier(0.4,0,0.2,1);
+  }
+  [data-theme="dark"] {
+    --c-primary:     #14B8A6;
+    --c-primary-dk:  #0F766E;
+    --c-secondary:   #2DD4BF;
+    --c-accent:      #38BDF8;
+    --c-bg:          #0F172A;
+    --c-fg:          #E2E8F0;
+    --c-surface:     #1E293B;
+    --c-muted:       #334155;
+    --c-border:      #334155;
+    --c-text:        #CBD5E1;
+    --c-subtle:      #94A3B8;
+    --c-danger:      #F87171;
+    --c-gold:        #FBBF24;
+    --c-gold-bg:     #422006;
+    --c-green-bg:    #052E1C;
+    --c-green-text:  #4ADE80;
+  }
+
+  .vd-wrap { font-family: var(--font-body); background: var(--c-bg); min-height: 100vh; color: var(--c-text); }
+  .vd-inner { max-width: 1200px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  .vd-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 28px; }
+  .vd-title { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 700; color: var(--c-fg); }
+  .vd-subtitle { font-size: 0.85rem; color: var(--c-subtle); margin-top: 4px; }
+
+  .vd-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+  .vd-stat { background: var(--c-surface); border-radius: var(--r-lg); padding: 18px 20px; box-shadow: var(--shadow-sm); border: 1px solid rgba(153,246,228,0.4); }
+  .vd-stat-val { font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; color: var(--c-fg); }
+  .vd-stat-label { font-size: 0.7rem; color: var(--c-subtle); font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 2px; }
+  .vd-stat--warn .vd-stat-val { color: var(--c-danger); }
+
+  .vd-actions-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px; }
+  .vd-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    padding: 10px 20px; border-radius: var(--r); font-size: 0.85rem; font-weight: 600;
+    font-family: var(--font-body); border: none; cursor: pointer; text-decoration: none;
+    transition: all 200ms var(--ease); white-space: nowrap;
+  }
+  .vd-btn svg { width: 15px; height: 15px; }
+  .vd-btn-teal { background: var(--c-primary); color: #FFF; }
+  .vd-btn-teal:hover { background: var(--c-primary-dk); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .vd-btn-danger { background: #FEE2E2; color: var(--c-danger); border: 1.5px solid #FECACA; }
+  .vd-btn-danger:hover { background: var(--c-danger); color: #FFF; border-color: var(--c-danger); }
+  .vd-btn-outline { background: var(--c-surface); color: var(--c-fg); border: 1.5px solid var(--c-border); }
+  .vd-btn-outline:hover { background: var(--c-muted); }
+  .vd-btn-sm { padding: 6px 12px; font-size: 0.75rem; }
+  .vd-btn-sm svg { width: 12px; height: 12px; }
+
+  .vd-section { margin-bottom: 40px; }
+  .vd-section-head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1.5px solid var(--c-border);
+  }
+  .vd-section-title {
+    font-family: var(--font-mono); font-size: 1rem; font-weight: 700; color: var(--c-fg);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .vd-section-title::before { content: ''; width: 4px; height: 16px; background: var(--c-primary); border-radius: 2px; display: block; }
+  .vd-section-count { font-size: 0.75rem; color: var(--c-subtle); font-family: var(--font-mono); }
+
+  .vd-table-wrap { background: var(--c-surface); border-radius: var(--r-xl); border: 1px solid rgba(153,246,228,0.35); box-shadow: var(--shadow-sm); overflow: hidden; }
+  table.vd-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .vd-table th {
+    text-align: left; padding: 12px 16px; background: var(--c-muted);
+    font-size: 0.68rem; font-weight: 700; color: var(--c-subtle);
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .vd-table td { padding: 12px 16px; border-top: 1px solid var(--c-border); vertical-align: middle; }
+  .vd-table tr:hover td { background: var(--c-bg); }
+
+  .vd-entity { display: flex; align-items: center; gap: 10px; }
+  .vd-logo { width: 36px; height: 36px; border-radius: 8px; overflow: hidden; flex-shrink: 0; background: linear-gradient(135deg, var(--c-primary), var(--c-secondary)); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-weight: 700; }
+  .vd-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .vd-name { font-family: var(--font-mono); font-weight: 700; color: var(--c-fg); font-size: 0.85rem; }
+  .vd-meta { font-size: 0.72rem; color: var(--c-subtle); margin-top: 1px; }
+
+  .vd-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: var(--r-full); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+  .vd-badge--sponsor { background: var(--c-gold-bg); color: var(--c-gold); }
+  .vd-badge--ok { background: var(--c-green-bg); color: var(--c-green-text); }
+  .vd-badge--failed { background: #FEE2E2; color: var(--c-danger); }
+  .vd-badge--manual { background: var(--c-muted); color: var(--c-subtle); }
+  .vd-badge--none { background: var(--c-muted); color: var(--c-subtle); }
+
+  .vd-expiry { font-family: var(--font-mono); font-size: 0.8rem; }
+  .vd-expiry--expired { color: var(--c-danger); font-weight: 700; }
+  .vd-expiry--soon { color: var(--c-gold); font-weight: 700; }
+  .vd-expiry--ok { color: var(--c-text); }
+  .vd-expiry--none { color: var(--c-subtle); font-style: italic; }
+
+  .vd-row-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .vd-empty { text-align: center; padding: 40px 24px; color: var(--c-subtle); font-size: 0.85rem; }
+
+  .vd-messages { margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+  .vd-msg { padding: 12px 16px; border-radius: var(--r); font-size: 0.85rem; font-weight: 600; }
+  .vd-msg--success { background: var(--c-green-bg); color: var(--c-green-text); }
+  .vd-msg--error { background: #FEE2E2; color: var(--c-danger); }
+
+  @media (max-width: 900px) {
+    .vd-stats { grid-template-columns: repeat(2, 1fr); }
+    .vd-table-wrap { overflow-x: auto; }
+    table.vd-table { min-width: 720px; }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div style="max-width:900px; margin:0 auto; padding:32px 24px;">
-  <h1 style="font-family:monospace; margin-bottom:8px;">Vendor Dashboard</h1>
-  <p style="color:#5EAFA8; margin-bottom:24px;">{{ failed_count }} vendor(s) with a failed scrape — check these manually.</p>
+<div class="vd-wrap">
+  <div class="vd-inner">
 
-  <h2 style="font-family:monospace; font-size:1rem; margin-bottom:12px;">Movers</h2>
-  <table style="width:100%; border-collapse:collapse; margin-bottom:32px;">
-    <tr style="text-align:left; border-bottom:2px solid #99F6E4;">
-      <th style="padding:8px;">Name</th><th>Sponsor</th><th>Data Source</th><th>Scrape Status</th><th>Last Scraped</th>
-    </tr>
-    {% for mover in movers %}
-    <tr style="border-bottom:1px solid #E8F0F3;">
-      <td style="padding:8px;">{{ mover.name }}</td>
-      <td>{% if mover.is_major_sponsor %}⭐{% endif %}</td>
-      <td>{{ mover.get_data_source_display }}</td>
-      <td style="color:{% if mover.scrape_status == 'failed' %}#DC2626{% elif mover.scrape_status == 'ok' %}#0F766E{% else %}#94A3B8{% endif %};">
-        {{ mover.get_scrape_status_display }}
-      </td>
-      <td>{{ mover.last_scraped_at|date:"d M Y H:i"|default:"—" }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+    <div class="vd-header">
+      <div>
+        <div class="vd-title">Vendor Dashboard</div>
+        <div class="vd-subtitle">Manage movers and furniture vendors — edit details, track contracts, remove expired listings.</div>
+      </div>
+    </div>
 
-  <h2 style="font-family:monospace; font-size:1rem; margin-bottom:12px;">Furniture Vendors</h2>
-  <table style="width:100%; border-collapse:collapse;">
-    <tr style="text-align:left; border-bottom:2px solid #99F6E4;">
-      <th style="padding:8px;">Name</th><th>Sponsor</th><th>Data Source</th><th>Scrape Status</th><th>Last Scraped</th>
-    </tr>
-    {% for vendor in furniture_vendors %}
-    <tr style="border-bottom:1px solid #E8F0F3;">
-      <td style="padding:8px;">{{ vendor.name }}</td>
-      <td>{% if vendor.is_major_sponsor %}⭐{% endif %}</td>
-      <td>{{ vendor.get_data_source_display }}</td>
-      <td style="color:{% if vendor.scrape_status == 'failed' %}#DC2626{% elif vendor.scrape_status == 'ok' %}#0F766E{% else %}#94A3B8{% endif %};">
-        {{ vendor.get_scrape_status_display }}
-      </td>
-      <td>{{ vendor.last_scraped_at|date:"d M Y H:i"|default:"—" }}</td>
-    </tr>
-    {% endfor %}
-  </table>
+    {% if messages %}
+    <div class="vd-messages">
+      {% for message in messages %}
+      <div class="vd-msg {% if message.tags == 'error' %}vd-msg--error{% else %}vd-msg--success{% endif %}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="vd-stats">
+      <div class="vd-stat">
+        <div class="vd-stat-val">{{ movers.count }}</div>
+        <div class="vd-stat-label">Total Movers</div>
+      </div>
+      <div class="vd-stat">
+        <div class="vd-stat-val">{{ furniture_vendors.count }}</div>
+        <div class="vd-stat-label">Total Furniture Vendors</div>
+      </div>
+      <div class="vd-stat {% if failed_count %}vd-stat--warn{% endif %}">
+        <div class="vd-stat-val">{{ failed_count }}</div>
+        <div class="vd-stat-label">Failed Scrapes</div>
+      </div>
+      <div class="vd-stat {% if expired_count %}vd-stat--warn{% endif %}">
+        <div class="vd-stat-val">{{ expired_count }}</div>
+        <div class="vd-stat-label">Expired Contracts</div>
+      </div>
+    </div>
+
+    {% if expired_count %}
+    <div class="vd-actions-bar">
+      <form method="post" action="{% url 'remove_expired_vendors' %}" onsubmit="return confirm('Remove {{ expired_count }} expired listing(s)? This cannot be undone.');">
+        {% csrf_token %}
+        <button type="submit" class="vd-btn vd-btn-danger">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Remove All Expired ({{ expired_count }})
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    <!-- ── Movers ─────────────────────────────────────────────── -->
+    <div class="vd-section">
+      <div class="vd-section-head">
+        <h2 class="vd-section-title">Movers</h2>
+        <span class="vd-section-count">{{ movers.count }} total</span>
+      </div>
+      <div class="vd-table-wrap">
+        <table class="vd-table">
+          <thead>
+            <tr>
+              <th>Mover</th>
+              <th>Phone</th>
+              <th>Scrape Status</th>
+              <th>Contract Expiry</th>
+              <th>Type</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for mover in movers %}
+            <tr>
+              <td>
+                <div class="vd-entity">
+                  <div class="vd-logo">
+                    {% if mover.logo %}<img src="{{ mover.logo.url }}" alt="{{ mover.name }}">{% else %}{{ mover.name|slice:":1"|upper }}{% endif %}
+                  </div>
+                  <div>
+                    <div class="vd-name">{{ mover.name }}</div>
+                    <div class="vd-meta">{{ mover.service_counties|default:"No counties set" }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="vd-expiry">{{ mover.phone_number|default:"—" }}</td>
+              <td>
+                {% if mover.scrape_status == 'failed' %}
+                  <span class="vd-badge vd-badge--failed">Failed</span>
+                {% elif mover.data_source == 'manual' %}
+                  <span class="vd-badge vd-badge--manual">Manual</span>
+                {% else %}
+                  <span class="vd-badge vd-badge--ok">OK</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if mover.contract_end_date %}
+                  {% if mover.contract_end_date < today %}
+                    <span class="vd-expiry vd-expiry--expired">Expired {{ mover.contract_end_date|date:"d M Y" }}</span>
+                  {% else %}
+                    <span class="vd-expiry vd-expiry--ok">{{ mover.contract_end_date|date:"d M Y" }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="vd-expiry vd-expiry--none">No contract set</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if mover.is_major_sponsor %}
+                  <span class="vd-badge vd-badge--sponsor">⭐ Sponsor</span>
+                {% else %}
+                  <span class="vd-badge vd-badge--none">Paid listing</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="vd-row-actions" style="justify-content:flex-end;">
+                  <a href="{% url 'edit_mover' mover.id %}" class="vd-btn vd-btn-outline vd-btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                    Edit
+                  </a>
+                  <form method="post" action="{% url 'delete_mover' mover.id %}" onsubmit="return confirm('Delete mover \'{{ mover.name|escapejs }}\'? This cannot be undone.');" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="vd-btn vd-btn-danger vd-btn-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6"><div class="vd-empty">No movers added yet.</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Furniture Vendors ──────────────────────────────────── -->
+    <div class="vd-section">
+      <div class="vd-section-head">
+        <h2 class="vd-section-title">Furniture Vendors</h2>
+        <span class="vd-section-count">{{ furniture_vendors.count }} total</span>
+      </div>
+      <div class="vd-table-wrap">
+        <table class="vd-table">
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Phone</th>
+              <th>Scrape Status</th>
+              <th>Contract Expiry</th>
+              <th>Type</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for vendor in furniture_vendors %}
+            <tr>
+              <td>
+                <div class="vd-entity">
+                  <div class="vd-logo">
+                    {% if vendor.image %}<img src="{{ vendor.image.url }}" alt="{{ vendor.name }}">{% else %}{{ vendor.name|slice:":1"|upper }}{% endif %}
+                  </div>
+                  <div>
+                    <div class="vd-name">{{ vendor.name }}</div>
+                    <div class="vd-meta">{{ vendor.location|default:"No location set" }}</div>
+                  </div>
+                </div>
+              </td>
+              <td class="vd-expiry">{{ vendor.phone_number|default:"—" }}</td>
+              <td>
+                {% if vendor.scrape_status == 'failed' %}
+                  <span class="vd-badge vd-badge--failed">Failed</span>
+                {% elif vendor.data_source == 'manual' %}
+                  <span class="vd-badge vd-badge--manual">Manual</span>
+                {% else %}
+                  <span class="vd-badge vd-badge--ok">OK</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if vendor.contract_end_date %}
+                  {% if vendor.contract_end_date < today %}
+                    <span class="vd-expiry vd-expiry--expired">Expired {{ vendor.contract_end_date|date:"d M Y" }}</span>
+                  {% else %}
+                    <span class="vd-expiry vd-expiry--ok">{{ vendor.contract_end_date|date:"d M Y" }}</span>
+                  {% endif %}
+                {% else %}
+                  <span class="vd-expiry vd-expiry--none">No contract set</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if vendor.is_major_sponsor %}
+                  <span class="vd-badge vd-badge--sponsor">⭐ Sponsor</span>
+                {% else %}
+                  <span class="vd-badge vd-badge--none">Paid listing</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="vd-row-actions" style="justify-content:flex-end;">
+                  <a href="{% url 'edit_furniture_vendor' vendor.id %}" class="vd-btn vd-btn-outline vd-btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+                    Edit
+                  </a>
+                  <form method="post" action="{% url 'delete_furniture_vendor' vendor.id %}" onsubmit="return confirm('Delete vendor \'{{ vendor.name|escapejs }}\'? This cannot be undone.');" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="vd-btn vd-btn-danger vd-btn-sm">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                      Delete
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6"><div class="vd-empty">No furniture vendors added yet.</div></td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

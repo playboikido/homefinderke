@@ -687,6 +687,7 @@ class FurnitureVendor(models.Model):
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     service_counties = models.CharField(max_length=500, blank=True, help_text="Comma-separated counties served, e.g. Nairobi, Kiambu")
+    contract_end_date = models.DateField(blank=True, null=True, help_text="When this mover's paid listing/contract expires")
 
     # --- NEW: live product data ---
     data_source = models.CharField(max_length=10, choices=DATA_SOURCE_CHOICES, default='manual')
