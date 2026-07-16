@@ -713,3 +713,19 @@ class FurnitureProduct(models.Model):
 
     class Meta:
         indexes = [models.Index(fields=['vendor', 'is_active'])]
+
+
+class MoverGalleryImage(models.Model):
+    """Portfolio photos ('what they do, how they do it') — separate from the
+    scraped MoverProduct ticker. Shown on the mover's own detail/view page
+    for both sponsor and directory tiers."""
+    mover = models.ForeignKey(Mover, on_delete=models.CASCADE, related_name='gallery_images')
+    image = models.ImageField(upload_to='movers/gallery/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+class FurnitureGalleryImage(models.Model):
+    """Portfolio photos for furniture vendors — same purpose as MoverGalleryImage."""
+    vendor = models.ForeignKey(FurnitureVendor, on_delete=models.CASCADE, related_name='gallery_images')
+    image = models.ImageField(upload_to='furniture/gallery/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)

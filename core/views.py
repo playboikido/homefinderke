@@ -18,7 +18,7 @@ from .forms import ProfileForm
 from .models import Residence, Profile
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct
+from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage
 from django.contrib import messages
 from .forms import ContactForm
 from django.contrib.auth.decorators import login_required
@@ -1249,6 +1249,8 @@ def add_mover(request):
             mover.is_approved = True
             mover.is_major_sponsor = False
             mover.save()
+            for photo in request.FILES.getlist('gallery_images'):
+                MoverGalleryImage.objects.create(mover=mover, image=photo)
             messages.success(request, f'Mover "{mover.name}" has been added successfully.')
             return redirect('admin_dashboard')
     else:
@@ -1265,6 +1267,8 @@ def add_mover_sponsor(request):
             mover.is_approved = True
             mover.is_major_sponsor = True
             mover.save()
+            for photo in request.FILES.getlist('gallery_images'):
+                MoverGalleryImage.objects.create(mover=mover, image=photo)
             messages.success(request, f'Sponsored mover "{mover.name}" has been added successfully.')
             return redirect('admin_dashboard')
     else:
@@ -1281,6 +1285,8 @@ def add_furniture_vendor(request):
             vendor.is_approved = True
             vendor.is_major_sponsor = False
             vendor.save()
+            for photo in request.FILES.getlist('gallery_images'):
+                FurnitureGalleryImage.objects.create(vendor=vendor, image=photo)
             messages.success(request, f'Furniture Vendor "{vendor.name}" has been added successfully.')
             return redirect('admin_dashboard')
     else:
@@ -1303,6 +1309,14 @@ def add_furniture_vendor_sponsor(request):
         form = FurnitureVendorSponsorForm()
     return render(request, 'core/add_furniture_vendor_sponsor.html', {'form': form})
 
+def mover_detail(request, pk):
+    mover = get_object_or_404(Mover, pk=pk, is_approved=True)
+    return render(request, 'core/mover_detail.html', {'mover': mover})
+
+
+def furniture_vendor_detail(request, pk):
+    vendor = get_object_or_404(FurnitureVendor, pk=pk, is_approved=True)
+    return render(request, 'core/furniture_vendor_detail.html', {'vendor': vendor})
 
 def robots_txt(request):
     base_url = request.build_absolute_uri('/')[:-1]

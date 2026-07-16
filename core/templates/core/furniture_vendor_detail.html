@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}{{ vendor.name }} — HomeFinder Kenya{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+  :root {
+    --c-primary: #D97706; --c-primary-dk: #B45309; --c-secondary: #F59E0B;
+    --c-bg: #FFFBEB; --c-fg: #78350F; --c-surface: #FFFFFF; --c-muted: #FEF3C7;
+    --c-border: #FDE68A; --c-text: #451A03; --c-subtle: #D97706;
+    --font-body: 'Fira Sans', system-ui, sans-serif; --font-mono: 'Fira Code', monospace;
+    --r: 12px; --r-lg: 18px; --shadow: 0 4px 12px rgba(217,119,6,0.10);
+  }
+  .fv-wrap { font-family: var(--font-body); background: var(--c-bg); min-height: 100vh; color: var(--c-text); }
+  .fv-inner { max-width: 760px; margin: 0 auto; padding: 40px 24px 64px; }
+  .fv-hero { background: linear-gradient(135deg, var(--c-fg), var(--c-primary)); border-radius: var(--r-lg); padding: 32px; display:flex; align-items:center; gap:20px; box-shadow: var(--shadow); }
+  .fv-logo { width:72px; height:72px; border-radius:14px; object-fit:cover; border:2px solid rgba(255,255,255,0.3); flex-shrink:0; }
+  .fv-logo-fallback { width:72px; height:72px; border-radius:14px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-mono); font-size:1.8rem; font-weight:700; flex-shrink:0; }
+  .fv-name { font-family: var(--font-mono); font-size: 1.4rem; font-weight:700; color:#fff; }
+  .fv-meta { color: rgba(255,255,255,0.75); font-size:0.85rem; margin-top:4px; }
+  .fv-card { background: var(--c-surface); border-radius: var(--r-lg); border:1.5px solid var(--c-border); box-shadow: var(--shadow); padding: 24px; margin-top: 20px; }
+  .fv-section-title { font-family: var(--font-mono); font-size: 0.9rem; font-weight:700; color: var(--c-fg); margin-bottom: 14px; }
+  .fv-gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .fv-gallery img { width:100%; height:120px; object-fit:cover; border-radius: var(--r); border:1.5px solid var(--c-border); }
+  .fv-btn { display:inline-flex; align-items:center; gap:8px; padding:11px 22px; border-radius:var(--r); font-size:0.88rem; font-weight:600; border:none; cursor:pointer; text-decoration:none; }
+  .fv-btn-wa { background:#D1FAE5; color:#065F46; }
+  .fv-btn-phone { background:#DBEAFE; color:#0369A1; }
+  .fv-btn-web { background:var(--c-muted); color:var(--c-fg); border:1.5px solid var(--c-border); }
+  .rd-ticker-wrap { margin-top: 14px; overflow: hidden; width: 100%; border-top: 1px dashed var(--c-border); padding-top: 10px; }
+  .rd-ticker-track { display: flex; gap: 14px; width: max-content; animation: rd-ticker-scroll 18s linear infinite; }
+  .rd-ticker-wrap:hover .rd-ticker-track { animation-play-state: paused; }
+  .rd-ticker-item { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--c-subtle); white-space: nowrap; flex-shrink: 0; }
+  .rd-ticker-item img { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; }
+  .rd-ticker-price { font-family: var(--font-mono); font-weight: 700; color: var(--c-primary); }
+  @keyframes rd-ticker-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+</style>
+
+<div class="fv-wrap">
+  <div class="fv-inner">
+    <div class="fv-hero">
+      {% if vendor.image %}
+        <img src="{{ vendor.image.url }}" alt="{{ vendor.name }}" class="fv-logo">
+      {% else %}
+        <div class="fv-logo-fallback">{{ vendor.name|slice:":1"|upper }}</div>
+      {% endif %}
+      <div>
+        <div class="fv-name">{{ vendor.name }}</div>
+        <div class="fv-meta">Furniture Vendor{% if vendor.location %} · {{ vendor.location }}{% endif %}{% if vendor.service_counties %} · Serving {{ vendor.service_counties }}{% endif %}</div>
+      </div>
+    </div>
+
+    <div class="fv-card">
+      <div class="fv-section-title">About</div>
+      <p style="font-size:0.9rem; line-height:1.7;">{{ vendor.description }}</p>
+
+      {% if vendor.is_major_sponsor and vendor.products.all %}
+      <div class="rd-ticker-wrap">
+        <div class="rd-ticker-track">
+          {% for product in vendor.products.all|slice:":15" %}
+            <span class="rd-ticker-item">
+              {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+              {{ product.name|truncatechars:26 }}
+              {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+            </span>
+          {% endfor %}
+          {% for product in vendor.products.all|slice:":15" %}
+            <span class="rd-ticker-item" aria-hidden="true">
+              {% if product.image_url %}<img src="{{ product.image_url }}" alt="">{% endif %}
+              {{ product.name|truncatechars:26 }}
+              {% if product.price %}<span class="rd-ticker-price">KSh {{ product.price|floatformat:"0" }}</span>{% endif %}
+            </span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:20px;">
+        <a href="https://wa.me/254{{ vendor.phone_number|slice:'1:' }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE%20and%20I%20am%20interested%20in%20your%20furniture." target="_blank" class="fv-btn fv-btn-wa">WhatsApp</a>
+        <a href="tel:{{ vendor.phone_number }}" class="fv-btn fv-btn-phone">Call</a>
+        {% if vendor.website %}<a href="{{ vendor.website }}" target="_blank" rel="noopener noreferrer" class="fv-btn fv-btn-web">Visit Website ↗</a>{% endif %}
+      </div>
+    </div>
+
+    {% if vendor.gallery_images.all %}
+    <div class="fv-card">
+      <div class="fv-section-title">Photos</div>
+      <div class="fv-gallery">
+        {% for photo in vendor.gallery_images.all %}
+          <img src="{{ photo.image.url }}" alt="{{ vendor.name }} photo">
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
