@@ -1414,8 +1414,8 @@ def remove_expired_vendors(request):
     """Deletes any Mover/FurnitureVendor whose contract_end_date has passed.
     Ones with no contract_end_date set are left alone — only explicit expiries are removed."""
     today = timezone.now().date()
-    expired_movers = Mover.objects.filter(contract_end_date__lt=today)
-    expired_vendors = FurnitureVendor.objects.filter(contract_end_date__lt=today)
+    expired_movers = Mover.objects.filter(contract_expires_at__lt=today)
+    expired_vendors = FurnitureVendor.objects.filter(contract_expires_at__lt=today)
     count = expired_movers.count() + expired_vendors.count()
     expired_movers.delete()
     expired_vendors.delete()
@@ -1806,8 +1806,8 @@ def vendor_dashboard(request):
         + furniture_vendors.filter(scrape_status='failed').count()
     )
     expired_count = (
-        movers.filter(contract_end_date__lt=today).count()
-        + furniture_vendors.filter(contract_end_date__lt=today).count()
+        movers.filter(contract_expires_at__lt=today).count()
+        + furniture_vendors.filter(contract_expires_at__lt=today).count()
     )
 
     context = {

@@ -24,9 +24,9 @@
     <tr style="border-bottom:1px solid #E8F0F3;">
       <td style="padding:8px;">{{ mover.name }}</td>
       <td>{% if mover.is_major_sponsor %}⭐{% endif %}</td>
-      <td style="color:{% if mover.contract_end_date and mover.contract_end_date < today %}#DC2626{% else %}inherit{% endif %};">
-        {{ mover.contract_end_date|date:"d M Y"|default:"—" }}
-        {% if mover.contract_end_date and mover.contract_end_date < today %}<strong> (expired)</strong>{% endif %}
+      <td style="color:{% if mover.contract_expires_at and mover.contract_expires_at < today %}#DC2626{% else %}inherit{% endif %};">
+        {{ mover.contract_expires_at|date:"d M Y"|default:"—" }}
+        {% if mover.contract_expires_at and mover.contract_expires_at < today %}<strong> (expired)</strong>{% endif %}
       </td>
       <td>{{ mover.get_scrape_status_display }}</td>
       <td>
@@ -49,9 +49,9 @@
     <tr style="border-bottom:1px solid #E8F0F3;">
       <td style="padding:8px;">{{ vendor.name }}</td>
       <td>{% if vendor.is_major_sponsor %}⭐{% endif %}</td>
-      <td style="color:{% if vendor.contract_end_date and vendor.contract_end_date < today %}#DC2626{% else %}inherit{% endif %};">
-        {{ vendor.contract_end_date|date:"d M Y"|default:"—" }}
-        {% if vendor.contract_end_date and vendor.contract_end_date < today %}<strong> (expired)</strong>{% endif %}
+      <td style="color:{% if vendor.contract_expires_at and vendor.contract_expires_at < today %}#DC2626{% else %}inherit{% endif %};">
+        {{ vendor.contract_expires_at|date:"d M Y"|default:"—" }}
+        {% if vendor.contract_expires_at and vendor.contract_expires_at < today %}<strong> (expired)</strong>{% endif %}
       </td>
       <td>{{ vendor.get_scrape_status_display }}</td>
       <td>
