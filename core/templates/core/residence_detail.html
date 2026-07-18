@@ -809,21 +809,10 @@
               {% if request.user.is_authenticated and residence.owner and request.user != residence.owner %}
               <a href="{% url 'start_conversation' residence.owner.id %}" class="rd-btn rd-btn-white">Message</a>
               {% endif %}
-              <div class="rd-share-wrap" style="position:relative;">
-                <button type="button" id="shareToggleBtn" class="rd-btn rd-btn-ghost" onclick="document.getElementById('shareMenu').classList.toggle('open')">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                  Share
-                </button>
-                <div id="shareMenu" class="rd-share-menu">
-                  <a href="https://wa.me/?text={{ share_text|urlencode }}" target="_blank" rel="noopener">WhatsApp</a>
-                  <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" rel="noopener">Facebook</a>
-                  <button type="button" onclick="shareNative()">Share from device</button>
-                  <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" onclick="copyShareLink(event)">Instagram</a>
-                  <a href="https://t.me/share/url?url={{ share_url|urlencode }}&text={{ residence.name|urlencode }}" target="_blank" rel="noopener">Telegram</a>
-                  <a href="https://twitter.com/intent/tweet?url={{ share_url|urlencode }}&text={{ residence.name|urlencode }}" target="_blank" rel="noopener">X</a>
-                  <button type="button" onclick="copyShareLink()">Copy Link</button>
-                </div>
-              </div>
+              <button type="button" class="rd-btn rd-btn-ghost" onclick="shareNative()">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                Share
+              </button>
             </div>
           </div>
           <div class="rd-hero-side">
@@ -1524,6 +1513,16 @@
     navigator.clipboard.writeText("{{ share_url|escapejs }}").then(() => {
       alert("Link copied to clipboard!");
     });
+  }
+
+  function shareNative() {
+    const url = "{{ share_url|escapejs }}";
+    const title = "{{ residence.name|escapejs }}";
+    if (navigator.share) {
+      navigator.share({ title: title, url: url });
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
+    }
   }
 
   document.addEventListener('click', function(e) {
