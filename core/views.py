@@ -18,7 +18,7 @@ from .forms import ProfileForm
 from .models import Residence, Profile
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage
+from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage, MoverFavorite, FurnitureVendorFavorite
 from django.contrib import messages
 from .forms import ContactForm
 from django.contrib.auth.decorators import login_required
@@ -1421,6 +1421,27 @@ def remove_expired_vendors(request):
     expired_vendors.delete()
     messages.success(request, f'Removed {count} expired contract(s).')
     return redirect('vendor_dashboard')
+
+@login_required
+def save_mover_favorite(request, pk):
+    mover = get_object_or_404(Mover, pk=pk, is_approved=True)
+    favorite, created = MoverFavorite.objects.get_or_create(user=request.user, mover=mover)
+    if created:
+        messages.success(request, 'Mover saved to your favorites.')
+    else:
+        messages.info(request, 'Already in your favorites.')
+    return redirect('mover_detail', pk=mover.pk)
+
+
+@login_required
+def save_furniture_vendor_favorite(request, pk):
+    vendor = get_object_or_404(FurnitureVendor, pk=pk, is_approved=True)
+    favorite, created = FurnitureVendorFavorite.objects.get_or_create(user=request.user, vendor=vendor)
+    if created:
+        messages.success(request, 'Vendor saved to your favorites.')
+    else:
+        messages.info(request, 'Already in your favorites.')
+    return redirect('furniture_vendor_detail', pk=vendor.pk)
 
 def mover_detail(request, pk):
     mover = get_object_or_404(Mover, pk=pk, is_approved=True)

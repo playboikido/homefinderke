@@ -108,6 +108,8 @@ urlpatterns = [
         ), 
     path('about/', views.about, name='about'), 
     path('residence/<int:pk>/verify-location/', views.verify_location, name='verify_location'),
+    path('mover/<int:pk>/save/', views.save_mover_favorite, name='save_mover_favorite'),
+    path('furniture-vendor/<int:pk>/save/', views.save_furniture_vendor_favorite, name='save_furniture_vendor_favorite'),
 
 
     path('admin-dashboard-redirect/', views.admin_dashboard, name='admin_dashboard_view'),

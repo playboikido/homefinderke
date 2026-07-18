@@ -662,6 +662,7 @@ class Mover(models.Model):
         return bool(self.contract_expires_at and self.contract_expires_at < timezone.now().date())
 
 
+
 class MoverProduct(models.Model):
     SOURCE_CHOICES = [('scraped', 'Scraped'), ('manual', 'Manual')]
 
@@ -736,3 +737,18 @@ class FurnitureGalleryImage(models.Model):
     vendor = models.ForeignKey(FurnitureVendor, on_delete=models.CASCADE, related_name='gallery_images')
     image = models.ImageField(upload_to='furniture/gallery/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+class MoverFavorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='mover_favorites')
+    mover = models.ForeignKey(Mover, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'mover')
+
+
+class FurnitureVendorFavorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='furniture_favorites')
+    vendor = models.ForeignKey(FurnitureVendor, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta:
+        unique_together = ('user', 'vendor')    
