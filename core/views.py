@@ -423,6 +423,13 @@ def add_residence(request):
     return render(request, 'core/add_residence.html', {'form': form})
 
 
+def listing_terms(request):
+    return render(request, 'core/listing_terms.html', {
+        'terms_text': LISTING_TERMS_TEXT,
+        'version': CURRENT_TERMS_VERSION,
+    })
+
+
 @login_required
 def dashboard(request):
     if request.user.email == 'homefinder.ke.help@gmail.com':
