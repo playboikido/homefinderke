@@ -411,6 +411,14 @@
   .app-links { display: flex; gap: 12px; }
   .app-btn { background: #FFFFFF; color: #111827; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; }
 
+  .county-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .county-chip { background: #FFFFFF; border: 1.5px solid #99F6E4; border-radius: 10px; padding: 14px 16px; text-align: center; color: #134E4A; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 200ms; display: block; }
+  .county-chip:hover { background: #0F766E; color: #FFFFFF; border-color: #0F766E; transform: translateY(-2px); }
+  .housetype-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 16px; }
+  .housetype-item { display: flex; flex-direction: column; align-items: center; gap: 8px; background: #FFFFFF; border: 1.5px solid #99F6E4; border-radius: 14px; padding: 20px 12px; text-decoration: none; color: #134E4A; font-weight: 600; font-size: 0.85rem; transition: all 200ms; }
+  .housetype-item:hover { border-color: #0F766E; background: #E8F8F6; transform: translateY(-3px); }
+  .housetype-icon { font-size: 1.8rem; }
+
   @media (max-width: 900px) {
     .advanced-filter-drawer { grid-template-columns: repeat(2, 1fr); }
     .location-grid { grid-template-columns: 1fr; }
@@ -527,6 +535,12 @@
         const drawer = document.getElementById('advancedDrawer');
         drawer.style.display = (drawer.style.display === 'grid') ? 'none' : 'grid';
     });
+    document.getElementById('toggleCountiesBtn').addEventListener('click', function() {
+        const more = document.getElementById('countyGridMore');
+        const isHidden = more.style.display === 'none';
+        more.style.display = isHidden ? 'grid' : 'none';
+        this.textContent = isHidden ? 'Show Fewer Counties' : 'Show All 47 Counties';
+    });
 </script>
 
 <section class="stats-bar">
@@ -548,6 +562,91 @@
                 <div class="stat-number">100%</div>
                 <div class="stat-label">Free to Browse</div>
             </div>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="padding-top:56px; padding-bottom:40px;">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">Browse by County</h2>
+                <p class="section-subtitle">Find listings wherever you're headed in Kenya</p>
+            </div>
+        </div>
+        <div class="county-grid">
+            <a href="/search/?county=Nairobi" class="county-chip">Nairobi</a>
+            <a href="/search/?county=Kiambu" class="county-chip">Kiambu</a>
+            <a href="/search/?county=Mombasa" class="county-chip">Mombasa</a>
+            <a href="/search/?county=Kisumu" class="county-chip">Kisumu</a>
+            <a href="/search/?county=Nakuru" class="county-chip">Nakuru</a>
+            <a href="/search/?county=Uasin+Gishu" class="county-chip">Uasin Gishu</a>
+            <a href="/search/?county=Machakos" class="county-chip">Machakos</a>
+            <a href="/search/?county=Kajiado" class="county-chip">Kajiado</a>
+            <a href="/search/?county=Murang%27a" class="county-chip">Murang'a</a>
+            <a href="/search/?county=Meru" class="county-chip">Meru</a>
+            <a href="/search/?county=Nyeri" class="county-chip">Nyeri</a>
+            <a href="/search/?county=Kakamega" class="county-chip">Kakamega</a>
+            <a href="/search/?county=Bungoma" class="county-chip">Bungoma</a>
+            <a href="/search/?county=Trans+Nzoia" class="county-chip">Trans Nzoia</a>
+            <a href="/search/?county=Kericho" class="county-chip">Kericho</a>
+            <a href="/search/?county=Bomet" class="county-chip">Bomet</a>
+            <a href="/search/?county=Kilifi" class="county-chip">Kilifi</a>
+            <a href="/search/?county=Kwale" class="county-chip">Kwale</a>
+            <a href="/search/?county=Garissa" class="county-chip">Garissa</a>
+            <a href="/search/?county=Kitui" class="county-chip">Kitui</a>
+        </div>
+        <div class="county-grid" id="countyGridMore" style="display:none; margin-top:12px;">
+            <a href="/search/?county=Baringo" class="county-chip">Baringo</a>
+            <a href="/search/?county=Busia" class="county-chip">Busia</a>
+            <a href="/search/?county=Elgeyo-Marakwet" class="county-chip">Elgeyo-Marakwet</a>
+            <a href="/search/?county=Embu" class="county-chip">Embu</a>
+            <a href="/search/?county=Homa+Bay" class="county-chip">Homa Bay</a>
+            <a href="/search/?county=Isiolo" class="county-chip">Isiolo</a>
+            <a href="/search/?county=Kirinyaga" class="county-chip">Kirinyaga</a>
+            <a href="/search/?county=Kisii" class="county-chip">Kisii</a>
+            <a href="/search/?county=Laikipia" class="county-chip">Laikipia</a>
+            <a href="/search/?county=Lamu" class="county-chip">Lamu</a>
+            <a href="/search/?county=Makueni" class="county-chip">Makueni</a>
+            <a href="/search/?county=Mandera" class="county-chip">Mandera</a>
+            <a href="/search/?county=Marsabit" class="county-chip">Marsabit</a>
+            <a href="/search/?county=Migori" class="county-chip">Migori</a>
+            <a href="/search/?county=Nandi" class="county-chip">Nandi</a>
+            <a href="/search/?county=Narok" class="county-chip">Narok</a>
+            <a href="/search/?county=Nyamira" class="county-chip">Nyamira</a>
+            <a href="/search/?county=Nyandarua" class="county-chip">Nyandarua</a>
+            <a href="/search/?county=Samburu" class="county-chip">Samburu</a>
+            <a href="/search/?county=Siaya" class="county-chip">Siaya</a>
+            <a href="/search/?county=Taita-Taveta" class="county-chip">Taita-Taveta</a>
+            <a href="/search/?county=Tana+River" class="county-chip">Tana River</a>
+            <a href="/search/?county=Tharaka-Nithi" class="county-chip">Tharaka-Nithi</a>
+            <a href="/search/?county=Turkana" class="county-chip">Turkana</a>
+            <a href="/search/?county=Vihiga" class="county-chip">Vihiga</a>
+            <a href="/search/?county=Wajir" class="county-chip">Wajir</a>
+            <a href="/search/?county=West+Pokot" class="county-chip">West Pokot</a>
+        </div>
+        <div style="text-align:center; margin-top:20px;">
+            <button type="button" id="toggleCountiesBtn" style="background:#fff; color:#0F766E; border:1.5px solid #99F6E4; border-radius:10px; padding:10px 22px; font-weight:600; font-size:0.88rem; cursor:pointer;">Show All 47 Counties</button>
+        </div>
+    </div>
+</section>
+
+<section class="section" style="padding-top:0; padding-bottom:40px;">
+    <div class="container">
+        <div class="section-header">
+            <div>
+                <h2 class="section-title">Browse by House Type</h2>
+                <p class="section-subtitle">Jump straight to the layout you're looking for</p>
+            </div>
+        </div>
+        <div class="housetype-grid">
+            <a href="/search/?house_type=single" class="housetype-item"><span class="housetype-icon">🛏️</span>Single</a>
+            <a href="/search/?house_type=bedsitter" class="housetype-item"><span class="housetype-icon">🏠</span>Bedsitter</a>
+            <a href="/search/?house_type=double_room" class="housetype-item"><span class="housetype-icon">🚪</span>Double Room</a>
+            <a href="/search/?house_type=studio" class="housetype-item"><span class="housetype-icon">🏢</span>Studio</a>
+            <a href="/search/?house_type=1_bedroom" class="housetype-item"><span class="housetype-icon">🏡</span>1 Bedroom</a>
+            <a href="/search/?house_type=2_bedroom" class="housetype-item"><span class="housetype-icon">🏘️</span>2 Bedroom</a>
+            <a href="/search/?house_type=3_bedroom" class="housetype-item"><span class="housetype-icon">🏰</span>3 Bedroom</a>
         </div>
     </div>
 </section>

@@ -401,21 +401,23 @@
   }
 </script>
 <script>
+  const searchInput = document.querySelector('.input-bar-decorator input[name="q"]');
+  let debounceTimer;
   let currentPage = 1;
-let hasNext = false;
-let isLoadingMore = false;
+  let hasNext = false;
+  let isLoadingMore = false;
 
-function runFastSearch() {
-  const form = searchInput.closest('form');
-  const params = new URLSearchParams(new FormData(form));
-  currentPage = 1;
-  fetch(`/search/?${params.toString()}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-    .then(res => res.json())
-    .then(data => {
-      renderResults(data.results, false);
-      hasNext = data.has_next;
-    });
-}
+  function runFastSearch() {
+    const form = searchInput.closest('form');
+    const params = new URLSearchParams(new FormData(form));
+    currentPage = 1;
+    fetch(`/search/?${params.toString()}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => res.json())
+      .then(data => {
+        renderResults(data.results, false);
+        hasNext = data.has_next;
+      });
+  }
 
   function loadNextPage() {
     if (!hasNext || isLoadingMore) return;
