@@ -27,6 +27,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse
 from django.utils import timezone
+from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage, MoverFavorite, FurnitureVendorFavorite, ListingAgreement, CURRENT_TERMS_VERSION, LISTING_TERMS_TEXT
 import json
 import base64
 from openai import OpenAI
@@ -394,6 +395,15 @@ def add_residence(request):
                         pass
 
                 residence.save()
+
+                ListingAgreement.objects.create(
+                    residence=residence,
+                    owner=request.user,
+                    terms_version=CURRENT_TERMS_VERSION,
+                    terms_snapshot=LISTING_TERMS_TEXT,
+                    ip_address=request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR'),
+                    user_agent=request.META.get('HTTP_USER_AGENT', ''),
+                )
 
                 for gallery_photo in request.FILES.getlist('gallery_images'):
                     ResidencePhoto.objects.create(residence=residence, image=watermark_image(gallery_photo))
@@ -1818,3 +1828,58 @@ def vendor_dashboard(request):
         'today': today,
     }
     return render(request, 'core/vendor_dashboard.html', context)
+
+
+@staff_or_help_admin_required
+def download_agreement_pdf(request, pk):
+    residence = get_object_or_404(Residence, pk=pk)
+    agreement = get_object_or_404(ListingAgreement, residence=residence)
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=2*cm, bottomMargin=2*cm)
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('AgreementTitle', parent=styles['Heading1'], textColor=colors.HexColor('#0F766E'))
+    elements = []
+
+    elements.append(Paragraph("HomeFinder KE — Listing Agreement Record", title_style))
+    elements.append(Spacer(1, 14))
+
+    data = [
+        ['Residence', residence.name],
+        ['Owner (username)', agreement.owner.username],
+        ['Owner email', agreement.owner.email or '—'],
+        ['Terms version', agreement.terms_version],
+        ['Agreed at (server timestamp)', agreement.agreed_at.strftime('%d %B %Y, %H:%M:%S UTC')],
+        ['IP address at consent', agreement.ip_address or 'Not captured'],
+        ['User agent at consent', agreement.user_agent or 'Not captured'],
+    ]
+    table = Table(data, colWidths=[5.5*cm, 10.5*cm])
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#F0FDFA')),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#99F6E4')),
+        ('PADDING', (0, 0), (-1, -1), 8),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+    ]))
+    elements.append(table)
+    elements.append(Spacer(1, 20))
+
+    elements.append(Paragraph("Terms Agreed To (Full Text, As Presented At Time Of Consent)", styles['Heading3']))
+    elements.append(Spacer(1, 8))
+    for line in agreement.terms_snapshot.strip().split('\n'):
+        elements.append(Paragraph(line if line.strip() else '&nbsp;', styles['Normal']))
+    elements.append(Spacer(1, 20))
+
+    elements.append(Paragraph(
+        "This document was generated automatically by HomeFinder KE and records the electronic "
+        "consent given by the above user at the time of listing submission. It is not a substitute "
+        "for independent legal advice.",
+        ParagraphStyle('Footer', parent=styles['Normal'], fontSize=8, textColor=colors.grey)
+    ))
+
+    doc.build(elements)
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+
+    response = HttpResponse(pdf_bytes, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="agreement_{residence.id}_{residence.name.replace(" ", "_")}.pdf"'
+    return response

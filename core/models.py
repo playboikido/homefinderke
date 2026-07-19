@@ -520,6 +520,35 @@ class LeaseAgreement(models.Model):
     def __str__(self):
         return f"Lease: {self.residence.name} - {self.tenant_full_name}"
 
+CURRENT_TERMS_VERSION = 'v1.0'  # bump this any time you change the terms text below
+
+LISTING_TERMS_TEXT = """
+
+By submitting this listing to HomeFinder KE, I confirm that:
+1. I am the owner, caretaker, or authorized agent for this property, and have the right to list it.
+2. All information provided (rent, location, amenities, availability, and photos) is accurate
+   to the best of my knowledge as of the submission date.
+3. HomeFinder KE is a listings platform only and is not a party to any tenancy agreement,
+   rent collection, or dispute between myself and any tenant.
+4. I am solely responsible for the accuracy of this listing and for complying with all
+   applicable Kenyan laws regarding rental property advertising and tenancy.
+5. HomeFinder KE may remove this listing at its discretion if it is found to be inaccurate,
+   fraudulent, or in violation of platform guidelines.
+"""
+
+class ListingAgreement(models.Model):
+    residence = models.OneToOneField(Residence, on_delete=models.CASCADE, related_name='agreement')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listing_agreements')
+    terms_version = models.CharField(max_length=20)
+    terms_snapshot = models.TextField(help_text="Full terms text as it existed at the moment of consent")
+    agreed_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"Agreement — {self.residence.name} — {self.agreed_at.strftime('%d %b %Y')}"
+
+
 class Notification(models.Model):
 
     user = models.ForeignKey(

@@ -22,6 +22,8 @@ urlpatterns = [
         views.add_residence,
         name='add_residence'
     ),
+    path('control-panel-2947/residence/<int:pk>/agreement-pdf/', views.download_agreement_pdf, name='download_agreement_pdf'),
+    path('listing-terms/', views.listing_terms, name='listing_terms'),
     path('suspended-users/', views.suspended_users, name='suspended_users'),
     path('unsuspend-user/<int:user_id>/', views.unsuspend_user, name='unsuspend_user'),
     path('dashboard/', views.dashboard, name='dashboard'),

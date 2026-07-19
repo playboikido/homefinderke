@@ -754,6 +754,15 @@
               <div class="ar-hint">You can select multiple photos at once.</div>
             </div>
 
+            <div class="ar-field" style="margin-top:20px; padding:16px; background:var(--c-muted); border-radius:var(--r); border:1.5px solid var(--c-border);">
+              <label style="display:flex; align-items:flex-start; gap:10px; text-transform:none; letter-spacing:0; font-weight:500; font-size:0.85rem; cursor:pointer;">
+                <input type="checkbox" name="agree_to_terms" required style="margin-top:3px; accent-color:var(--c-primary);">
+                <span>I confirm this listing is accurate and I agree to HomeFinder KE's
+                  <a href="{% url 'listing_terms' %}" target="_blank" style="color:var(--c-primary); font-weight:600;">Landlord Listing Agreement</a>.
+                </span>
+              </label>
+            </div>
+
             {% if form.non_field_errors %}
               <div class="ar-field-error">{{ form.non_field_errors }}</div>
             {% endif %}

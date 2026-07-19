@@ -781,6 +781,11 @@
           {% if approved_residences %}
             <span class="db-badge">{{ approved_residences|length }} active</span>
           {% endif %}
+          {% if residence.agreement %}
+            <a href="{% url 'download_agreement_pdf' residence.id %}" style="color:#0F766E; font-weight:600; font-size:0.82rem;">📄 View Approval Details</a>
+            {% else %}
+            <span style="color:#DC2626; font-size:0.78rem;">⚠ No agreement on file</span>
+          {% endif %}
         </h2>
       </div>
       <div class="db-divider"></div>

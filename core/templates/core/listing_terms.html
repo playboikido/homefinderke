@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Landlord Listing Agreement — HomeFinder KE{% endblock %}
+{% block content %}
+<div style="max-width:700px; margin:40px auto; padding:0 24px 60px;">
+  <h1 style="font-family:monospace;">Landlord Listing Agreement</h1>
+  <p style="color:#5EAFA8; font-size:0.85rem;">Version {{ version }}</p>
+  <div style="white-space:pre-wrap; line-height:1.7; margin-top:20px;">{{ terms_text }}</div>
+</div>
+{% endblock %}
