@@ -236,7 +236,7 @@ POSTMARK = {
     'VERBOSITY': 0,
 }
 
-DEFAULT_FROM_EMAIL = "homefinderke@onrender.com" 
+DEFAULT_FROM_EMAIL = "homefinder.ke.help@gmail.com"
 
 SITE_ID = 3
 
