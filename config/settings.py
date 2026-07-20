@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'allauth.mfa',
     "anymail",
 
 
@@ -80,6 +81,9 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
 
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.RequireStaffMFAMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
     'allauth.account.middleware.AccountMiddleware',
 
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -224,6 +228,8 @@ STORAGES = {
 LOGIN_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
+MFA_SUPPORTED_TYPES = ['totp', 'recovery_codes']
+MFA_TOTP_ISSUER = 'HomeFinder KE'
 
 EMAIL_BACKEND = 'postmarker.django.EmailBackend'
 EMAIL_TIMEOUT = 10  # never let a hung email call risk crashing the worker
