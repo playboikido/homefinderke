@@ -1710,7 +1710,8 @@ def vendor_dashboard(request):
     }
     return render(request, 'core/vendor_dashboard.html', context)
 
-
+def sentry_test(request):
+    1 / 0
 @staff_or_help_admin_required
 def edit_mover(request, pk):
     mover = get_object_or_404(Mover, pk=pk)

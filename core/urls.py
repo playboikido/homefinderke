@@ -131,6 +131,7 @@ urlpatterns = [
         views.compare_residences,
         name='compare_residences'
     ),
+    path('sentry-test/', views.sentry_test, name='sentry_test'),
     path('admin-dashboard/export-csv/', views.export_residences_csv, name='export_residences_csv'),
     path('admin-dashboard/suspicious-users/', views.suspicious_users, name='suspicious_users'),
     path('warn-user/<int:user_id>/', views.warn_user, name='warn_user'),
