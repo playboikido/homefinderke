@@ -167,9 +167,7 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
-ANYMAIL = {
-    "POSTMARK_SERVER_TOKEN": os.environ.get("POSTMARK_SERVER_TOKEN"),
-}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
@@ -226,14 +224,13 @@ LOGIN_URL = 'account_login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.postmarkapp.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.environ.get('POSTMARK_SERVER_TOKEN')
-EMAIL_HOST_PASSWORD = os.environ.get('POSTMARK_SERVER_TOKEN')
 EMAIL_BACKEND = 'postmarker.django.EmailBackend'
-POSTMARK_SERVER_TOKEN = os.environ.get('POSTMARK_SERVER_TOKEN') # Your Server API Token
+EMAIL_TIMEOUT = 10  # never let a hung email call risk crashing the worker
+POSTMARK = {
+    'TOKEN': os.environ.get('POSTMARK_SERVER_TOKEN'),
+    'TEST_MODE': False,
+    'VERBOSITY': 0,
+}
 
 DEFAULT_FROM_EMAIL = "homefinderke@onrender.com" 
 
