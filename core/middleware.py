@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.contrib import messages
 from allauth.mfa.utils import is_mfa_enabled
 
 STAFF_URL_PREFIXES = ('/control-panel-2947/', '/admin-dashboard/', '/staff-tools/')
@@ -19,5 +20,9 @@ class RequireStaffMFAMiddleware:
                 user.is_staff or user.email == 'homefinder.ke.help@gmail.com'
             )
             if is_admin_account and not is_mfa_enabled(user):
-                return redirect(reverse('account_login') + '?mfa_required=1')
+                messages.warning(
+                    request,
+                    '🔒 Admin accounts require two-factor authentication. Please set it up below to continue.'
+                )
+                return redirect(reverse('mfa_activate_totp'))
         return self.get_response(request)
