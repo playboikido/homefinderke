@@ -178,20 +178,24 @@ def about(request):
             return redirect('about')
 
         if form.is_valid():
-            send_mail(
-                subject=form.cleaned_data['subject'],
-                message=f"""
+            try:
+                send_mail(
+                    subject=form.cleaned_data['subject'],
+                    message=f"""
 From: {form.cleaned_data['name']}
 Email: {form.cleaned_data['email']}
 
 Message:
 {form.cleaned_data['message']}
-                """,
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=['homefinder.ke.help@gmail.com'],
-                fail_silently=True,
-            )
-            messages.success(request, 'Your message has been sent successfully.')
+                    """,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=['homefinder.ke.help@gmail.com'],
+                    fail_silently=False,
+                )
+                messages.success(request, 'Your message has been sent successfully.')
+            except Exception as e:
+                print("CONTACT FORM EMAIL ERROR:", e)
+                messages.error(request, "Sorry, your message couldn't be sent right now. Please try again shortly, or reach us directly at homefinder.ke.help@gmail.com.")
             return redirect('about')
 
     return render(request, 'core/about.html', {'form': form})
