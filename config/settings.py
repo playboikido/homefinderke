@@ -229,13 +229,13 @@ LOGOUT_REDIRECT_URL = 'home'
 MFA_SUPPORTED_TYPES = ['totp', 'recovery_codes']
 MFA_TOTP_ISSUER = 'HomeFinder KE'
 
-EMAIL_BACKEND = 'anymail.backends.postmark.EmailBackend'
+EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
 EMAIL_TIMEOUT = 10
 ANYMAIL = {
-    'POSTMARK_SERVER_TOKEN': config('POSTMARK_SERVER_TOKEN', default=''),
+    'RESEND_API_KEY': config('RESEND_API_KEY', default=''),
 }
 
-DEFAULT_FROM_EMAIL = "homefinder.ke.help@gmail.com"
+DEFAULT_FROM_EMAIL = "HomeFinder KE <onboarding@resend.dev>"
 
 SITE_ID = 3
 
