@@ -26,3 +26,25 @@ class RequireStaffMFAMiddleware:
                 )
                 return redirect(reverse('mfa_activate_totp'))
         return self.get_response(request)
+    
+STAFF_SESSION_AGE_SECONDS = 60 * 60 * 2  # 2 hours for admin accounts
+DEFAULT_SESSION_AGE_SECONDS = 60 * 60 * 24 * 14  # 14 days for everyone else (Django's normal default)
+
+
+class StaffShortSessionMiddleware:
+    """Shortens session lifetime specifically for staff/help-admin accounts,
+    without affecting regular tenant/landlord session length."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        user = getattr(request, 'user', None)
+        if user and user.is_authenticated:
+            is_admin_account = user.is_staff or user.email == 'homefinder.ke.help@gmail.com'
+            if is_admin_account:
+                request.session.set_expiry(STAFF_SESSION_AGE_SECONDS)
+            else:
+                request.session.set_expiry(DEFAULT_SESSION_AGE_SECONDS)
+        return response    
