@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load allauth account %}
+
+{% block title %}Enter Verification Code — HomeFinder Kenya{% endblock %}
+
+{% block content %}
+<style>
+  .verify-wrap {
+    font-family: 'Fira Sans', system-ui, sans-serif;
+    background: #F0FDFA;
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .verify-card {
+    background: #FFFFFF;
+    border-radius: 18px;
+    border: 1px solid rgba(153, 246, 228, 0.5);
+    box-shadow: 0 12px 32px rgba(15, 118, 110, 0.1);
+    max-width: 460px;
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+  }
+  .verify-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: #CCFBF1; color: #0F766E;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .verify-icon svg { width: 32px; height: 32px; }
+  .verify-title {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.5rem; font-weight: 700; color: #134E4A;
+    margin-bottom: 12px;
+  }
+  .verify-text { color: #1C4A47; font-size: 0.95rem; line-height: 1.6; margin-bottom: 24px; }
+  .code-input {
+    width: 100%; font-size: 1.5rem; letter-spacing: 0.5rem; text-align: center;
+    padding: 14px; border-radius: 12px; border: 1px solid #99F6E4;
+    margin-bottom: 8px; font-family: 'Fira Code', monospace;
+  }
+  .code-input:focus { outline: none; border-color: #0F766E; }
+  .field-errors { color: #DC2626; font-size: 0.85rem; margin-bottom: 16px; }
+  .btn-row { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .btn-primary {
+    padding: 12px 24px; background: #0F766E; color: #fff; border: none;
+    font-weight: 600; border-radius: 12px; cursor: pointer; width: 100%;
+  }
+  .btn-primary:hover { background: #0D5E58; }
+  .btn-outline {
+    padding: 12px 24px; background: transparent; color: #0F766E;
+    border: 1px solid #99F6E4; font-weight: 600; border-radius: 12px;
+    cursor: pointer; width: 100%; text-decoration: none; display: inline-block;
+  }
+  .change-email { margin-top: 20px; font-size: 0.85rem; color: #64748B; }
+  .change-email summary { cursor: pointer; color: #0F766E; }
+</style>
+
+<div class="verify-wrap">
+  <div class="verify-card">
+    <div class="verify-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    </div>
+
+    <h1 class="verify-title">Enter Your Code</h1>
+    <p class="verify-text">
+      We've sent a verification code to <strong>{{ email }}</strong>. Enter it below to continue. The code expires shortly.
+    </p>
+
+    <form method="post" action="{% url 'account_email_verification_sent' %}">
+      {% csrf_token %}
+      {{ redirect_field }}
+      {{ verify_form.code }}
+      {% if verify_form.code.errors %}
+        <div class="field-errors">{{ verify_form.code.errors|striptags }}</div>
+      {% endif %}
+      <div class="btn-row">
+        <button type="submit" class="btn-primary">Confirm</button>
+      </div>
+    </form>
+
+    <div class="btn-row" style="margin-top: 12px;">
+      {% if can_resend %}
+      <form method="post" action="{% url 'account_email_verification_sent' %}">
+        <input type="hidden" name="action" value="resend">
+        {{ redirect_field }}
+        {% csrf_token %}
+        <button type="submit" class="btn-outline">Request new code</button>
+      </form>
+      {% endif %}
+
+      {% if cancel_url %}
+        <a href="{{ cancel_url }}" class="btn-outline">Cancel</a>
+      {% else %}
+      <form method="post" action="{% url 'account_logout' %}">
+        <input type="hidden" name="next" value="{% url 'account_login' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-outline">Cancel</button>
+      </form>
+      {% endif %}
+    </div>
+
+    {% if can_change %}
+    <details class="change-email">
+      <summary>Use a different email address</summary>
+      <form method="post" action="{% url 'account_email_verification_sent' %}" style="margin-top: 12px;">
+        <input type="hidden" name="action" value="change">
+        {{ redirect_field }}
+        {% csrf_token %}
+        {{ change_form.email }}
+        {% if change_form.email.errors %}
+          <div class="field-errors">{{ change_form.email.errors|striptags }}</div>
+        {% endif %}
+        <button type="submit" class="btn-primary" style="margin-top: 10px;">Change</button>
+      </form>
+    </details>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
