@@ -229,13 +229,11 @@ LOGOUT_REDIRECT_URL = 'home'
 MFA_SUPPORTED_TYPES = ['totp', 'recovery_codes']
 MFA_TOTP_ISSUER = 'HomeFinder KE'
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'anymail.backends.postmark.EmailBackend'
 EMAIL_TIMEOUT = 10
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'homefinder.ke.help@gmail.com'
-EMAIL_HOST_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD')
+ANYMAIL = {
+    'POSTMARK_SERVER_TOKEN': config('POSTMARK_SERVER_TOKEN', default=''),
+}
 
 DEFAULT_FROM_EMAIL = "homefinder.ke.help@gmail.com"
 
