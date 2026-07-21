@@ -116,6 +116,8 @@ from django.views.decorators.http import require_POST
 @require_POST
 def ai_fix_description(request):
     import json
+    if request.user.is_authenticated and not check_submission_rate_limit(request, 'ai_fix_description', limit=10, window_seconds=3600):
+        return JsonResponse({'error': 'Too many requests. Please slow down and try again shortly.'}, status=429)
     try:
         data = json.loads(request.body)
         original = data.get('description', '').strip()
@@ -353,7 +355,6 @@ def residence_detail(request, pk):
     }
     return render(request, 'core/residence_detail.html', context)
 
-@login_required
 def check_submission_rate_limit(request, action_name, limit=5, window_seconds=3600):
     from django.core.cache import cache
     ip = request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR')
@@ -364,13 +365,24 @@ def check_submission_rate_limit(request, action_name, limit=5, window_seconds=36
     cache.set(key, count + 1, timeout=window_seconds)
     return True
 
+MAX_LISTINGS_PER_OWNER = 5
+
 @login_required
 def add_residence(request):
     if request.user.email == 'homefinder.ke.help@gmail.com':
         return redirect('admin_dashboard')
     if not check_not_suspended(request):
         return redirect('home')
+
+    current_listing_count = Residence.objects.filter(owner=request.user).count()
+    if current_listing_count >= MAX_LISTINGS_PER_OWNER:
+        messages.error(request, f'You have reached the maximum of {MAX_LISTINGS_PER_OWNER} listings.Thanks for the contibibution add a friend to also add ')
+        return redirect('dashboard')
+
     if request.method == 'POST':
+        if not check_submission_rate_limit(request, 'add_residence', limit=10, window_seconds=3600):
+            messages.error(request, 'Too many listings submitted recently. Please try again in an hour.')
+            return redirect('add_residence')
         form = ResidenceForm(request.POST, request.FILES)
         if form.is_valid():
             residence = form.save(commit=False)

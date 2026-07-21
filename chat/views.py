@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 from .models import Conversation, Message
 from django.contrib.auth import get_user_model
+from core.views import check_submission_rate_limit
 
 User = get_user_model()
 
@@ -251,8 +252,12 @@ SEARCH MATCH LOGIC:
 LIVE APPROVED DATA (ONLY REFER TO THIS):
 [{current_approved_residences}]
 """
+        if not check_submission_rate_limit(request, 'ai_chat_assistant', limit=20, window_seconds=3600):
+            return JsonResponse({'error': 'Too many messages. Please slow down and try again shortly.'}, status=429)
 
         # 3. CONNECT TO NVIDIA API
+
+        
         client = OpenAI(
             base_url="https://integrate.api.nvidia.com/v1",
             api_key=settings.NVIDIA_API_KEY,
