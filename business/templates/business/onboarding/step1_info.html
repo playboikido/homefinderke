@@ -1,0 +1,35 @@
+{% extends "business/onboarding/_base.html" %}
+{% block title %}Business Information{% endblock %}
+{% block content %}
+<h1>Business Information</h1>
+<p class="subtitle">Step 1 of 5 — Tell us about your business</p>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <label for="{{ form.name.id_for_label }}">Business Name</label>
+    {{ form.errors.name }}
+    {{ form.name }}
+
+    <label for="{{ form.category.id_for_label }}">Business Category</label>
+    {{ form.errors.category }}
+    {{ form.category }}
+
+    <label for="{{ form.description.id_for_label }}">Description</label>
+    {{ form.errors.description }}
+    {{ form.description }}
+
+    <label for="{{ form.logo.id_for_label }}">Business Logo</label>
+    {{ form.errors.logo }}
+    {{ form.logo }}
+
+    <label for="{{ form.cover_image.id_for_label }}">Cover Image</label>
+    {{ form.errors.cover_image }}
+    {{ form.cover_image }}
+
+    <div class="form-actions">
+        <button type="submit" class="btn-primary">Continue</button>
+    </div>
+</form>
+{% endblock %}

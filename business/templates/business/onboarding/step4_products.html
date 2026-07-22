@@ -1,0 +1,54 @@
+{% extends "business/onboarding/_base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+<h1>Products</h1>
+<p class="subtitle">
+    Step 4 of 5 — Showcase what you offer (no checkout, no stock — just a showcase).
+    {% if product_limit %}Your {{ business.plan }} plan allows up to {{ product_limit }} products.{% endif %}
+</p>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {{ formset.non_form_errors }}
+
+    {% for form in formset %}
+        <div style="border:1px solid #eee; border-radius:12px; padding:16px; margin-bottom:16px;">
+            {{ form.id }}
+            {{ form.non_field_errors }}
+
+            <label>Product Name</label>
+            {{ form.name.errors }}
+            {{ form.name }}
+
+            <label>Category</label>
+            {{ form.category }}
+
+            <label>Price (KES)</label>
+            {{ form.price }}
+
+            <label>Description</label>
+            {{ form.description }}
+
+            <label>Image</label>
+            {{ form.image }}
+
+            <label style="display:flex; align-items:center; gap:8px;">
+                {{ form.is_available }} Available
+            </label>
+
+            {% if form.instance.pk %}
+                <label style="display:flex; align-items:center; gap:8px; color:#c0392b;">
+                    {{ form.DELETE }} Remove this product
+                </label>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <div class="form-actions">
+        <a href="{% url 'business:onboarding_location' %}" class="btn btn-ghost">Back</a>
+        <button type="submit" name="skip" value="1" class="btn btn-ghost">Skip for now</button>
+        <button type="submit" class="btn-primary">Continue</button>
+    </div>
+</form>
+{% endblock %}

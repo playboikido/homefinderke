@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Business Setup{% endblock %} | HomeFinderKE</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
+
+        body {
+            min-height:100vh;
+            background:#F4F7F6;
+            padding:40px 20px;
+        }
+
+        .wrap { max-width:640px; margin:0 auto; }
+
+        .brand { text-align:center; margin-bottom:24px; color:#0F766E; font-weight:bold; font-size:20px; }
+
+        .progress { display:flex; gap:6px; margin-bottom:28px; }
+        .progress span {
+            flex:1; height:6px; border-radius:99px; background:#D9E6E4;
+        }
+        .progress span.done, .progress span.active { background:#0F766E; }
+
+        .card {
+            background:#fff; border-radius:20px; padding:36px;
+            box-shadow:0 8px 30px rgba(0,0,0,.06);
+        }
+
+        .card h1 { font-size:22px; color:#0F172A; margin-bottom:6px; }
+        .card .subtitle { color:#667; margin-bottom:24px; font-size:14px; }
+
+        label { display:block; margin-bottom:6px; font-weight:600; color:#333; font-size:14px; }
+        input, textarea, select {
+            width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;
+            font-size:15px; margin-bottom:16px; outline:none;
+        }
+        input:focus, textarea:focus, select:focus { border-color:#0F766E; }
+
+        .errorlist { color:#c0392b; list-style:none; margin-bottom:10px; font-size:13px; }
+
+        .actions { display:flex; justify-content:space-between; align-items:center; margin-top:10px; }
+
+        button, .btn {
+            padding:14px 24px; border-radius:10px; border:none; font-weight:bold;
+            font-size:15px; cursor:pointer; text-decoration:none; display:inline-block;
+        }
+        .btn-primary { background:#0F766E; color:#fff; }
+        .btn-primary:hover { background:#0a5c56; }
+        .btn-ghost { background:transparent; color:#667; border:1px solid #ddd; }
+        .btn-ghost:hover { background:#f1f1f1; }
+
+        .form-actions { display:flex; justify-content:flex-end; gap:12px; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="wrap">
+    <div class="brand">HomeFinderKE Business Workspace</div>
+    <div class="progress">
+        {% for n in "12345" %}
+            <span class="{% if step > forloop.counter %}done{% elif step == forloop.counter %}active{% endif %}"></span>
+        {% endfor %}
+    </div>
+    <div class="card">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+</body>
+</html>

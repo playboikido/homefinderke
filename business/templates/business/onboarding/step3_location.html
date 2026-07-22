@@ -1,0 +1,56 @@
+{% extends "business/onboarding/_base.html" %}
+{% block title %}Location{% endblock %}
+{% block content %}
+<h1>Location</h1>
+<p class="subtitle">Step 3 of 5 — Where can customers find you?</p>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <label for="{{ form.county.id_for_label }}">County</label>
+    {{ form.errors.county }}
+    {{ form.county }}
+
+    <label for="{{ form.town.id_for_label }}">Town</label>
+    {{ form.errors.town }}
+    {{ form.town }}
+
+    <label for="{{ form.estate.id_for_label }}">Estate</label>
+    {{ form.errors.estate }}
+    {{ form.estate }}
+
+    <label for="{{ form.street.id_for_label }}">Street</label>
+    {{ form.errors.street }}
+    {{ form.street }}
+
+    <label for="{{ form.service_counties.id_for_label }}">Other Counties You Serve (comma-separated)</label>
+    {{ form.errors.service_counties }}
+    {{ form.service_counties }}
+
+    <label for="{{ form.latitude.id_for_label }}">Google Maps Latitude (optional)</label>
+    {{ form.errors.latitude }}
+    {{ form.latitude }}
+
+    <label for="{{ form.longitude.id_for_label }}">Google Maps Longitude (optional)</label>
+    {{ form.errors.longitude }}
+    {{ form.longitude }}
+
+    <label for="{{ form.opens_at.id_for_label }}">Opens At</label>
+    {{ form.errors.opens_at }}
+    {{ form.opens_at }}
+
+    <label for="{{ form.closes_at.id_for_label }}">Closes At</label>
+    {{ form.errors.closes_at }}
+    {{ form.closes_at }}
+
+    <label for="{{ form.closed_weekdays.id_for_label }}">Closed Weekdays</label>
+    {{ form.errors.closed_weekdays }}
+    {{ form.closed_weekdays }}
+
+    <div class="form-actions">
+        <a href="{% url 'business:onboarding_contact' %}" class="btn btn-ghost">Back</a>
+        <button type="submit" class="btn-primary">Continue</button>
+    </div>
+</form>
+{% endblock %}

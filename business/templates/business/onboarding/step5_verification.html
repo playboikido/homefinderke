@@ -1,0 +1,29 @@
+{% extends "business/onboarding/_base.html" %}
+{% block title %}Verification{% endblock %}
+{% block content %}
+<h1>Verification</h1>
+<p class="subtitle">Step 5 of 5 — Get the HomeFinder Verified badge by uploading these documents. You can also do this later from Settings.</p>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <label for="{{ form.registration_certificate.id_for_label }}">Business Registration Certificate</label>
+    {{ form.registration_certificate }}
+
+    <label for="{{ form.kra_pin.id_for_label }}">KRA PIN Certificate</label>
+    {{ form.kra_pin }}
+
+    <label for="{{ form.business_permit.id_for_label }}">Business Permit</label>
+    {{ form.business_permit }}
+
+    <label for="{{ form.national_id.id_for_label }}">National ID</label>
+    {{ form.national_id }}
+
+    <div class="form-actions">
+        <a href="{% url 'business:onboarding_products' %}" class="btn btn-ghost">Back</a>
+        <button type="submit" name="skip" value="1" class="btn btn-ghost">Skip for now</button>
+        <button type="submit" class="btn-primary">Finish Setup</button>
+    </div>
+</form>
+{% endblock %}

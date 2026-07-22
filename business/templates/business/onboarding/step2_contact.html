@@ -1,0 +1,44 @@
+{% extends "business/onboarding/_base.html" %}
+{% block title %}Contact Details{% endblock %}
+{% block content %}
+<h1>Contact</h1>
+<p class="subtitle">Step 2 of 5 — How should customers reach you?</p>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <label for="{{ form.phone_number.id_for_label }}">Phone</label>
+    {{ form.errors.phone_number }}
+    {{ form.phone_number }}
+
+    <label for="{{ form.whatsapp_number.id_for_label }}">WhatsApp (leave blank to use phone number)</label>
+    {{ form.errors.whatsapp_number }}
+    {{ form.whatsapp_number }}
+
+    <label for="{{ form.email.id_for_label }}">Email</label>
+    {{ form.errors.email }}
+    {{ form.email }}
+
+    <label for="{{ form.website.id_for_label }}">Website</label>
+    {{ form.errors.website }}
+    {{ form.website }}
+
+    <label for="{{ form.facebook.id_for_label }}">Facebook</label>
+    {{ form.errors.facebook }}
+    {{ form.facebook }}
+
+    <label for="{{ form.instagram.id_for_label }}">Instagram</label>
+    {{ form.errors.instagram }}
+    {{ form.instagram }}
+
+    <label for="{{ form.tiktok.id_for_label }}">TikTok</label>
+    {{ form.errors.tiktok }}
+    {{ form.tiktok }}
+
+    <div class="form-actions">
+        <a href="{% url 'business:onboarding_info' %}" class="btn btn-ghost">Back</a>
+        <button type="submit" class="btn-primary">Continue</button>
+    </div>
+</form>
+{% endblock %}
