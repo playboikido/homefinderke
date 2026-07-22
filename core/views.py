@@ -7,6 +7,8 @@ from .models import Residence, ResidenceReport, UserReport
 from .models import Residence, ResidenceReport, ResidenceView
 from .forms import ResidenceForm, ResidenceReportForm, MoverForm, FurnitureVendorForm, MoverSponsorForm, FurnitureVendorSponsorForm
 from django.contrib import messages
+from django.db.models import Count
+from django.db.models import Prefetch, Count
 from .models import Residence, ResidenceReport, Favorite
 from django.db.models import Sum
 from django.contrib.auth.models import User
