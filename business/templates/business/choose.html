@@ -76,7 +76,7 @@
             <div class="icon">🏡</div>
             <h2>Personal Account</h2>
             <p>Find homes and discover trusted businesses.</p>
-            <a class="resident-btn" href="{% url 'account_login' %}">Continue as Resident</a>
+            <a class="resident-btn" href="{% url 'account_login' %}{% if next_url %}?next={{ next_url }}{% endif %}">Continue as Resident</a>
         </div>
 
         <div class="card">

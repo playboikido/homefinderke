@@ -14,7 +14,8 @@ from .models import Business, BusinessInquiry, BusinessAnalyticsEvent
 
 def choose(request):
     """Split-screen entry point: Resident vs Business."""
-    return render(request, 'business/choose.html')
+    next_url = request.GET.get('next', '')
+    return render(request, 'business/choose.html', {'next_url': next_url})
 
 
 @login_required

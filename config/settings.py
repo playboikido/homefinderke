@@ -224,7 +224,7 @@ STORAGES = {
        },
    }
 
-LOGIN_URL = 'account_login'
+LOGIN_URL = 'business:choose'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 MFA_SUPPORTED_TYPES = ['totp', 'recovery_codes']
