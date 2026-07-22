@@ -29,7 +29,13 @@
 
   .hd-wrap { font-family: var(--hd-font); background: var(--hd-bg); min-height: 100vh; color: var(--hd-dark); }
 
-  .hd-hero { padding: 56px 24px 40px; text-align: center; }
+  .hd-hero {
+    padding: 64px 24px 48px; text-align: center; position: relative; color: #fff;
+    background: linear-gradient(rgba(15,23,42,0.55), rgba(15,23,42,0.65)),
+                url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80');
+    background-size: cover; background-position: center;
+  }
+  .hd-hero p { color: rgba(255,255,255,0.85); }
   .hd-hero h1 { font-family: var(--hd-font-head); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
   .hd-hero p { color: var(--hd-text-muted); max-width: 560px; margin: 0 auto 28px; font-size: 1.05rem; }
 
@@ -48,6 +54,13 @@
     transition: background 0.2s ease;
   }
   .hd-search-bar button:hover { background: #128A3E; }
+  .hd-suggestions {
+    max-width: 620px; margin: 4px auto 0; background: var(--hd-card); border-radius: 12px;
+    box-shadow: var(--hd-shadow-lg); overflow: hidden; text-align: left; display: none;
+  }
+  .hd-suggestions a { display: block; padding: 10px 16px; text-decoration: none; color: var(--hd-dark); border-bottom: 1px solid var(--hd-border); }
+  .hd-suggestions a:hover { background: var(--hd-bg); }
+  .hd-stars { color: #F59E0B; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
 
   .hd-categories {
     max-width: 1100px; margin: 40px auto; padding: 0 24px;
@@ -109,10 +122,14 @@
   <div class="hd-hero">
     <h1>Everything For Your New Home</h1>
     <p>Discover trusted movers and home essentials businesses near you — with real prices, photos, and direct contact.</p>
-    <form class="hd-search-bar" method="get">
-      <input type="text" name="county" placeholder="Search by county, e.g. Nairobi" value="{{ selected_county }}">
+    <form class="hd-search-bar" method="get" id="hd-search-form">
+      <input type="text" name="county" id="hd-search-input" placeholder="Search by county or business name" value="{{ selected_county }}" autocomplete="off">
+      <input type="hidden" name="lat" id="hd-lat">
+      <input type="hidden" name="lng" id="hd-lng">
       <button type="submit">Search</button>
     </form>
+    <div class="hd-suggestions" id="hd-suggestions"></div>
+    <button type="button" onclick="hdUseMyLocation()" style="margin-top:12px;background:none;border:none;color:#fff;text-decoration:underline;cursor:pointer;font-size:0.85rem;">📍 Use my location to sort by distance</button>
   </div>
 
   <div class="hd-categories">
@@ -147,6 +164,8 @@
             {% if mover.is_major_sponsor %}<span class="hd-verified hd-sponsor">Sponsored</span>
             {% elif mover.is_approved %}<span class="hd-verified">✓ Verified</span>{% endif %}
             <h3>{{ mover.name }}</h3>
+            {% if mover.average_rating %}<div class="hd-stars">★ {{ mover.average_rating }} ({{ mover.review_count }})</div>{% endif %}
+            {% if mover.distance_km %}<div class="hd-card-loc">📍 {{ mover.distance_km|floatformat:1 }} km away</div>{% endif %}
             <div class="hd-card-loc">🚚 Serves {{ mover.service_counties|default:"multiple counties" }}</div>
             {% with first_product=mover.products.all|first %}
               {% if first_product and first_product.price %}
@@ -192,4 +211,35 @@
     </div>
   </div>
 </div>
+<script>
+function hdUseMyLocation() {
+  if (!navigator.geolocation) { alert('Geolocation not supported on this device.'); return; }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    document.getElementById('hd-lat').value = pos.coords.latitude;
+    document.getElementById('hd-lng').value = pos.coords.longitude;
+    document.getElementById('hd-search-form').submit();
+  }, function() { alert('Could not get your location.'); });
+}
+
+const hdInput = document.getElementById('hd-search-input');
+const hdBox = document.getElementById('hd-suggestions');
+let hdTimer;
+hdInput.addEventListener('input', function() {
+  clearTimeout(hdTimer);
+  const q = this.value;
+  hdTimer = setTimeout(function() {
+    if (q.length < 2) { hdBox.style.display = 'none'; return; }
+    fetch("{% url 'directory_search_suggestions' %}?q=" + encodeURIComponent(q))
+      .then(r => r.json())
+      .then(data => {
+        if (!data.results.length) { hdBox.style.display = 'none'; return; }
+        hdBox.innerHTML = data.results.map(r => `<a href="${r.url}">${r.name} <span style="color:var(--hd-text-muted);font-size:0.8rem;">(${r.type})</span></a>`).join('');
+        hdBox.style.display = 'block';
+      });
+  }, 250);
+});
+document.addEventListener('click', function(e) {
+  if (!hdBox.contains(e.target) && e.target !== hdInput) hdBox.style.display = 'none';
+});
+</script>
 {% endblock %}

@@ -11,6 +11,9 @@ from django.db.models import Count
 from django.db.models import Prefetch, Count
 from .models import Residence, ResidenceReport, Favorite
 from django.db.models import Sum
+from django.db.models import Prefetch, Count, Avg
+from django.contrib import messages
+import math
 from django.contrib.auth.models import User
 from .models import Review
 from .forms import ReviewForm
@@ -20,7 +23,7 @@ from .forms import ProfileForm
 from .models import Residence, Profile
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage, MoverFavorite, FurnitureVendorFavorite
+from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage, MoverFavorite, FurnitureVendorFavorite, MoverReview, FurnitureVendorReview
 from django.contrib import messages
 from .forms import ContactForm
 from django.contrib.auth.decorators import login_required
@@ -272,6 +275,8 @@ def residence_list(request):
 def moving_essentials(request):
     county = request.GET.get('county', '').strip()
     category = request.GET.get('category', '').strip()
+    user_lat = request.GET.get('lat')
+    user_lng = request.GET.get('lng')
 
     movers_qs = Mover.objects.filter(is_approved=True).prefetch_related(
         Prefetch('products', queryset=MoverProduct.objects.filter(is_active=True)[:3])
@@ -289,8 +294,17 @@ def moving_essentials(request):
     elif category == 'movers':
         vendors_qs = vendors_qs.none()
 
-    movers = list(movers_qs.order_by('-is_major_sponsor', '-created_at'))
-    vendors = list(vendors_qs.order_by('-is_major_sponsor', '-created_at'))
+    movers = list(movers_qs) if category in ('', 'movers') else []
+    vendors = list(vendors_qs) if category != 'movers' else []
+
+    if user_lat and user_lng:
+        for obj in movers + vendors:
+            obj.distance_km = haversine_km(user_lat, user_lng, obj.latitude, obj.longitude)
+        movers.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
+        vendors.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
+    else:
+        movers.sort(key=lambda o: (not o.is_major_sponsor, -o.created_at.timestamp()))
+        vendors.sort(key=lambda o: (not o.is_major_sponsor, -o.created_at.timestamp()))
 
     category_counts = (
         FurnitureVendor.objects.filter(is_approved=True)
@@ -306,12 +320,34 @@ def moving_essentials(request):
     categories.insert(0, {'key': 'movers', 'label': 'Movers', 'count': Mover.objects.filter(is_approved=True).count(), 'icon': '🚚'})
 
     return render(request, 'core/moving_essentials.html', {
-        'movers': movers if category in ('', 'movers') else [],
-        'vendors': vendors if category != 'movers' else [],
+        'movers': movers,
+        'vendors': vendors,
         'selected_county': county,
         'selected_category': category,
         'categories': categories,
+        'has_location': bool(user_lat and user_lng),
     })
+
+
+def directory_search_suggestions(request):
+    q = request.GET.get('q', '').strip()
+    if len(q) < 2:
+        return JsonResponse({'results': []})
+    movers = Mover.objects.filter(is_approved=True, name__icontains=q)[:5]
+    vendors = FurnitureVendor.objects.filter(is_approved=True, name__icontains=q)[:5]
+    results = [{'type': 'mover', 'name': m.name, 'url': f'/mover/{m.pk}/'} for m in movers]
+    results += [{'type': 'vendor', 'name': v.name, 'url': f'/furniture-vendor/{v.pk}/'} for v in vendors]
+    return JsonResponse({'results': results})
+
+def haversine_km(lat1, lng1, lat2, lng2):
+    if None in (lat1, lng1, lat2, lng2):
+        return None
+    lat1, lng1, lat2, lng2 = map(float, (lat1, lng1, lat2, lng2))
+    R = 6371
+    dlat = math.radians(lat2 - lat1)
+    dlng = math.radians(lng2 - lng1)
+    a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlng/2)**2
+    return R * 2 * math.asin(math.sqrt(a))
 
 def residence_detail(request, pk):
     # Allow owners to preview their own unapproved residences
@@ -1523,11 +1559,33 @@ def save_furniture_vendor_favorite(request, pk):
 
 def mover_detail(request, pk):
     mover = get_object_or_404(Mover, pk=pk, is_approved=True)
-    return render(request, 'core/mover_detail.html', {'mover': mover})
+    if request.method == 'POST' and request.user.is_authenticated:
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment', '').strip()
+        if rating:
+            MoverReview.objects.update_or_create(
+                mover=mover, user=request.user,
+                defaults={'rating': int(rating), 'comment': comment}
+            )
+            messages.success(request, "Thanks for your review!")
+            return redirect('mover_detail', pk=mover.pk)
+    reviews = mover.reviews.select_related('user')[:20]
+    return render(request, 'core/mover_detail.html', {'mover': mover, 'reviews': reviews})
 
 def furniture_vendor_detail(request, pk):
     vendor = get_object_or_404(FurnitureVendor, pk=pk, is_approved=True)
-    return render(request, 'core/furniture_vendor_detail.html', {'vendor': vendor})
+    if request.method == 'POST' and request.user.is_authenticated:
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment', '').strip()
+        if rating:
+            FurnitureVendorReview.objects.update_or_create(
+                vendor=vendor, user=request.user,
+                defaults={'rating': int(rating), 'comment': comment}
+            )
+            messages.success(request, "Thanks for your review!")
+            return redirect('furniture_vendor_detail', pk=vendor.pk)
+    reviews = vendor.reviews.select_related('user')[:20]
+    return render(request, 'core/furniture_vendor_detail.html', {'vendor': vendor, 'reviews': reviews})
 
 def robots_txt(request):
     base_url = request.build_absolute_uri('/')[:-1]

@@ -349,6 +349,30 @@ class Review(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.residence.name}'
 
+class MoverReview(models.Model):
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+    mover = models.ForeignKey('Mover', on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('mover', 'user')
+
+
+class FurnitureVendorReview(models.Model):
+    RATING_CHOICES = [(i, str(i)) for i in range(1, 6)]
+    vendor = models.ForeignKey('FurnitureVendor', on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('vendor', 'user')
 
 class Profile(models.Model):
 
@@ -666,6 +690,34 @@ class Mover(models.Model):
     is_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     service_counties = models.CharField(max_length=500, blank=True, help_text="Comma-separated counties served, e.g. Nairobi, Kiambu")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    opens_at = models.TimeField(null=True, blank=True)
+    closes_at = models.TimeField(null=True, blank=True)
+    closed_weekdays = models.CharField(max_length=20, blank=True, help_text="Comma-separated, 0=Mon..6=Sun, e.g. '6' for closed Sundays")
+
+    @property
+    def is_open_now(self):
+        if not self.opens_at or not self.closes_at:
+            return None
+        from django.utils import timezone
+        now = timezone.localtime()
+        if str(now.weekday()) in (self.closed_weekdays or '').split(','):
+            return False
+        current = now.time()
+        if self.opens_at <= self.closes_at:
+            return self.opens_at <= current <= self.closes_at
+        return current >= self.opens_at or current <= self.closes_at
+
+    @property
+    def average_rating(self):
+        from django.db.models import Avg
+        agg = self.reviews.aggregate(avg=Avg('rating'))
+        return round(agg['avg'], 1) if agg['avg'] else None
+
+    @property
+    def review_count(self):
+        return self.reviews.count()
 
     # --- NEW: live product data ---
     data_source = models.CharField(max_length=10, choices=DATA_SOURCE_CHOICES, default='manual')

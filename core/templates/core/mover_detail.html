@@ -147,7 +147,6 @@
     <img id="mvLightboxImg" src="" alt="Full size photo">
   </div>
 </div>
-
 <script>
   const mvGalleryPhotos = [{% for photo in mover.gallery_images.all %}"{{ photo.image.url|escapejs }}",{% endfor %}];
   let mvLightboxIndex = 0;
@@ -176,4 +175,39 @@
     }
   }
 </script>
+<div class="mv-inner" style="margin-top:24px;">
+  <div style="background:var(--mv-surface);border-radius:var(--mv-r-lg);padding:20px;box-shadow:var(--mv-shadow);margin-bottom:16px;">
+    {% if mover.is_open_now is not None %}
+      <span style="font-weight:700;padding:4px 12px;border-radius:999px;font-size:0.85rem;{% if mover.is_open_now %}background:#DCFCE7;color:#15803D;{% else %}background:#FEE2E2;color:#B91C1C;{% endif %}">
+        {% if mover.is_open_now %}● Open now{% else %}● Closed now{% endif %}
+      </span>
+    {% endif %}
+    {% if mover.average_rating %}
+      <span style="margin-left:12px;font-weight:700;color:var(--mv-primary);">★ {{ mover.average_rating }} ({{ mover.review_count }} review{{ mover.review_count|pluralize }})</span>
+    {% endif %}
+  </div>
+
+  <h3 style="font-family:var(--mv-font-mono);color:var(--mv-fg);margin-bottom:12px;">Reviews</h3>
+  {% for r in reviews %}
+    <div style="background:var(--mv-surface);border-radius:var(--mv-r);padding:14px;margin-bottom:10px;box-shadow:var(--mv-shadow);">
+      <strong>{{ r.user.username }}</strong> — {{ r.rating }}★
+      {% if r.comment %}<p style="margin-top:6px;">{{ r.comment }}</p>{% endif %}
+    </div>
+  {% empty %}
+    <p style="color:var(--mv-subtle);">No reviews yet.</p>
+  {% endfor %}
+
+  {% if user.is_authenticated %}
+  <form method="post" style="background:var(--mv-surface);border-radius:var(--mv-r-lg);padding:18px;margin-top:16px;box-shadow:var(--mv-shadow);">
+    {% csrf_token %}
+    <label style="font-weight:700;display:block;margin-bottom:8px;">Leave a review</label>
+    <select name="rating" required style="padding:8px;border-radius:8px;margin-bottom:10px;">
+      <option value="">Rating</option>
+      {% for i in "12345" %}<option value="{{ i }}">{{ i }} star{{ i|pluralize }}</option>{% endfor %}
+    </select>
+    <textarea name="comment" placeholder="Optional comment" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--mv-border);margin-bottom:10px;"></textarea>
+    <button type="submit" style="background:var(--mv-primary);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:700;">Submit Review</button>
+  </form>
+  {% endif %}
+</div>
 {% endblock %}

@@ -131,6 +131,8 @@ urlpatterns = [
         views.compare_residences,
         name='compare_residences'
     ),
+    path('moving-essentials/', views.moving_essentials, name='moving_essentials'),
+    path('directory-search/', views.directory_search_suggestions, name='directory_search_suggestions'),
     path('sentry-test/', views.sentry_test, name='sentry_test'),
     path('admin-dashboard/export-csv/', views.export_residences_csv, name='export_residences_csv'),
     path('admin-dashboard/suspicious-users/', views.suspicious_users, name='suspicious_users'),
