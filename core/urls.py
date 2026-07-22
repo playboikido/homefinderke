@@ -131,6 +131,7 @@ urlpatterns = [
         views.compare_residences,
         name='compare_residences'
     ),
+    path('business/', include('business.urls')),
     path('moving-essentials/', views.moving_essentials, name='moving_essentials'),
     path('directory-search/', views.directory_search_suggestions, name='directory_search_suggestions'),
     path('sentry-test/', views.sentry_test, name='sentry_test'),
