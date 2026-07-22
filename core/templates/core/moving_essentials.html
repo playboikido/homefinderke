@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Home Directory — HomeFinder Kenya{% endblock %}
+{% block meta_description %}Discover trusted movers, furniture, and home essentials businesses across Kenya — with prices, photos, and contact details.{% endblock %}
+
+{% block extra_head %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap');
+
+  :root {
+    --hd-primary: #16A34A;
+    --hd-accent: #22C55E;
+    --hd-dark: #0F172A;
+    --hd-bg: #F8FAFC;
+    --hd-card: #FFFFFF;
+    --hd-border: #E5E7EB;
+    --hd-text-muted: #64748B;
+    --hd-r: 16px;
+    --hd-r-lg: 20px;
+    --hd-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+    --hd-shadow-lg: 0 12px 32px rgba(15,23,42,0.10), 0 4px 8px rgba(15,23,42,0.04);
+    --hd-font: 'Inter', system-ui, sans-serif;
+    --hd-font-head: 'Manrope', 'Inter', sans-serif;
+  }
+  [data-theme="dark"] {
+    --hd-dark: #F1F5F9; --hd-bg: #0F172A; --hd-card: #1E293B;
+    --hd-border: #334155; --hd-text-muted: #94A3B8;
+  }
+
+  .hd-wrap { font-family: var(--hd-font); background: var(--hd-bg); min-height: 100vh; color: var(--hd-dark); }
+
+  .hd-hero { padding: 56px 24px 40px; text-align: center; }
+  .hd-hero h1 { font-family: var(--hd-font-head); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
+  .hd-hero p { color: var(--hd-text-muted); max-width: 560px; margin: 0 auto 28px; font-size: 1.05rem; }
+
+  .hd-search-bar {
+    max-width: 620px; margin: 0 auto; display: flex; gap: 10px;
+    background: var(--hd-card); padding: 8px; border-radius: var(--hd-r-lg);
+    box-shadow: var(--hd-shadow-lg); border: 1px solid var(--hd-border);
+  }
+  .hd-search-bar input {
+    flex: 1; border: none; outline: none; padding: 12px 16px; font-family: var(--hd-font);
+    font-size: 0.95rem; background: transparent; color: var(--hd-dark);
+  }
+  .hd-search-bar button {
+    background: var(--hd-primary); color: #fff; border: none; padding: 12px 24px;
+    border-radius: 12px; font-weight: 700; font-family: var(--hd-font); cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .hd-search-bar button:hover { background: #128A3E; }
+
+  .hd-categories {
+    max-width: 1100px; margin: 40px auto; padding: 0 24px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px;
+  }
+  .hd-cat-card {
+    background: var(--hd-card); border: 1px solid var(--hd-border); border-radius: var(--hd-r);
+    padding: 20px 12px; text-align: center; text-decoration: none; color: var(--hd-dark);
+    box-shadow: var(--hd-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .hd-cat-card:hover { transform: translateY(-4px); box-shadow: var(--hd-shadow-lg); }
+  .hd-cat-card.active { border-color: var(--hd-primary); background: rgba(22,163,74,0.06); }
+  .hd-cat-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
+  .hd-cat-name { font-weight: 700; font-size: 0.85rem; display: block; }
+  .hd-cat-count { font-size: 0.75rem; color: var(--hd-text-muted); }
+
+  .hd-body { max-width: 1100px; margin: 0 auto; padding: 0 24px 70px; display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
+  @media (max-width: 800px) { .hd-body { grid-template-columns: 1fr; } }
+
+  .hd-filters { background: var(--hd-card); border: 1px solid var(--hd-border); border-radius: var(--hd-r); padding: 20px; height: fit-content; box-shadow: var(--hd-shadow); }
+  .hd-filters label { font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 8px; }
+  .hd-filters input[type="text"] {
+    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--hd-border);
+    font-family: var(--hd-font); background: var(--hd-bg); color: var(--hd-dark);
+  }
+  .hd-filters button {
+    margin-top: 14px; width: 100%; background: var(--hd-primary); color: #fff; border: none;
+    padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer;
+  }
+
+  .hd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+  .hd-card {
+    background: var(--hd-card); border: 1px solid var(--hd-border); border-radius: var(--hd-r-lg);
+    overflow: hidden; box-shadow: var(--hd-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex; flex-direction: column;
+  }
+  .hd-card:hover { transform: translateY(-3px); box-shadow: var(--hd-shadow-lg); }
+  .hd-card-img { width: 100%; height: 160px; object-fit: cover; background: var(--hd-border); }
+  .hd-card-body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
+  .hd-verified {
+    display: inline-flex; align-items: center; gap: 4px; background: rgba(22,163,74,0.1);
+    color: var(--hd-primary); font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
+    border-radius: 999px; width: fit-content; margin-bottom: 8px;
+  }
+  .hd-sponsor { background: #FEF3C7; color: #B45309; }
+  .hd-card h3 { font-family: var(--hd-font-head); font-size: 1.05rem; margin-bottom: 4px; }
+  .hd-card-loc { font-size: 0.85rem; color: var(--hd-text-muted); margin-bottom: 10px; }
+  .hd-price-from { font-size: 0.85rem; color: var(--hd-primary); font-weight: 700; margin-bottom: 12px; }
+  .hd-actions { margin-top: auto; display: flex; gap: 8px; }
+  .hd-btn { flex: 1; text-align: center; padding: 10px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.85rem; }
+  .hd-btn-primary { background: var(--hd-primary); color: #fff; }
+  .hd-btn-outline { border: 1px solid var(--hd-border); color: var(--hd-dark); }
+  .hd-empty { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--hd-text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hd-wrap">
+  <div class="hd-hero">
+    <h1>Everything For Your New Home</h1>
+    <p>Discover trusted movers and home essentials businesses near you — with real prices, photos, and direct contact.</p>
+    <form class="hd-search-bar" method="get">
+      <input type="text" name="county" placeholder="Search by county, e.g. Nairobi" value="{{ selected_county }}">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+
+  <div class="hd-categories">
+    {% for cat in categories %}
+      <a class="hd-cat-card {% if selected_category == cat.key %}active{% endif %}"
+         href="?category={{ cat.key }}{% if selected_county %}&county={{ selected_county }}{% endif %}">
+        <span class="hd-cat-icon">{{ cat.icon }}</span>
+        <span class="hd-cat-name">{{ cat.label }}</span>
+        <span class="hd-cat-count">{{ cat.count }} listed</span>
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="hd-body">
+    <aside class="hd-filters">
+      <form method="get">
+        <label>County</label>
+        <input type="text" name="county" value="{{ selected_county }}" placeholder="e.g. Nairobi">
+        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+        <button type="submit">Apply</button>
+      </form>
+      {% if selected_category or selected_county %}
+        <a href="{% url 'moving_essentials' %}" style="display:block;text-align:center;margin-top:10px;font-size:0.85rem;color:var(--hd-text-muted);">Clear filters</a>
+      {% endif %}
+    </aside>
+
+    <div class="hd-grid">
+      {% for mover in movers %}
+        <div class="hd-card">
+          {% if mover.logo %}<img class="hd-card-img" src="{{ mover.logo.url }}" alt="{{ mover.name }}">{% endif %}
+          <div class="hd-card-body">
+            {% if mover.is_major_sponsor %}<span class="hd-verified hd-sponsor">Sponsored</span>
+            {% elif mover.is_approved %}<span class="hd-verified">✓ Verified</span>{% endif %}
+            <h3>{{ mover.name }}</h3>
+            <div class="hd-card-loc">🚚 Serves {{ mover.service_counties|default:"multiple counties" }}</div>
+            {% with first_product=mover.products.all|first %}
+              {% if first_product and first_product.price %}
+                <div class="hd-price-from">From KSh {{ first_product.price }}</div>
+              {% endif %}
+            {% endwith %}
+            <div class="hd-actions">
+              <a class="hd-btn hd-btn-primary" href="{% url 'mover_detail' mover.pk %}">View Details</a>
+              {% if mover.whatsapp_number %}
+              <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ mover.whatsapp_number }}" target="_blank">WhatsApp</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      {% for vendor in vendors %}
+        <div class="hd-card">
+          {% if vendor.image %}<img class="hd-card-img" src="{{ vendor.image.url }}" alt="{{ vendor.name }}">{% endif %}
+          <div class="hd-card-body">
+            {% if vendor.is_major_sponsor %}<span class="hd-verified hd-sponsor">Sponsored</span>
+            {% elif vendor.is_approved %}<span class="hd-verified">✓ Verified</span>{% endif %}
+            <h3>{{ vendor.name }}</h3>
+            <div class="hd-card-loc">📍 {{ vendor.location }}</div>
+            {% with first_product=vendor.products.all|first %}
+              {% if first_product and first_product.price %}
+                <div class="hd-price-from">From KSh {{ first_product.price }}</div>
+              {% endif %}
+            {% endwith %}
+            <div class="hd-actions">
+              <a class="hd-btn hd-btn-primary" href="{% url 'furniture_vendor_detail' vendor.pk %}">View Details</a>
+              {% if vendor.whatsapp_number %}
+              <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ vendor.whatsapp_number }}" target="_blank">WhatsApp</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+
+      {% if not movers and not vendors %}
+        <div class="hd-empty">No businesses found{% if selected_county %} in "{{ selected_county }}"{% endif %}. Try clearing filters.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

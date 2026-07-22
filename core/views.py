@@ -267,6 +267,49 @@ def residence_list(request):
     page_obj   = paginator.get_page(request.GET.get('page'))
     return render(request, 'core/residence_list.html', {'page_obj': page_obj})
 
+def moving_essentials(request):
+    county = request.GET.get('county', '').strip()
+    category = request.GET.get('category', '').strip()
+
+    movers_qs = Mover.objects.filter(is_approved=True).prefetch_related(
+        Prefetch('products', queryset=MoverProduct.objects.filter(is_active=True)[:3])
+    )
+    vendors_qs = FurnitureVendor.objects.filter(is_approved=True).prefetch_related(
+        Prefetch('products', queryset=FurnitureProduct.objects.filter(is_active=True)[:3])
+    )
+
+    if county:
+        movers_qs = movers_qs.filter(service_counties__icontains=county)
+        vendors_qs = vendors_qs.filter(service_counties__icontains=county)
+
+    if category and category != 'movers':
+        vendors_qs = vendors_qs.filter(category=category)
+    elif category == 'movers':
+        vendors_qs = vendors_qs.none()
+
+    movers = list(movers_qs.order_by('-is_major_sponsor', '-created_at'))
+    vendors = list(vendors_qs.order_by('-is_major_sponsor', '-created_at'))
+
+    category_counts = (
+        FurnitureVendor.objects.filter(is_approved=True)
+        .values('category').annotate(count=Count('id'))
+    )
+    counts_by_cat = {c['category']: c['count'] for c in category_counts}
+    categories = [
+        {'key': k, 'label': label, 'count': counts_by_cat.get(k, 0), 'icon': icon}
+        for (k, label), icon in zip(FurnitureVendor.CATEGORY_CHOICES, [
+            '🛋️', '🪟', '📺', '🍽️', '🛏️', '🛁', '🧹', '💡', '🛠️', '🌿'
+        ])
+    ]
+    categories.insert(0, {'key': 'movers', 'label': 'Movers', 'count': Mover.objects.filter(is_approved=True).count(), 'icon': '🚚'})
+
+    return render(request, 'core/moving_essentials.html', {
+        'movers': movers if category in ('', 'movers') else [],
+        'vendors': vendors if category != 'movers' else [],
+        'selected_county': county,
+        'selected_category': category,
+        'categories': categories,
+    })
 
 def residence_detail(request, pk):
     # Allow owners to preview their own unapproved residences

@@ -711,6 +711,19 @@ class FurnitureVendor(models.Model):
     image = models.ImageField(upload_to='furniture/', blank=True, null=True)
     phone_number = models.CharField(max_length=20)
     location = models.CharField(max_length=200)
+    CATEGORY_CHOICES = [
+    ('furniture', 'Furniture'),
+    ('curtains', 'Curtains'),
+    ('electronics', 'Electronics'),
+    ('kitchen', 'Kitchen'),
+    ('mattresses', 'Mattresses'),
+    ('bathroom', 'Bathroom'),
+    ('cleaning', 'Cleaning'),
+    ('lighting', 'Lighting'),
+    ('repairs', 'Repairs'),
+    ('garden', 'Garden'),
+    ]
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='furniture')
     description = models.TextField()
     website = models.URLField(blank=True, null=True)
     is_major_sponsor = models.BooleanField(default=False, help_text="Shows on every listing page, regardless of location")
