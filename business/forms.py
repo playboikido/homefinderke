@@ -1,64 +1,78 @@
 from django import forms
+from django.core.validators import FileExtensionValidator
+from django.forms import modelformset_factory
 
-from .models import Business, BusinessProduct, BusinessVerificationDocument
+from .models import Business, BusinessProduct
+
+ALLOWED_DOC_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png']
+MAX_DOC_SIZE_MB = 5
+
+
+def validate_doc_size(value):
+    if value and value.size > MAX_DOC_SIZE_MB * 1024 * 1024:
+        raise forms.ValidationError(f"File must be under {MAX_DOC_SIZE_MB}MB.")
 
 
 class BusinessInfoForm(forms.ModelForm):
+    REQUIRED_FIELDS = ['name', 'category', 'description', 'cover_image']
+
     class Meta:
         model = Business
         fields = ['name', 'category', 'description', 'logo', 'cover_image']
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Tell customers what you do...'}),
-        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.REQUIRED_FIELDS:
+            self.fields[field_name].required = True
 
 
 class BusinessContactForm(forms.ModelForm):
+    REQUIRED_FIELDS = ['phone_number']
+
     class Meta:
         model = Business
-        fields = ['phone_number', 'whatsapp_number', 'email', 'website', 'facebook', 'instagram', 'tiktok']
-        widgets = {
-            'phone_number': forms.TextInput(attrs={'placeholder': '07XX XXX XXX'}),
-        }
+        fields = ['phone_number', 'whatsapp_input', 'email', 'website', 'facebook', 'instagram', 'tiktok']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.REQUIRED_FIELDS:
+            self.fields[field_name].required = True
 
 
 class BusinessLocationForm(forms.ModelForm):
+    REQUIRED_FIELDS = ['county', 'town', 'estate', 'street', 'latitude', 'longitude', 'opens_at', 'closes_at']
+
     class Meta:
         model = Business
         fields = [
-            'county', 'town', 'estate', 'street',
-            'latitude', 'longitude', 'service_counties',
-            'opens_at', 'closes_at', 'closed_weekdays',
+            'county', 'town', 'estate', 'street', 'service_counties',
+            'latitude', 'longitude', 'opens_at', 'closes_at', 'closed_weekdays',
         ]
         widgets = {
             'opens_at': forms.TimeInput(attrs={'type': 'time'}),
             'closes_at': forms.TimeInput(attrs={'type': 'time'}),
-            'closed_weekdays': forms.TextInput(attrs={'placeholder': "e.g. 6 for closed Sundays"}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.REQUIRED_FIELDS:
+            self.fields[field_name].required = True
 
-class BusinessProductForm(forms.ModelForm):
-    class Meta:
-        model = BusinessProduct
-        fields = ['name', 'category', 'price', 'description', 'image', 'is_available']
 
-
-BusinessProductFormSet = forms.modelformset_factory(
-    BusinessProduct, form=BusinessProductForm, extra=3, can_delete=True
+BusinessProductFormSet = modelformset_factory(
+    BusinessProduct,
+    fields=['name', 'category', 'price', 'description', 'image', 'is_available'],
+    extra=1,
+    can_delete=True,
 )
 
 
 class BusinessVerificationForm(forms.Form):
-    registration_certificate = forms.FileField(required=False)
-    kra_pin = forms.FileField(required=False)
-    business_permit = forms.FileField(required=False)
-    national_id = forms.FileField(required=False)
-
-    def save(self, business):
-        for doc_type, _ in BusinessVerificationDocument.DOC_TYPE_CHOICES:
-            if doc_type == 'logo':
-                continue
-            f = self.cleaned_data.get(doc_type)
-            if f:
-                BusinessVerificationDocument.objects.update_or_create(
-                    business=business, doc_type=doc_type, defaults={'file': f}
-                )
+    registration_certificate = forms.FileField(
+        required=False, validators=[FileExtensionValidator(ALLOWED_DOC_EXTENSIONS), validate_doc_size])
+    kra_pin = forms.FileField(
+        required=False, validators=[FileExtensionValidator(ALLOWED_DOC_EXTENSIONS), validate_doc_size])
+    business_permit = forms.FileField(
+        required=False, validators=[FileExtensionValidator(ALLOWED_DOC_EXTENSIONS), validate_doc_size])
+    national_id = forms.FileField(
+        required=False, validators=[FileExtensionValidator(ALLOWED_DOC_EXTENSIONS), validate_doc_size])
