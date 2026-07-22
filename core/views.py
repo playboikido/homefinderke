@@ -151,6 +151,12 @@ def ai_fix_description(request):
         print("AI DESCRIPTION FIX ERROR:", e)
         return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
 def home(request):
+    if request.user.is_authenticated:
+        profile = getattr(request.user, 'profile', None)
+        if profile and profile.account_type == 'business':
+            from django.shortcuts import redirect
+            return redirect('business:dashboard')
+
     residences = Residence.objects.filter(approved=True, is_hidden=False)
 
     county = request.GET.get('county')
