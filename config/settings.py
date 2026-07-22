@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     'core.apps.CoreConfig',
     'accounts',
+    'business.apps.BusinessConfig',
     'django.contrib.sites',
 
     'allauth',

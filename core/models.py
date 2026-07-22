@@ -394,6 +394,8 @@ class Profile(models.Model):
 
     bio = models.TextField(blank=True)
     is_suspended = models.BooleanField(default=False)
+    ACCOUNT_TYPE_CHOICES = [('resident', 'Resident'), ('business', 'Business')]
+    account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='resident')
 
     def save(self, *args, **kwargs):
         if self.profile_picture and hasattr(self.profile_picture, 'file'):
