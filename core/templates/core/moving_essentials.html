@@ -23,53 +23,134 @@
     --hd-font-head: 'Manrope', 'Inter', sans-serif;
   }
   [data-theme="dark"] {
-    --hd-dark: #F1F5F9; --hd-bg: #0F172A; --hd-card: #1E293B;
-    --hd-border: #334155; --hd-text-muted: #94A3B8;
+    --hd-dark: #F1F5F9;
+    --hd-bg: #0F172A;
+    --hd-card: #1E293B;
+    --hd-border: #334155;
+    --hd-text-muted: #94A3B8;
   }
 
-  .hd-wrap { font-family: var(--hd-font); background: var(--hd-bg); min-height: 100vh; color: var(--hd-dark); }
+  .hd-wrap {
+    font-family: var(--hd-font);
+    background: var(--hd-bg);
+    min-height: 100vh;
+    color: var(--hd-dark);
+  }
 
   .hd-hero {
-    padding: 64px 24px 48px; text-align: center; position: relative; color: #fff;
+    padding: 64px 24px 48px;
+    text-align: center;
+    position: relative;
+    color: #fff;
     background: linear-gradient(rgba(15,23,42,0.55), rgba(15,23,42,0.65)),
                 url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80');
-    background-size: cover; background-position: center;
+    background-size: cover;
+    background-position: center;
   }
-  .hd-hero p { color: rgba(255,255,255,0.85); }
-  .hd-hero h1 { font-family: var(--hd-font-head); font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
-  .hd-hero p { color: var(--hd-text-muted); max-width: 560px; margin: 0 auto 28px; font-size: 1.05rem; }
+  .hd-hero h1 {
+    font-family: var(--hd-font-head);
+    font-size: 2.4rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+  .hd-hero p {
+    color: rgba(255,255,255,0.85);
+    max-width: 560px;
+    margin: 0 auto 28px;
+    font-size: 1.05rem;
+  }
 
   .hd-search-bar {
-    max-width: 620px; margin: 0 auto; display: flex; gap: 10px;
-    background: var(--hd-card); padding: 8px; border-radius: var(--hd-r-lg);
-    box-shadow: var(--hd-shadow-lg); border: 1px solid var(--hd-border);
+    max-width: 620px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    background: var(--hd-card);
+    padding: 8px;
+    border-radius: var(--hd-r-lg);
+    box-shadow: var(--hd-shadow-lg);
+    border: 1px solid var(--hd-border);
   }
   .hd-search-bar input {
-    flex: 1; border: none; outline: none; padding: 12px 16px; font-family: var(--hd-font);
-    font-size: 0.95rem; background: transparent; color: var(--hd-dark);
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 12px 16px;
+    font-family: var(--hd-font);
+    font-size: 0.95rem;
+    background: transparent;
+    color: var(--hd-dark);
   }
   .hd-search-bar button {
-    background: var(--hd-primary); color: #fff; border: none; padding: 12px 24px;
-    border-radius: 12px; font-weight: 700; font-family: var(--hd-font); cursor: pointer;
+    background: var(--hd-primary);
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-family: var(--hd-font);
+    cursor: pointer;
     transition: background 0.2s ease;
   }
   .hd-search-bar button:hover { background: #128A3E; }
-  .hd-suggestions {
-    max-width: 620px; margin: 4px auto 0; background: var(--hd-card); border-radius: 12px;
-    box-shadow: var(--hd-shadow-lg); overflow: hidden; text-align: left; display: none;
+
+  .hd-locate-btn {
+    margin-top: 12px;
+    background: none;
+    border: none;
+    color: #fff;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.85rem;
   }
-  .hd-suggestions a { display: block; padding: 10px 16px; text-decoration: none; color: var(--hd-dark); border-bottom: 1px solid var(--hd-border); }
+
+  .hd-suggestions {
+    max-width: 620px;
+    margin: 4px auto 0;
+    background: var(--hd-card);
+    border-radius: 12px;
+    box-shadow: var(--hd-shadow-lg);
+    overflow: hidden;
+    text-align: left;
+    display: none;
+    position: relative;
+    z-index: 20;
+  }
+  .hd-suggestions a {
+    display: block;
+    padding: 10px 16px;
+    text-decoration: none;
+    color: var(--hd-dark);
+    border-bottom: 1px solid var(--hd-border);
+  }
+  .hd-suggestions a:last-child { border-bottom: none; }
   .hd-suggestions a:hover { background: var(--hd-bg); }
-  .hd-stars { color: #F59E0B; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+
+  .hd-stars {
+    color: #F59E0B;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
 
   .hd-categories {
-    max-width: 1100px; margin: 40px auto; padding: 0 24px;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 14px;
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
   }
   .hd-cat-card {
-    background: var(--hd-card); border: 1px solid var(--hd-border); border-radius: var(--hd-r);
-    padding: 20px 12px; text-align: center; text-decoration: none; color: var(--hd-dark);
-    box-shadow: var(--hd-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: var(--hd-card);
+    border: 1px solid var(--hd-border);
+    border-radius: var(--hd-r);
+    padding: 20px 12px;
+    text-align: center;
+    text-decoration: none;
+    color: var(--hd-dark);
+    box-shadow: var(--hd-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
   .hd-cat-card:hover { transform: translateY(-4px); box-shadow: var(--hd-shadow-lg); }
   .hd-cat-card.active { border-color: var(--hd-primary); background: rgba(22,163,74,0.06); }
@@ -77,59 +158,160 @@
   .hd-cat-name { font-weight: 700; font-size: 0.85rem; display: block; }
   .hd-cat-count { font-size: 0.75rem; color: var(--hd-text-muted); }
 
-  .hd-body { max-width: 1100px; margin: 0 auto; padding: 0 24px 70px; display: grid; grid-template-columns: 220px 1fr; gap: 32px; }
-  @media (max-width: 800px) { .hd-body { grid-template-columns: 1fr; } }
+  .hd-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px 70px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 32px;
+  }
+  @media (max-width: 800px) {
+    .hd-body { grid-template-columns: 1fr; }
+  }
 
-  .hd-filters { background: var(--hd-card); border: 1px solid var(--hd-border); border-radius: var(--hd-r); padding: 20px; height: fit-content; box-shadow: var(--hd-shadow); }
-  .hd-filters label { font-weight: 700; font-size: 0.85rem; display: block; margin-bottom: 8px; }
+  .hd-filters {
+    background: var(--hd-card);
+    border: 1px solid var(--hd-border);
+    border-radius: var(--hd-r);
+    padding: 20px;
+    height: fit-content;
+    box-shadow: var(--hd-shadow);
+  }
+  .hd-filters label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: block;
+    margin-bottom: 8px;
+  }
   .hd-filters input[type="text"] {
-    width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--hd-border);
-    font-family: var(--hd-font); background: var(--hd-bg); color: var(--hd-dark);
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--hd-border);
+    font-family: var(--hd-font);
+    background: var(--hd-bg);
+    color: var(--hd-dark);
   }
   .hd-filters button {
-    margin-top: 14px; width: 100%; background: var(--hd-primary); color: #fff; border: none;
-    padding: 10px; border-radius: 10px; font-weight: 700; cursor: pointer;
+    margin-top: 14px;
+    width: 100%;
+    background: var(--hd-primary);
+    color: #fff;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .hd-clear-link {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: var(--hd-text-muted);
   }
 
-  .hd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+  .hd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 20px;
+  }
   .hd-card {
-    background: var(--hd-card); border: 1px solid var(--hd-border); border-radius: var(--hd-r-lg);
-    overflow: hidden; box-shadow: var(--hd-shadow); transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex; flex-direction: column;
+    background: var(--hd-card);
+    border: 1px solid var(--hd-border);
+    border-radius: var(--hd-r-lg);
+    overflow: hidden;
+    box-shadow: var(--hd-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    display: flex;
+    flex-direction: column;
   }
   .hd-card:hover { transform: translateY(-3px); box-shadow: var(--hd-shadow-lg); }
-  .hd-card-img { width: 100%; height: 160px; object-fit: cover; background: var(--hd-border); }
-  .hd-card-body { padding: 18px; flex: 1; display: flex; flex-direction: column; }
+  .hd-card-img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    background: var(--hd-border);
+  }
+  .hd-card-body {
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
   .hd-verified {
-    display: inline-flex; align-items: center; gap: 4px; background: rgba(22,163,74,0.1);
-    color: var(--hd-primary); font-size: 0.72rem; font-weight: 700; padding: 3px 10px;
-    border-radius: 999px; width: fit-content; margin-bottom: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(22,163,74,0.1);
+    color: var(--hd-primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    width: fit-content;
+    margin-bottom: 8px;
   }
   .hd-sponsor { background: #FEF3C7; color: #B45309; }
-  .hd-card h3 { font-family: var(--hd-font-head); font-size: 1.05rem; margin-bottom: 4px; }
-  .hd-card-loc { font-size: 0.85rem; color: var(--hd-text-muted); margin-bottom: 10px; }
-  .hd-price-from { font-size: 0.85rem; color: var(--hd-primary); font-weight: 700; margin-bottom: 12px; }
-  .hd-actions { margin-top: auto; display: flex; gap: 8px; }
-  .hd-btn { flex: 1; text-align: center; padding: 10px; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 0.85rem; }
+  .hd-card h3 {
+    font-family: var(--hd-font-head);
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+  }
+  .hd-card-loc {
+    font-size: 0.85rem;
+    color: var(--hd-text-muted);
+    margin-bottom: 6px;
+  }
+  .hd-price-from {
+    font-size: 0.85rem;
+    color: var(--hd-primary);
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  .hd-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
+  }
+  .hd-btn {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
   .hd-btn-primary { background: var(--hd-primary); color: #fff; }
   .hd-btn-outline { border: 1px solid var(--hd-border); color: var(--hd-dark); }
-  .hd-empty { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: var(--hd-text-muted); }
+  .hd-empty {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--hd-text-muted);
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="hd-wrap">
+
   <div class="hd-hero">
     <h1>Everything For Your New Home</h1>
     <p>Discover trusted movers and home essentials businesses near you — with real prices, photos, and direct contact.</p>
+
     <form class="hd-search-bar" method="get" id="hd-search-form">
       <input type="text" name="county" id="hd-search-input" placeholder="Search by county or business name" value="{{ selected_county }}" autocomplete="off">
       <input type="hidden" name="lat" id="hd-lat">
       <input type="hidden" name="lng" id="hd-lng">
       <button type="submit">Search</button>
     </form>
+
     <div class="hd-suggestions" id="hd-suggestions"></div>
-    <button type="button" onclick="hdUseMyLocation()" style="margin-top:12px;background:none;border:none;color:#fff;text-decoration:underline;cursor:pointer;font-size:0.85rem;">📍 Use my location to sort by distance</button>
+
+    <button type="button" class="hd-locate-btn" onclick="hdUseMyLocation()">📍 Use my location to sort by distance</button>
   </div>
 
   <div class="hd-categories">
@@ -152,30 +334,46 @@
         <button type="submit">Apply</button>
       </form>
       {% if selected_category or selected_county %}
-        <a href="{% url 'moving_essentials' %}" style="display:block;text-align:center;margin-top:10px;font-size:0.85rem;color:var(--hd-text-muted);">Clear filters</a>
+        <a href="{% url 'moving_essentials' %}" class="hd-clear-link">Clear filters</a>
       {% endif %}
     </aside>
 
     <div class="hd-grid">
+
       {% for mover in movers %}
         <div class="hd-card">
-          {% if mover.logo %}<img class="hd-card-img" src="{{ mover.logo.url }}" alt="{{ mover.name }}">{% endif %}
+          {% if mover.logo %}
+            <img class="hd-card-img" src="{{ mover.logo.url }}" alt="{{ mover.name }}">
+          {% endif %}
           <div class="hd-card-body">
-            {% if mover.is_major_sponsor %}<span class="hd-verified hd-sponsor">Sponsored</span>
-            {% elif mover.is_approved %}<span class="hd-verified">✓ Verified</span>{% endif %}
+            {% if mover.is_major_sponsor %}
+              <span class="hd-verified hd-sponsor">Sponsored</span>
+            {% elif mover.is_approved %}
+              <span class="hd-verified">✓ Verified</span>
+            {% endif %}
+
             <h3>{{ mover.name }}</h3>
-            {% if mover.average_rating %}<div class="hd-stars">★ {{ mover.average_rating }} ({{ mover.review_count }})</div>{% endif %}
-            {% if mover.distance_km %}<div class="hd-card-loc">📍 {{ mover.distance_km|floatformat:1 }} km away</div>{% endif %}
+
+            {% if mover.average_rating %}
+              <div class="hd-stars">★ {{ mover.average_rating }} ({{ mover.review_count }})</div>
+            {% endif %}
+
+            {% if mover.distance_km %}
+              <div class="hd-card-loc">📍 {{ mover.distance_km|floatformat:1 }} km away</div>
+            {% endif %}
+
             <div class="hd-card-loc">🚚 Serves {{ mover.service_counties|default:"multiple counties" }}</div>
+
             {% with first_product=mover.products.all|first %}
               {% if first_product and first_product.price %}
                 <div class="hd-price-from">From KSh {{ first_product.price }}</div>
               {% endif %}
             {% endwith %}
+
             <div class="hd-actions">
               <a class="hd-btn hd-btn-primary" href="{% url 'mover_detail' mover.pk %}">View Details</a>
               {% if mover.whatsapp_number %}
-              <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ mover.whatsapp_number }}" target="_blank">WhatsApp</a>
+                <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ mover.whatsapp_number }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
               {% endif %}
             </div>
           </div>
@@ -184,21 +382,38 @@
 
       {% for vendor in vendors %}
         <div class="hd-card">
-          {% if vendor.image %}<img class="hd-card-img" src="{{ vendor.image.url }}" alt="{{ vendor.name }}">{% endif %}
+          {% if vendor.image %}
+            <img class="hd-card-img" src="{{ vendor.image.url }}" alt="{{ vendor.name }}">
+          {% endif %}
           <div class="hd-card-body">
-            {% if vendor.is_major_sponsor %}<span class="hd-verified hd-sponsor">Sponsored</span>
-            {% elif vendor.is_approved %}<span class="hd-verified">✓ Verified</span>{% endif %}
+            {% if vendor.is_major_sponsor %}
+              <span class="hd-verified hd-sponsor">Sponsored</span>
+            {% elif vendor.is_approved %}
+              <span class="hd-verified">✓ Verified</span>
+            {% endif %}
+
             <h3>{{ vendor.name }}</h3>
+
+            {% if vendor.average_rating %}
+              <div class="hd-stars">★ {{ vendor.average_rating }} ({{ vendor.review_count }})</div>
+            {% endif %}
+
+            {% if vendor.distance_km %}
+              <div class="hd-card-loc">📍 {{ vendor.distance_km|floatformat:1 }} km away</div>
+            {% endif %}
+
             <div class="hd-card-loc">📍 {{ vendor.location }}</div>
+
             {% with first_product=vendor.products.all|first %}
               {% if first_product and first_product.price %}
                 <div class="hd-price-from">From KSh {{ first_product.price }}</div>
               {% endif %}
             {% endwith %}
+
             <div class="hd-actions">
               <a class="hd-btn hd-btn-primary" href="{% url 'furniture_vendor_detail' vendor.pk %}">View Details</a>
               {% if vendor.whatsapp_number %}
-              <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ vendor.whatsapp_number }}" target="_blank">WhatsApp</a>
+                <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ vendor.whatsapp_number }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
               {% endif %}
             </div>
           </div>
@@ -208,38 +423,63 @@
       {% if not movers and not vendors %}
         <div class="hd-empty">No businesses found{% if selected_county %} in "{{ selected_county }}"{% endif %}. Try clearing filters.</div>
       {% endif %}
+
     </div>
   </div>
 </div>
-<script>
-function hdUseMyLocation() {
-  if (!navigator.geolocation) { alert('Geolocation not supported on this device.'); return; }
-  navigator.geolocation.getCurrentPosition(function(pos) {
-    document.getElementById('hd-lat').value = pos.coords.latitude;
-    document.getElementById('hd-lng').value = pos.coords.longitude;
-    document.getElementById('hd-search-form').submit();
-  }, function() { alert('Could not get your location.'); });
-}
 
-const hdInput = document.getElementById('hd-search-input');
-const hdBox = document.getElementById('hd-suggestions');
-let hdTimer;
-hdInput.addEventListener('input', function() {
-  clearTimeout(hdTimer);
-  const q = this.value;
-  hdTimer = setTimeout(function() {
-    if (q.length < 2) { hdBox.style.display = 'none'; return; }
-    fetch("{% url 'directory_search_suggestions' %}?q=" + encodeURIComponent(q))
-      .then(r => r.json())
-      .then(data => {
-        if (!data.results.length) { hdBox.style.display = 'none'; return; }
-        hdBox.innerHTML = data.results.map(r => `<a href="${r.url}">${r.name} <span style="color:var(--hd-text-muted);font-size:0.8rem;">(${r.type})</span></a>`).join('');
-        hdBox.style.display = 'block';
-      });
-  }, 250);
-});
-document.addEventListener('click', function(e) {
-  if (!hdBox.contains(e.target) && e.target !== hdInput) hdBox.style.display = 'none';
-});
+<script>
+  function hdUseMyLocation() {
+    if (!navigator.geolocation) {
+      alert('Geolocation not supported on this device.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      document.getElementById('hd-lat').value = pos.coords.latitude;
+      document.getElementById('hd-lng').value = pos.coords.longitude;
+      document.getElementById('hd-search-form').submit();
+    }, function () {
+      alert('Could not get your location.');
+    });
+  }
+
+  (function () {
+    const hdInput = document.getElementById('hd-search-input');
+    const hdBox = document.getElementById('hd-suggestions');
+    let hdTimer;
+
+    hdInput.addEventListener('input', function () {
+      clearTimeout(hdTimer);
+      const q = this.value;
+      hdTimer = setTimeout(function () {
+        if (q.length < 2) {
+          hdBox.style.display = 'none';
+          return;
+        }
+        fetch("{% url 'directory_search_suggestions' %}?q=" + encodeURIComponent(q))
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (!data.results.length) {
+              hdBox.style.display = 'none';
+              return;
+            }
+            hdBox.innerHTML = data.results.map(function (r) {
+              return '<a href="' + r.url + '">' + r.name +
+                ' <span style="color:var(--hd-text-muted);font-size:0.8rem;">(' + r.type + ')</span></a>';
+            }).join('');
+            hdBox.style.display = 'block';
+          })
+          .catch(function () {
+            hdBox.style.display = 'none';
+          });
+      }, 250);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!hdBox.contains(e.target) && e.target !== hdInput) {
+        hdBox.style.display = 'none';
+      }
+    });
+  })();
 </script>
 {% endblock %}

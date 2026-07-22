@@ -28,6 +28,8 @@ from django.contrib import messages
 from .forms import ContactForm
 from django.contrib.auth.decorators import login_required
 from .models import Notification
+from django.db.models import Prefetch, Count, Avg
+import math
 from django.db.models import Q
 from django.http import JsonResponse
 from django.urls import reverse
@@ -279,10 +281,10 @@ def moving_essentials(request):
     user_lng = request.GET.get('lng')
 
     movers_qs = Mover.objects.filter(is_approved=True).prefetch_related(
-        Prefetch('products', queryset=MoverProduct.objects.filter(is_active=True)[:3])
+        Prefetch('products', queryset=MoverProduct.objects.filter(is_active=True))
     )
     vendors_qs = FurnitureVendor.objects.filter(is_approved=True).prefetch_related(
-        Prefetch('products', queryset=FurnitureProduct.objects.filter(is_active=True)[:3])
+        Prefetch('products', queryset=FurnitureProduct.objects.filter(is_active=True))
     )
 
     if county:
@@ -303,6 +305,8 @@ def moving_essentials(request):
         movers.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
         vendors.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
     else:
+        for obj in movers + vendors:
+            obj.distance_km = None
         movers.sort(key=lambda o: (not o.is_major_sponsor, -o.created_at.timestamp()))
         vendors.sort(key=lambda o: (not o.is_major_sponsor, -o.created_at.timestamp()))
 
@@ -311,13 +315,17 @@ def moving_essentials(request):
         .values('category').annotate(count=Count('id'))
     )
     counts_by_cat = {c['category']: c['count'] for c in category_counts}
+    icons = ['🛋️', '🪟', '📺', '🍽️', '🛏️', '🛁', '🧹', '💡', '🛠️', '🌿']
     categories = [
         {'key': k, 'label': label, 'count': counts_by_cat.get(k, 0), 'icon': icon}
-        for (k, label), icon in zip(FurnitureVendor.CATEGORY_CHOICES, [
-            '🛋️', '🪟', '📺', '🍽️', '🛏️', '🛁', '🧹', '💡', '🛠️', '🌿'
-        ])
+        for (k, label), icon in zip(FurnitureVendor.CATEGORY_CHOICES, icons)
     ]
-    categories.insert(0, {'key': 'movers', 'label': 'Movers', 'count': Mover.objects.filter(is_approved=True).count(), 'icon': '🚚'})
+    categories.insert(0, {
+        'key': 'movers',
+        'label': 'Movers',
+        'count': Mover.objects.filter(is_approved=True).count(),
+        'icon': '🚚',
+    })
 
     return render(request, 'core/moving_essentials.html', {
         'movers': movers,
@@ -327,7 +335,6 @@ def moving_essentials(request):
         'categories': categories,
         'has_location': bool(user_lat and user_lng),
     })
-
 
 def directory_search_suggestions(request):
     q = request.GET.get('q', '').strip()
