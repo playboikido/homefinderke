@@ -28,3 +28,4 @@ class Command(BaseCommand):
             cursor.execute("DELETE FROM django_migrations WHERE app='business';")
             self.stdout.write("Cleared business migration history")
         self.stdout.write(self.style.SUCCESS("Done."))
+        
