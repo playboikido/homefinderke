@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit {{ business.name }} | HomeFinderKE Business</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
+        body { background:#F4F7F6; padding:40px 20px; }
+        .wrap { max-width:720px; margin:0 auto; }
+        .topbar { text-align:center; color:#0F766E; font-weight:bold; font-size:15px; margin-bottom:20px; }
+        .back-link { margin-bottom:16px; }
+        .back-link a { color:#0F766E; text-decoration:none; font-size:14px; font-weight:bold; }
+        .back-link a:hover { text-decoration:underline; }
+
+        .card { background:#fff; border-radius:20px; padding:36px; box-shadow:0 8px 30px rgba(0,0,0,.06); margin-bottom:20px; }
+        .card h1 { font-size:22px; color:#0F172A; margin-bottom:4px; }
+        .card h2 { font-size:15px; color:#0F766E; margin:24px 0 14px; text-transform:uppercase; letter-spacing:.03em; }
+        .card h2:first-of-type { margin-top:6px; }
+        .subtitle { color:#667; font-size:14px; margin-bottom:20px; }
+
+        label { display:block; margin-bottom:6px; font-weight:600; color:#333; font-size:14px; }
+        input, textarea, select {
+            width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;
+            font-size:15px; margin-bottom:16px; outline:none;
+        }
+        input:focus, textarea:focus, select:focus { border-color:#0F766E; }
+
+        .errorlist { color:#c0392b; list-style:none; margin-bottom:10px; font-size:13px; }
+
+        button, .btn {
+            padding:14px 24px; border-radius:10px; border:none; font-weight:bold;
+            font-size:15px; cursor:pointer; text-decoration:none; display:inline-block;
+        }
+        .btn-primary { background:#0F766E; color:#fff; }
+        .btn-primary:hover { background:#0a5c56; }
+        .btn-ghost { background:transparent; color:#667; border:1px solid #ddd; }
+        .btn-ghost:hover { background:#f1f1f1; }
+        .form-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:8px; }
+
+        .messages { margin-bottom:20px; }
+        .messages li { list-style:none; background:#DCFCE7; color:#166534; padding:12px 16px; border-radius:10px; margin-bottom:8px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="topbar">HomeFinderKE Business Workspace</div>
+    <div class="back-link"><a href="{% url 'business:dashboard' %}">&larr; Back to Dashboard</a></div>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="card">
+            <h1>Edit Business</h1>
+            <p class="subtitle">Update your business details anytime — changes are visible immediately.</p>
+
+            <h2>Business Info</h2>
+            <label for="{{ form.name.id_for_label }}">Business Name</label>
+            {{ form.errors.name }}
+            {{ form.name }}
+
+            <label for="{{ form.category.id_for_label }}">Business Category</label>
+            {{ form.errors.category }}
+            {{ form.category }}
+
+            <label for="{{ form.description.id_for_label }}">Description</label>
+            {{ form.errors.description }}
+            {{ form.description }}
+
+            <label for="{{ form.logo.id_for_label }}">Business Logo</label>
+            {{ form.errors.logo }}
+            {{ form.logo }}
+
+            <label for="{{ form.cover_image.id_for_label }}">Cover Image</label>
+            {{ form.errors.cover_image }}
+            {{ form.cover_image }}
+
+            <h2>Contact</h2>
+            <label for="{{ form.phone_number.id_for_label }}">Phone</label>
+            {{ form.errors.phone_number }}
+            {{ form.phone_number }}
+
+            <label for="{{ form.whatsapp_number.id_for_label }}">WhatsApp (leave blank to use phone number)</label>
+            {{ form.errors.whatsapp_number }}
+            {{ form.whatsapp_number }}
+
+            <label for="{{ form.email.id_for_label }}">Email</label>
+            {{ form.errors.email }}
+            {{ form.email }}
+
+            <label for="{{ form.website.id_for_label }}">Website</label>
+            {{ form.errors.website }}
+            {{ form.website }}
+
+            <label for="{{ form.facebook.id_for_label }}">Facebook</label>
+            {{ form.errors.facebook }}
+            {{ form.facebook }}
+
+            <label for="{{ form.instagram.id_for_label }}">Instagram</label>
+            {{ form.errors.instagram }}
+            {{ form.instagram }}
+
+            <label for="{{ form.tiktok.id_for_label }}">TikTok</label>
+            {{ form.errors.tiktok }}
+            {{ form.tiktok }}
+
+            <h2>Location</h2>
+            <label for="{{ form.county.id_for_label }}">County</label>
+            {{ form.errors.county }}
+            {{ form.county }}
+
+            <label for="{{ form.town.id_for_label }}">Town</label>
+            {{ form.errors.town }}
+            {{ form.town }}
+
+            <label for="{{ form.estate.id_for_label }}">Estate</label>
+            {{ form.errors.estate }}
+            {{ form.estate }}
+
+            <label for="{{ form.street.id_for_label }}">Street</label>
+            {{ form.errors.street }}
+            {{ form.street }}
+
+            <label for="{{ form.service_counties.id_for_label }}">Other Counties You Serve (comma-separated)</label>
+            {{ form.errors.service_counties }}
+            {{ form.service_counties }}
+
+            <label for="{{ form.latitude.id_for_label }}">Google Maps Latitude</label>
+            {{ form.errors.latitude }}
+            {{ form.latitude }}
+
+            <label for="{{ form.longitude.id_for_label }}">Google Maps Longitude</label>
+            {{ form.errors.longitude }}
+            {{ form.longitude }}
+
+            <label for="{{ form.opens_at.id_for_label }}">Opens At</label>
+            {{ form.errors.opens_at }}
+            {{ form.opens_at }}
+
+            <label for="{{ form.closes_at.id_for_label }}">Closes At</label>
+            {{ form.errors.closes_at }}
+            {{ form.closes_at }}
+
+            <label for="{{ form.closed_weekdays.id_for_label }}">Closed Weekdays</label>
+            {{ form.errors.closed_weekdays }}
+            {{ form.closed_weekdays }}
+
+            <div class="form-actions">
+                <a href="{% url 'business:dashboard' %}" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+</html>
