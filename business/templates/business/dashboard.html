@@ -9,40 +9,76 @@
         * { margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
         body { background:#F4F7F6; padding:40px 20px; }
         .wrap { max-width:1000px; margin:0 auto; }
-        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
-        .header h1 { color:#0F172A; font-size:24px; }
+
+        .topbar { text-align:center; color:#0F766E; font-weight:bold; font-size:15px; margin-bottom:20px; }
+
+        .header {
+            display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+            background:linear-gradient(135deg, #0D1F2D, #0F766E);
+            border-radius:20px; padding:28px 32px; margin-bottom:24px; color:#fff;
+            box-shadow:0 15px 40px rgba(0,0,0,.15);
+        }
+        .header h1 { font-size:24px; margin-bottom:8px; }
+        .header .badges { display:flex; gap:8px; flex-wrap:wrap; }
         .badge {
             display:inline-block; padding:4px 12px; border-radius:99px; font-size:12px; font-weight:bold;
-            background:{% if business.verification_status == 'verified' %}#DCFCE7{% elif business.verification_status == 'rejected' %}#FEE2E2{% else %}#FEF3C7{% endif %};
-            color:{% if business.verification_status == 'verified' %}#166534{% elif business.verification_status == 'rejected' %}#991B1B{% else %}#92400E{% endif %};
         }
-        .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:28px; }
+        .badge-verified { background:#DCFCE7; color:#166534; }
+        .badge-rejected { background:#FEE2E2; color:#991B1B; }
+        .badge-pending  { background:#FEF3C7; color:#92400E; }
+        .badge-plan     { background:rgba(255,255,255,.18); color:#fff; }
+
+        .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:16px; margin-bottom:24px; }
         .stat { background:#fff; border-radius:16px; padding:20px; box-shadow:0 4px 20px rgba(0,0,0,.05); }
         .stat .value { font-size:26px; font-weight:bold; color:#0F766E; }
         .stat .label { font-size:13px; color:#667; margin-top:4px; }
+
+        .actions { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:24px; }
+        .action-btn {
+            display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+            background:#fff; border-radius:16px; padding:22px 12px; text-decoration:none;
+            box-shadow:0 4px 20px rgba(0,0,0,.05); border:1px solid transparent;
+            transition:border-color .2s ease, transform .2s ease;
+        }
+        .action-btn:hover { border-color:#0F766E; transform:translateY(-2px); }
+        .action-btn .icon { font-size:24px; }
+        .action-btn .label { font-size:13px; font-weight:bold; color:#0F172A; text-align:center; }
+        .action-btn.primary { background:#0F766E; }
+        .action-btn.primary .label { color:#fff; }
+
         .card { background:#fff; border-radius:16px; padding:24px; box-shadow:0 4px 20px rgba(0,0,0,.05); margin-bottom:20px; }
         .card h2 { font-size:16px; margin-bottom:14px; color:#0F172A; }
         .inquiry { padding:12px 0; border-bottom:1px solid #eee; }
         .inquiry:last-child { border-bottom:none; }
         .empty { color:#999; font-size:14px; }
+
         .messages { margin-bottom:20px; }
         .messages li { list-style:none; background:#DCFCE7; color:#166534; padding:12px 16px; border-radius:10px; margin-bottom:8px; }
+        .messages li.error { background:#FEE2E2; color:#991B1B; }
     </style>
 </head>
 <body>
 <div class="wrap">
+    <div class="topbar">HomeFinderKE Business Workspace</div>
+
     {% if messages %}
         <ul class="messages">
-            {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+            {% for message in messages %}
+                <li{% if message.tags == 'error' %} class="error"{% endif %}>{{ message }}</li>
+            {% endfor %}
         </ul>
     {% endif %}
 
     <div class="header">
         <div>
             <h1>{{ business.name }}</h1>
-            <span class="badge">{{ business.get_verification_status_display }}</span>
+            <div class="badges">
+                <span class="badge {% if business.verification_status == 'verified' %}badge-verified{% elif business.verification_status == 'rejected' %}badge-rejected{% else %}badge-pending{% endif %}">
+                    {{ business.get_verification_status_display }}
+                </span>
+                <span class="badge badge-plan">{{ business.get_plan_display }} Plan</span>
+            </div>
         </div>
-        <div>Plan: <strong>{{ business.get_plan_display }}</strong></div>
     </div>
 
     <div class="grid">
@@ -52,7 +88,20 @@
         <div class="stat"><div class="value">{{ stats.website_visits }}</div><div class="label">Website Visits</div></div>
         <div class="stat"><div class="value">{{ stats.inquiries }}</div><div class="label">Customer Inquiries</div></div>
         <div class="stat"><div class="value">{{ stats.saved_count }}</div><div class="label">Saved by Users</div></div>
+        <div class="stat"><div class="value">{{ stats.product_count }}</div><div class="label">Active Products</div></div>
         <div class="stat"><div class="value">{{ stats.review_count }}</div><div class="label">Reviews{% if stats.average_rating %} ({{ stats.average_rating }}★){% endif %}</div></div>
+    </div>
+
+    <div class="actions">
+        <a href="{% url 'business:edit' %}" class="action-btn">
+            <span class="icon">✏️</span><span class="label">Edit Business</span>
+        </a>
+        <a href="{% url 'business:products' %}" class="action-btn">
+            <span class="icon">🛍️</span><span class="label">Manage Products</span>
+        </a>
+        <a href="{% url 'business:plans' %}" class="action-btn primary">
+            <span class="icon">⭐</span><span class="label">Upgrade Plan</span>
+        </a>
     </div>
 
     <div class="card">
@@ -60,14 +109,4 @@
         {% for inquiry in recent_inquiries %}
             <div class="inquiry">
                 <strong>{{ inquiry.customer_name }}</strong> — {{ inquiry.message|truncatewords:20 }}
-                <div style="font-size:12px; color:#999;">{{ inquiry.created_at|date:"M j, Y" }} · {{ inquiry.get_status_display }}</div>
-            </div>
-        {% empty %}
-            <p class="empty">No inquiries yet.</p>
-        {% endfor %}
-    </div>
-
-    <p class="empty">Products, gallery, reviews, analytics and subscription management are coming in the next update.</p>
-</div>
-</body>
-</html>
+                <div style="font-size:12px; color:#999;">{{ inquiry.created_at|date:"M j, Y" }} ·

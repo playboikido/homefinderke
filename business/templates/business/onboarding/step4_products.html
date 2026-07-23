@@ -4,7 +4,7 @@
 <h1>Products</h1>
 <p class="subtitle">
     Step 4 of 5 — Showcase what you offer (no checkout, no stock — just a showcase).
-    {% if product_limit %}Your {{ business.plan }} plan allows up to {{ product_limit }} products.{% endif %}
+    {% if product_limit %}Your {{ business.get_plan_display }} plan allows up to {{ product_limit }} products.{% endif %}
 </p>
 
 <form method="POST" enctype="multipart/form-data">
