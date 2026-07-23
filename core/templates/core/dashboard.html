@@ -1,958 +1,601 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}My Dashboard — HomeFinder Kenya{% endblock %}
+{% block title %}Dashboard — HomeFinder Kenya{% endblock %}
 
 {% block content %}
-
 <style>
-  /* ── Google Fonts ─────────────────────────────────────────── */
-  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-  /* ── Design Tokens ─────────────────────────────────────────── */
-  :root {
-    --c-primary:     #0F766E;
-    --c-primary-dk:  #0D5E58;
-    --c-secondary:   #14B8A6;
-    --c-accent:      #0369A1;
-    --c-bg:          #F0FDFA;
-    --c-fg:          #134E4A;
-    --c-surface:     #FFFFFF;
-    --c-muted:       #E8F0F3;
-    --c-border:      #99F6E4;
-    --c-text:        #1C4A47;
-    --c-subtle:      #5EAFA8;
-    --c-danger:      #DC2626;
-    --c-gold:        #D97706;
-    --c-gold-bg:     #FEF3C7;
-    --c-green-bg:    #DCFCE7;
-    --c-green-text:  #166534;
-    --c-pending-bg:  #FEF3C7;
-    --c-pending-txt: #92400E;
-
-    --font-body:     'Fira Sans', system-ui, sans-serif;
-    --font-mono:     'Fira Code', monospace;
-
-    --r-sm:   6px;
-    --r:      12px;
-    --r-lg:   18px;
-    --r-xl:   24px;
-    --r-full: 9999px;
-
-    --shadow-sm: 0 1px 3px rgba(15,118,110,0.08), 0 1px 2px rgba(15,118,110,0.04);
-    --shadow:    0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
-    --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
-    --ease: cubic-bezier(0.4,0,0.2,1);
-  }
-  [data-theme="dark"] {
-    --c-primary:     #14B8A6;
-    --c-primary-dk:  #0F766E;
-    --c-secondary:   #2DD4BF;
-    --c-accent:      #38BDF8;
-    --c-bg:          #0F172A;
-    --c-fg:          #E2E8F0;
-    --c-surface:     #1E293B;
-    --c-muted:       #334155;
-    --c-border:      #334155;
-    --c-text:        #CBD5E1;
-    --c-subtle:      #94A3B8;
-    --c-danger:      #F87171;
-    --c-gold:        #FBBF24;
-    --c-gold-bg:     #422006;
-    --c-green-bg:    #052E1C;
-    --c-green-text: #4ADE80;
-    --c-pending-bg:  #422006;
-    --c-pending-txt: #FBBF24;
-  }
-
-  /* ── Scope ──────────────────────────────────────────────────── */
-  .db-wrap {
-    font-family: var(--font-body);
-    background: var(--c-bg);
+  .pod-scope {
+    --pod-primary: #16A34A;
+    --pod-primary-dk: #14532D;
+    --pod-bg: #F8FAFC;
+    --pod-card: #FFFFFF;
+    --pod-border: #E5E9EF;
+    --pod-text: #0F172A;
+    --pod-muted: #64748B;
+    --pod-danger: #DC2626;
+    --pod-gold: #D97706;
+    --pod-gold-bg: #FEF3C7;
+    --pod-blue: #2563EB;
+    --pod-blue-bg: #DBEAFE;
+    --pod-r: 20px;
+    --pod-r-btn: 16px;
+    --pod-shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 16px rgba(15,23,42,.06);
+    --pod-shadow-lg: 0 8px 30px rgba(15,23,42,.10);
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--pod-text);
+    background: var(--pod-bg);
+    display: flex;
+    align-items: flex-start;
     min-height: 100vh;
-    color: var(--c-text);
-    -webkit-font-smoothing: antialiased;
   }
 
-  /* ── Layout ─────────────────────────────────────────────────── */
-  .db-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px 64px;
-  }
+  .pod-scope * { box-sizing: border-box; }
 
-  /* ── Hero Banner ─────────────────────────────────────────────── */
-  .db-hero {
-    background: linear-gradient(135deg, var(--c-fg) 0%, var(--c-primary) 60%, var(--c-secondary) 100%);
-    padding: 48px 24px 40px;
-    position: relative;
-    overflow: hidden;
-  }
-  .db-hero::before {
-    content: '';
-    position: absolute;
-    width: 600px; height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(20,184,166,.18), transparent 65%);
-    top: -200px; right: -150px;
-    pointer-events: none;
-  }
-  .db-hero-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
-    position: relative;
-  }
-  .db-hero-left {}
-  .db-hero-greeting {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--c-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 6px;
-    font-family: var(--font-mono);
-  }
-  .db-hero-title {
-    font-family: var(--font-mono);
-    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-    font-weight: 700;
-    color: #FFFFFF;
-    line-height: 1.15;
-    margin-bottom: 8px;
-  }
-  .db-hero-sub {
-    color: rgba(255,255,255,0.65);
-    font-size: 0.9rem;
-    max-width: 420px;
-  }
-  .db-hero-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .db-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 22px;
-    border-radius: var(--r);
-    font-size: 0.875rem;
-    font-weight: 600;
-    font-family: var(--font-body);
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 200ms var(--ease);
-    white-space: nowrap;
-  }
-  .db-btn-primary {
-    background: var(--c-surface);
-    color: var(--c-fg);
-    box-shadow: var(--shadow);
-  }
-  .db-btn-primary:hover {
-    background: var(--c-bg);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-  }
-  .db-btn-ghost {
-    background: rgba(255,255,255,0.12);
-    color: #FFFFFF;
-    border: 1.5px solid rgba(255,255,255,0.25);
-  }
-  .db-btn-ghost:hover {
-    background: rgba(255,255,255,0.2);
-    transform: translateY(-1px);
-  }
-
-  /* ── Stats Bar ──────────────────────────────────────────────── */
-  .db-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin: -28px 24px 0;
-    position: relative;
-    z-index: 10;
-    max-width: 1200px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0 24px;
-    margin-top: -28px;
-  }
-  .db-stat-card {
-    background: var(--c-surface);
-    border-radius: var(--r-lg);
-    padding: 20px 22px;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(153,246,228,0.4);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
-  }
-  .db-stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-  }
-  .db-stat-icon {
-    width: 44px; height: 44px;
-    border-radius: var(--r);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  /* ── Sidebar ─────────────────────────────────────────── */
+  .pod-sidebar {
+    width: 240px;
     flex-shrink: 0;
-  }
-  .db-stat-icon svg { width: 22px; height: 22px; }
-  .db-stat-icon--teal  { background: #CCFBF1; color: var(--c-primary); }
-  .db-stat-icon--blue  { background: #DBEAFE; color: var(--c-accent); }
-  .db-stat-icon--gold  { background: var(--c-gold-bg); color: var(--c-gold); }
-  .db-stat-icon--green { background: var(--c-green-bg); color: var(--c-green-text); }
-  .db-stat-value {
-    font-family: var(--font-mono);
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--c-fg);
-    line-height: 1;
-  }
-  .db-stat-label {
-    font-size: 0.75rem;
-    color: var(--c-subtle);
-    font-weight: 500;
-    margin-top: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  /* ── Section Title ──────────────────────────────────────────── */
-  .db-section {
-    margin-top: 40px;
-  }
-  .db-section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    padding-bottom: 14px;
-    border-bottom: 1.5px solid var(--c-border);
-  }
-  .db-section-title {
-    font-family: var(--font-mono);
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--c-fg);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .db-section-title::before {
-    content: '';
-    width: 4px; height: 18px;
-    background: var(--c-primary);
-    border-radius: 2px;
-    display: block;
-  }
-
-  /* ── Profile Card ───────────────────────────────────────────── */
-  .db-profile-card {
-    background: var(--c-surface);
-    border-radius: var(--r-xl);
-    padding: 32px;
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(153,246,228,0.35);
-    display: flex;
-    align-items: center;
-    gap: 28px;
-    flex-wrap: wrap;
-  }
-  .db-avatar {
-    width: 88px; height: 88px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid var(--c-border);
-    box-shadow: 0 0 0 4px rgba(15,118,110,0.08);
-    flex-shrink: 0;
-  }
-  .db-avatar-placeholder {
-    width: 88px; height: 88px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--c-primary), var(--c-secondary));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #FFFFFF;
-    font-family: var(--font-mono);
-    font-size: 2rem;
-    font-weight: 700;
-    flex-shrink: 0;
-  }
-  .db-profile-info { flex: 1; min-width: 200px; }
-  .db-profile-name {
-    font-family: var(--font-mono);
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--c-fg);
-    margin-bottom: 4px;
-  }
-  .db-profile-meta {
+    background: var(--pod-primary-dk);
+    color: #fff;
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-top: 8px;
+    padding: 22px 14px;
   }
-  .db-profile-meta-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    color: var(--c-subtle);
+  .pod-logo { display: flex; align-items: center; gap: 10px; padding: 6px 8px 22px; }
+  .pod-logo-mark {
+    width: 34px; height: 34px; border-radius: 10px; background: var(--pod-primary);
+    display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
   }
-  .db-profile-meta-item svg { width: 14px; height: 14px; color: var(--c-primary); flex-shrink: 0; }
-  .db-profile-bio {
-    font-size: 0.875rem;
-    color: var(--c-subtle);
-    margin-top: 10px;
-    font-style: italic;
-    line-height: 1.6;
-    max-width: 400px;
-  }
-  .db-profile-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
+  .pod-logo-text { line-height: 1.2; }
+  .pod-logo-text strong { display: block; font-size: 0.95rem; font-weight: 700; }
+  .pod-logo-text span { display: block; font-size: 0.68rem; color: rgba(255,255,255,.6); }
 
-  .db-btn-sm {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: var(--r);
-    font-size: 0.8rem;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 180ms var(--ease);
-    border: 1.5px solid transparent;
-    cursor: pointer;
-    font-family: var(--font-body);
+  .pod-nav { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .pod-nav-item {
+    display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 12px;
+    color: rgba(255,255,255,.72); text-decoration: none; font-size: 0.855rem; font-weight: 600;
+    transition: background .15s, color .15s;
   }
-  .db-btn-sm svg { width: 14px; height: 14px; }
-  .db-btn-outline {
-    border-color: var(--c-border);
-    color: var(--c-primary);
-    background: transparent;
-  }
-  .db-btn-outline:hover { background: var(--c-muted); border-color: var(--c-primary); }
-  .db-btn-teal {
-    background: var(--c-primary);
-    color: #FFFFFF;
-  }
-  .db-btn-teal:hover { background: var(--c-primary-dk); transform: translateY(-1px); box-shadow: var(--shadow); }
-  .db-btn-red {
-    background: #FEE2E2;
-    color: var(--c-danger);
-  }
-  .db-btn-red:hover { background: var(--c-danger); color: #FFF; }
+  .pod-nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .pod-nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .pod-nav-item.active { background: var(--pod-primary); color: #fff; }
 
-  /* ── Listing Cards Grid ─────────────────────────────────────── */
-  .db-listings-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+  .pod-upgrade-card {
+    margin-top: 14px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    border-radius: var(--pod-r); padding: 16px 14px;
   }
+  .pod-upgrade-card p.pod-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; }
+  .pod-upgrade-card p.pod-sub { font-size: 0.75rem; color: rgba(255,255,255,.65); margin-bottom: 12px; }
+  .pod-upgrade-btn {
+    display: block; text-align: center; background: var(--pod-primary); color: #fff; font-weight: 700;
+    font-size: 0.8rem; padding: 9px; border-radius: var(--pod-r-btn); text-decoration: none;
+  }
+  .pod-upgrade-btn:hover { background: #15803d; }
 
-  .db-listing-card {
-    background: var(--c-surface);
-    border-radius: var(--r-xl);
-    border: 1px solid rgba(153,246,228,0.35);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: transform 250ms var(--ease), box-shadow 250ms var(--ease);
-    display: flex;
-    flex-direction: column;
-  }
-  .db-listing-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-  }
+  /* ── Main column ─────────────────────────────────────── */
+  .pod-main { flex: 1; min-width: 0; padding: 0 0 60px; }
 
-  /* Card image */
-  .db-card-img {
-    height: 180px;
-    position: relative;
-    overflow: hidden;
-    background: var(--c-muted);
+  .pod-topbar {
+    position: sticky; top: 0; z-index: 20; background: rgba(248,250,252,.85); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--pod-border);
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    padding: 14px 28px;
+  }
+  .pod-search {
+    flex: 1; max-width: 380px; display: flex; align-items: center; gap: 8px;
+    background: #fff; border: 1px solid var(--pod-border); border-radius: 12px; padding: 9px 14px;
+  }
+  .pod-search svg { width: 16px; height: 16px; color: var(--pod-muted); flex-shrink: 0; }
+  .pod-search input { border: none; outline: none; font-size: 0.85rem; width: 100%; font-family: inherit; background: transparent; }
+
+  .pod-topbar-right { display: flex; align-items: center; gap: 14px; }
+  .pod-icon-btn {
+    width: 38px; height: 38px; border-radius: 12px; background: #fff; border: 1px solid var(--pod-border);
+    display: flex; align-items: center; justify-content: center; position: relative; color: var(--pod-text);
+    text-decoration: none; flex-shrink: 0;
+  }
+  .pod-icon-btn svg { width: 17px; height: 17px; }
+  .pod-badge-dot {
+    position: absolute; top: -4px; right: -4px; background: var(--pod-danger); color: #fff;
+    font-size: 0.62rem; font-weight: 700; min-width: 16px; height: 16px; border-radius: 999px;
+    display: flex; align-items: center; justify-content: center; padding: 0 3px; border: 2px solid var(--pod-bg);
+  }
+  .pod-user { display: flex; align-items: center; gap: 10px; }
+  .pod-avatar {
+    width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: var(--pod-primary);
+    display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 0.85rem;
     flex-shrink: 0;
   }
-  .db-card-img img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    transition: transform 350ms var(--ease);
-    display: block;
-  }
-  .db-listing-card:hover .db-card-img img { transform: scale(1.05); }
+  .pod-user-meta { line-height: 1.2; display: none; }
+  .pod-user-meta strong { display: block; font-size: 0.82rem; }
+  .pod-user-meta span { display: block; font-size: 0.7rem; color: var(--pod-muted); }
+  @media (min-width: 700px) { .pod-user-meta { display: block; } }
 
-  .db-card-img-placeholder {
-    width: 100%; height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    color: var(--c-subtle);
-    background: linear-gradient(135deg, #E8F8F6, #D4F0EC);
-  }
-  .db-card-img-placeholder svg { width: 36px; height: 36px; opacity: 0.5; }
-  .db-card-img-placeholder span { font-size: 0.72rem; font-weight: 500; }
+  .pod-inner { padding: 26px 28px 0; max-width: 1280px; margin: 0 auto; }
 
-  /* Status badge */
-  .db-status-badge {
-    position: absolute;
-    top: 12px; left: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: var(--r-full);
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    backdrop-filter: blur(8px);
-  }
-  .db-status-badge::before {
-    content: '';
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    display: block;
-  }
-  .db-badge-approved  { background: rgba(220,252,231,0.95); color: var(--c-green-text); }
-  .db-badge-approved::before  { background: #22C55E; }
-  .db-badge-pending   { background: rgba(254,243,199,0.95); color: var(--c-pending-txt); }
-  .db-badge-pending::before   { background: var(--c-gold); }
-
-  /* Views badge */
-  .db-views-badge {
-    position: absolute;
-    bottom: 10px; right: 10px;
-    background: rgba(0,0,0,0.55);
-    color: #FFFFFF;
-    padding: 3px 9px;
-    border-radius: var(--r-full);
-    font-size: 0.7rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    backdrop-filter: blur(4px);
-  }
-  .db-views-badge svg { width: 11px; height: 11px; }
-
-  /* Card body */
-  .db-card-body {
-    padding: 18px 20px 16px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  .db-card-location {
-    font-size: 0.72rem;
-    color: var(--c-subtle);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    font-weight: 600;
-    margin-bottom: 5px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .db-card-location svg { width: 11px; height: 11px; }
-  .db-card-title {
-    font-family: var(--font-mono);
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--c-fg);
-    margin-bottom: 12px;
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+  /* ── Hero row ─────────────────────────────────────────── */
+  .pod-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  .pod-hero h1 { font-size: 1.5rem; font-weight: 800; margin: 0 0 4px; }
+  .pod-hero p { font-size: 0.88rem; color: var(--pod-muted); margin: 0; }
+  .pod-date-filter {
+    border: 1px solid var(--pod-border); background: #fff; border-radius: 12px; padding: 9px 14px;
+    font-size: 0.82rem; font-weight: 600; font-family: inherit; color: var(--pod-text);
   }
 
-  /* Attributes row */
-  .db-card-attrs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 12px;
+  /* ── Stat cards ───────────────────────────────────────── */
+  .pod-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 22px; }
+  .pod-stat-card {
+    background: var(--pod-card); border-radius: var(--pod-r); padding: 20px; box-shadow: var(--pod-shadow);
+    border: 1px solid var(--pod-border); transition: transform .18s, box-shadow .18s;
   }
-  .db-attr-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--c-muted);
-    color: var(--c-text);
-    padding: 3px 9px;
-    border-radius: var(--r-full);
-    font-size: 0.72rem;
-    font-weight: 600;
-  }
-  .db-attr-chip svg { width: 11px; height: 11px; color: var(--c-primary); }
+  .pod-stat-card:hover { transform: translateY(-3px); box-shadow: var(--pod-shadow-lg); }
+  .pod-stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .pod-stat-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+  .pod-stat-icon svg { width: 18px; height: 18px; }
+  .pod-stat-icon--green { background: #DCFCE7; color: var(--pod-primary); }
+  .pod-stat-icon--blue  { background: var(--pod-blue-bg); color: var(--pod-blue); }
+  .pod-stat-icon--gold  { background: var(--pod-gold-bg); color: var(--pod-gold); }
+  .pod-stat-icon--pink  { background: #FCE7F3; color: #DB2777; }
+  .pod-stat-value { font-size: 1.55rem; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+  .pod-stat-label { font-size: 0.78rem; color: var(--pod-muted); font-weight: 600; }
 
-  /* Price */
-  .db-card-price {
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-    margin-bottom: 4px;
-  }
-  .db-price-value {
-    font-family: var(--font-mono);
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--c-primary);
-  }
-  .db-price-unit {
-    font-size: 0.75rem;
-    color: var(--c-subtle);
-  }
+  /* ── Two column analytics row ─────────────────────────── */
+  .pod-row { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; margin-bottom: 22px; }
+  @media (max-width: 900px) { .pod-row { grid-template-columns: 1fr; } }
 
-  /* Rating mini */
-  .db-card-rating {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    margin-bottom: 14px;
-  }
-  .db-stars { display: flex; gap: 1px; }
-  .db-star-filled { color: #F59E0B; font-size: 0.8rem; }
-  .db-star-empty  { color: #D1FAE5; font-size: 0.8rem; }
-  .db-rating-val  { font-size: 0.8rem; font-weight: 700; color: var(--c-text); font-family: var(--font-mono); }
-  .db-rating-count{ font-size: 0.72rem; color: var(--c-subtle); }
+  .pod-card { background: var(--pod-card); border-radius: var(--pod-r); border: 1px solid var(--pod-border); box-shadow: var(--pod-shadow); padding: 22px; }
+  .pod-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .pod-card-head h2 { font-size: 0.95rem; font-weight: 700; margin: 0; }
 
-  /* Amenity dots */
-  .db-card-amenities {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 16px;
+  .pod-ring-wrap { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
+  .pod-ring { position: relative; width: 92px; height: 92px; flex-shrink: 0; }
+  .pod-ring svg { transform: rotate(-90deg); }
+  .pod-ring-pct { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; font-weight: 800; }
+  .pod-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .pod-checklist li { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--pod-muted); }
+  .pod-checklist li.done { color: var(--pod-text); }
+  .pod-checklist svg { width: 15px; height: 15px; flex-shrink: 0; }
+  .pod-checklist li.done svg { color: var(--pod-primary); }
+  .pod-checklist li:not(.done) svg { color: #CBD5E1; }
+  .pod-complete-btn {
+    display: block; text-align: center; margin-top: 16px; background: var(--pod-primary); color: #fff;
+    font-weight: 700; font-size: 0.82rem; padding: 10px; border-radius: var(--pod-r-btn); text-decoration: none;
   }
-  .db-amenity-dot {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.7rem;
-    color: var(--c-primary);
-    font-weight: 600;
-  }
-  .db-amenity-dot svg { width: 12px; height: 12px; }
+  .pod-complete-btn:hover { background: #15803d; }
 
-  /* Card footer */
-  .db-card-footer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    padding-top: 14px;
-    border-top: 1px solid var(--c-border);
-    margin-top: auto;
-  }
-  .db-card-footer .db-btn-sm { justify-content: center; }
+  /* ── Listings grid ────────────────────────────────────── */
+  .pod-section { margin-bottom: 26px; }
+  .pod-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .pod-section-head h2 { font-size: 1.02rem; font-weight: 700; margin: 0; }
+  .pod-link { font-size: 0.82rem; font-weight: 700; color: var(--pod-primary); text-decoration: none; }
+  .pod-link:hover { text-decoration: underline; }
 
-  /* ── Empty State ─────────────────────────────────────────────── */
-  .db-empty {
-    background: var(--c-surface);
-    border-radius: var(--r-xl);
-    padding: 64px 32px;
-    text-align: center;
-    border: 2px dashed var(--c-border);
+  .pod-listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+  .pod-listing-card {
+    background: var(--pod-card); border-radius: var(--pod-r); border: 1px solid var(--pod-border);
+    box-shadow: var(--pod-shadow); overflow: hidden; display: flex; flex-direction: column;
+    transition: transform .2s, box-shadow .2s;
   }
-  .db-empty-icon {
-    width: 72px; height: 72px;
-    background: var(--c-muted);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 20px;
-    color: var(--c-subtle);
+  .pod-listing-card:hover { transform: translateY(-3px); box-shadow: var(--pod-shadow-lg); }
+  .pod-listing-img { position: relative; height: 160px; background: #EEF2F7; overflow: hidden; }
+  .pod-listing-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .35s; }
+  .pod-listing-card:hover .pod-listing-img img { transform: scale(1.04); }
+  .pod-listing-img-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #94A3B8; }
+  .pod-listing-img-empty svg { width: 30px; height: 30px; }
+  .pod-status-pill {
+    position: absolute; top: 10px; left: 10px; font-size: 0.66rem; font-weight: 700; padding: 4px 10px;
+    border-radius: 999px; text-transform: uppercase; letter-spacing: .04em;
   }
-  .db-empty-icon svg { width: 32px; height: 32px; }
-  .db-empty h3 {
-    font-family: var(--font-mono);
-    font-size: 1.15rem;
-    color: var(--c-fg);
-    margin-bottom: 8px;
-  }
-  .db-empty p {
-    color: var(--c-subtle);
-    font-size: 0.875rem;
-    margin-bottom: 24px;
-  }
+  .pod-status-approved { background: #DCFCE7; color: #166534; }
+  .pod-status-pending { background: var(--pod-gold-bg); color: #92400E; }
+  .pod-listing-body { padding: 14px 16px 16px; display: flex; flex-direction: column; flex: 1; }
+  .pod-listing-loc { font-size: 0.72rem; color: var(--pod-muted); font-weight: 600; margin-bottom: 3px; }
+  .pod-listing-title { font-size: 0.94rem; font-weight: 700; margin: 0 0 8px; line-height: 1.3; }
+  .pod-listing-price { font-size: 1.05rem; font-weight: 800; color: var(--pod-primary); margin-bottom: 10px; }
+  .pod-listing-price span { font-size: 0.72rem; color: var(--pod-muted); font-weight: 500; }
+  .pod-listing-meta { display: flex; align-items: center; gap: 14px; font-size: 0.76rem; color: var(--pod-muted); padding-top: 10px; border-top: 1px solid var(--pod-border); margin-top: auto; }
+  .pod-listing-meta span { display: flex; align-items: center; gap: 4px; }
+  .pod-listing-meta svg { width: 13px; height: 13px; }
 
-  /* ── Responsive ─────────────────────────────────────────────── */
+  /* ── Activity feed ─────────────────────────────────────── */
+  .pod-activity-list { display: flex; flex-direction: column; gap: 2px; }
+  .pod-activity-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--pod-border); }
+  .pod-activity-item:last-child { border-bottom: none; }
+  .pod-activity-dot { width: 32px; height: 32px; border-radius: 10px; background: #DCFCE7; color: var(--pod-primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .pod-activity-dot svg { width: 15px; height: 15px; }
+  .pod-activity-text { font-size: 0.82rem; line-height: 1.4; }
+  .pod-activity-time { font-size: 0.72rem; color: var(--pod-muted); margin-top: 2px; }
+
+  /* ── Empty state ──────────────────────────────────────── */
+  .pod-empty { text-align: center; padding: 56px 24px; border: 2px dashed var(--pod-border); border-radius: var(--pod-r); background: #fff; }
+  .pod-empty-icon { width: 64px; height: 64px; border-radius: 50%; background: #DCFCE7; color: var(--pod-primary); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+  .pod-empty-icon svg { width: 28px; height: 28px; }
+  .pod-empty h3 { font-size: 1.02rem; margin: 0 0 6px; }
+  .pod-empty p { font-size: 0.85rem; color: var(--pod-muted); margin: 0 0 18px; }
+  .pod-empty-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .pod-btn-primary, .pod-btn-outline {
+    display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; border-radius: var(--pod-r-btn);
+    font-size: 0.82rem; font-weight: 700; text-decoration: none; font-family: inherit;
+  }
+  .pod-btn-primary { background: var(--pod-primary); color: #fff; border: none; }
+  .pod-btn-primary:hover { background: #15803d; }
+  .pod-btn-outline { background: #fff; color: var(--pod-text); border: 1px solid var(--pod-border); }
+  .pod-btn-outline:hover { background: #F1F5F9; }
+
+  /* ── Mobile ───────────────────────────────────────────── */
+  .pod-mobile-nav { display: none; }
   @media (max-width: 900px) {
-    .db-stats { grid-template-columns: repeat(2, 1fr); margin-top: 20px; }
-    .db-hero-inner { flex-direction: column; align-items: flex-start; }
-    .db-profile-card { flex-direction: column; align-items: flex-start; }
-    .db-profile-actions { align-items: flex-start; flex-direction: row; }
+    .pod-sidebar { display: none; }
+    .pod-scope { flex-direction: column; }
+    .pod-inner { padding: 20px 16px 90px; }
+    .pod-row { gap: 16px; }
+    .pod-mobile-nav {
+      display: flex; position: fixed; bottom: 0; left: 0; right: 0; z-index: 30;
+      background: #fff; border-top: 1px solid var(--pod-border); padding: 8px 6px;
+      justify-content: space-around; box-shadow: 0 -4px 16px rgba(15,23,42,.06);
+    }
+    .pod-mobile-nav a { display: flex; flex-direction: column; align-items: center; gap: 2px; text-decoration: none; color: var(--pod-muted); font-size: 0.62rem; font-weight: 600; }
+    .pod-mobile-nav a.active { color: var(--pod-primary); }
+    .pod-mobile-nav svg { width: 20px; height: 20px; }
+    .pod-mobile-fab {
+      position: fixed; bottom: 76px; right: 18px; width: 52px; height: 52px; border-radius: 50%;
+      background: var(--pod-primary); color: #fff; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 8px 20px rgba(22,163,74,.4); z-index: 30; text-decoration: none;
+    }
+    .pod-mobile-fab svg { width: 22px; height: 22px; }
   }
-  @media (max-width: 600px) {
-    .db-stats { grid-template-columns: 1fr 1fr; }
-    .db-listings-grid { grid-template-columns: 1fr; }
-    .db-hero { padding: 36px 16px 32px; }
-    .db-inner { padding: 0 16px 48px; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { transition-duration: 0.01ms !important; }
-  }
+  @media (prefers-reduced-motion: reduce) { .pod-scope *, .pod-scope *::before, .pod-scope *::after { transition-duration: .01ms !important; } }
 </style>
 
-<div class="db-wrap">
+<div class="pod-scope">
 
-  <!-- ── Hero Banner ──────────────────────────────────────────── -->
-  <div class="db-hero">
-    <div class="db-hero-inner">
-      <div class="db-hero-left">
-        <p class="db-hero-greeting">Owner Dashboard</p>
-        <h1 class="db-hero-title">
-          Welcome back,<br>{{ request.user.get_full_name|default:request.user.username }}
-        </h1>
-        <p class="db-hero-sub">Manage your listings, track views, and connect with potential tenants.</p>
-      </div>
-      <div class="db-hero-actions">
-        <a href="{% url 'add_residence' %}" class="db-btn db-btn-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
-          Add New Listing
-        </a>
-        <a href="{% url 'my_favorites' %}" class="db-btn db-btn-ghost">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          My Favourites
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Stats Bar ─────────────────────────────────────────────── -->
-  <div class="db-inner" style="padding-top: 0;">
-
-    <div class="db-stats">
-      <div class="db-stat-card">
-        <div class="db-stat-icon db-stat-icon--teal">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        </div>
-        <div>
-          <div class="db-stat-value">{{ residences.count }}</div>
-          <div class="db-stat-label">Total Listings</div>
-        </div>
-      </div>
-
-      <div class="db-stat-card">
-        <div class="db-stat-icon db-stat-icon--green">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <div>
-          <div class="db-stat-value">{{ residences|length }}</div>
-          <div class="db-stat-label">Active</div>
-        </div>
-      </div>
-
-      <div class="db-stat-card">
-        <div class="db-stat-icon db-stat-icon--blue">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </div>
-        <div>
-          <div class="db-stat-value" id="total-views">
-            {% with total=0 %}
-              {% for r in residences %}
-                {% with total=total|add:r.views_count %}{% endwith %}
-              {% endfor %}
-              {{ residences|length }}
-            {% endwith %}
-          </div>
-          <div class="db-stat-label">Total Views</div>
-        </div>
-      </div>
-
-      <div class="db-stat-card">
-        <div class="db-stat-icon db-stat-icon--gold">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        </div>
-        <div>
-          <div class="db-stat-value" id="avg-rating">—</div>
-          <div class="db-stat-label">Avg. Rating</div>
-        </div>
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <aside class="pod-sidebar">
+    <div class="pod-logo">
+      <div class="pod-logo-mark">🏠</div>
+      <div class="pod-logo-text">
+        <strong>HomeFinder KE</strong>
+        <span>Property Owner Dashboard</span>
       </div>
     </div>
 
-    <!-- ── Profile ──────────────────────────────────────────────── -->
-    <div class="db-section">
-      <div class="db-section-head">
-        <h2 class="db-section-title">My Profile</h2>
+    <nav class="pod-nav">
+      <a href="{% url 'dashboard' %}" class="pod-nav-item active">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+      </a>
+      <a href="#pod-listings" class="pod-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        My Listings
+      </a>
+      <a href="{% url 'add_residence' %}" class="pod-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        Add Listing
+      </a>
+      <a href="{% url 'my_favorites' %}" class="pod-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Favourites
+      </a>
+      <a href="{% url 'notifications' %}" class="pod-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </a>
+      <a href="{% url 'owner_profile' request.user.id %}" class="pod-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        My Profile
+      </a>
+      <a href="{% url 'edit_profile' %}" class="pod-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Account Settings
+      </a>
+      <a href="{% url 'about' %}" class="pod-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Help Center
+      </a>
+      <a href="{% url 'account_logout' %}" class="pod-nav-item">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </a>
+    </nav>
+
+    <div class="pod-upgrade-card">
+      <p class="pod-title">Upgrade Your Listings</p>
+      <p class="pod-sub">Get more visibility and quality leads with Premium.</p>
+      <a href="{% url 'my_favorites' %}" class="pod-upgrade-btn">Upgrade Now</a>
+    </div>
+  </aside>
+
+  <!-- ── Main ─────────────────────────────────────────────── -->
+  <div class="pod-main">
+
+    <!-- Topbar -->
+    <div class="pod-topbar">
+      <div class="pod-search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search your listings…" disabled>
+      </div>
+      <div class="pod-topbar-right">
+        <a href="{% url 'notifications' %}" class="pod-icon-btn" aria-label="Notifications">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          {% if recent_activity %}<span class="pod-badge-dot">{{ recent_activity|length }}</span>{% endif %}
+        </a>
+        <a href="{% url 'add_residence' %}" class="pod-icon-btn" aria-label="Add listing" style="background:var(--pod-primary); color:#fff; border-color:var(--pod-primary);">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+        </a>
+        <div class="pod-user">
+          {% if request.user.profile.profile_picture %}
+            <img class="pod-avatar" src="{{ request.user.profile.profile_picture.url }}" alt="">
+          {% else %}
+            <div class="pod-avatar">{{ request.user.username|slice:":1"|upper }}</div>
+          {% endif %}
+          <div class="pod-user-meta">
+            <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+            <span>Property Owner</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pod-inner">
+
+      <!-- Hero -->
+      <div class="pod-hero">
+        <div>
+          <h1>Good {% now "G" as h %}{% if h|add:0 < 12 %}morning{% elif h|add:0 < 18 %}afternoon{% else %}evening{% endif %}, {{ request.user.first_name|default:request.user.username }} 👋</h1>
+          <p>Here's what's happening with your properties today.</p>
+        </div>
+        <select class="pod-date-filter" disabled>
+          <option>All Time</option>
+        </select>
       </div>
 
-      <div class="db-profile-card">
-
-        <!-- Avatar -->
-        {% if request.user.profile.profile_picture %}
-          <img
-            class="db-avatar"
-            src="{{ request.user.profile.profile_picture.url }}"
-            alt="{{ request.user.username }} profile photo"
-          >
-        {% else %}
-          <div class="db-avatar-placeholder" aria-hidden="true">
-            {{ request.user.username|slice:":1"|upper }}
+      <!-- Stat cards -->
+      <div class="pod-stats">
+        <div class="pod-stat-card">
+          <div class="pod-stat-top">
+            <div class="pod-stat-icon pod-stat-icon--green">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
           </div>
-        {% endif %}
+          <div class="pod-stat-value">{{ stats.total_listings }}</div>
+          <div class="pod-stat-label">Total Listings</div>
+        </div>
 
-        <!-- Info -->
-        <div class="db-profile-info">
-          <div class="db-profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
-          <div class="db-profile-meta">
-            <div class="db-profile-meta-item">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              @{{ request.user.username }}
+        <div class="pod-stat-card">
+          <div class="pod-stat-top">
+            <div class="pod-stat-icon pod-stat-icon--green">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
             </div>
-            {% if request.user.email %}
-            <div class="db-profile-meta-item">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              {{ request.user.email }}
-            </div>
-            {% endif %}
-            {% if request.user.profile.phone_number %}
-            <div class="db-profile-meta-item">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.18 6.18l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-              {{ request.user.profile.phone_number }}
-            </div>
-            {% endif %}
           </div>
-          {% if request.user.profile.bio %}
-          <p class="db-profile-bio">"{{ request.user.profile.bio }}"</p>
+          <div class="pod-stat-value">{{ stats.active_listings }}</div>
+          <div class="pod-stat-label">Active Listings</div>
+        </div>
+
+        <div class="pod-stat-card">
+          <div class="pod-stat-top">
+            <div class="pod-stat-icon pod-stat-icon--blue">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+          </div>
+          <div class="pod-stat-value">{{ stats.total_views }}</div>
+          <div class="pod-stat-label">Total Views</div>
+        </div>
+
+        <div class="pod-stat-card">
+          <div class="pod-stat-top">
+            <div class="pod-stat-icon pod-stat-icon--pink">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+          </div>
+          <div class="pod-stat-value">{{ stats.total_favorites }}</div>
+          <div class="pod-stat-label">Favourites</div>
+        </div>
+
+        <div class="pod-stat-card">
+          <div class="pod-stat-top">
+            <div class="pod-stat-icon pod-stat-icon--gold">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+          </div>
+          <div class="pod-stat-value">{{ stats.avg_rating|default:"—" }}</div>
+          <div class="pod-stat-label">Avg. Rating · {{ stats.total_reviews }} review{{ stats.total_reviews|pluralize }}</div>
+        </div>
+      </div>
+
+      <!-- Analytics + Profile completion -->
+      <div class="pod-row">
+        <div class="pod-card">
+          <div class="pod-card-head">
+            <h2>Views Overview</h2>
+            <span style="font-size:0.72rem; color:var(--pod-muted); font-weight:600;">Last 8 weeks</span>
+          </div>
+          <canvas id="podViewsChart" height="150"></canvas>
+        </div>
+
+        <div class="pod-card">
+          <div class="pod-card-head"><h2>Profile Completion</h2></div>
+          <div class="pod-ring-wrap">
+            <div class="pod-ring">
+              <svg width="92" height="92" viewBox="0 0 92 92">
+                <circle cx="46" cy="46" r="40" fill="none" stroke="#E5E9EF" stroke-width="9"/>
+                <circle cx="46" cy="46" r="40" fill="none" stroke="#16A34A" stroke-width="9"
+                        stroke-linecap="round"
+                        stroke-dasharray="{{ profile_completion|floatformat:0 }} 999"
+                        style="stroke-dasharray: calc({{ profile_completion }} * 2.513) 999;"/>
+              </svg>
+              <div class="pod-ring-pct">{{ profile_completion }}%</div>
+            </div>
+            <p style="font-size:0.82rem; color:var(--pod-muted); margin:0;">
+              {% if profile_completion == 100 %}Your profile is fully set up.{% else %}A complete profile builds tenant trust.{% endif %}
+            </p>
+          </div>
+          <ul class="pod-checklist">
+            {% for item in checklist %}
+            <li class="{% if item.done %}done{% endif %}">
+              {% if item.done %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              {% else %}
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
+              {% endif %}
+              {{ item.label }}
+            </li>
+            {% endfor %}
+          </ul>
+          {% if profile_completion < 100 %}
+          <a href="{% url 'edit_profile' %}" class="pod-complete-btn">Complete Profile</a>
           {% endif %}
         </div>
+      </div>
 
-        <!-- Actions -->
-        <div class="db-profile-actions">
-          <a href="{% url 'edit_profile' %}" class="db-btn-sm db-btn-teal">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit Profile
-          </a>
-          <a href="{% url 'my_favorites' %}" class="db-btn-sm db-btn-outline">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-            Favourites
-          </a>
+      <!-- My Listings -->
+      <div class="pod-section" id="pod-listings">
+        <div class="pod-section-head">
+          <h2>My Listings</h2>
+          <a href="{% url 'add_residence' %}" class="pod-link">+ Add New Listing</a>
         </div>
-      </div>
-    </div>
 
-    <!-- ── My Listings ───────────────────────────────────────────── -->
-    <div class="db-section">
-      <div class="db-section-head">
-        <h2 class="db-section-title">My Listings</h2>
-        <a href="{% url 'add_residence' %}" class="db-btn-sm db-btn-teal">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M12 5v14M5 12h14"/></svg>
-          Add Listing
-        </a>
-      </div>
-
-      {% for residence in residences %}
-
-      {% if forloop.first %}
-      <div class="db-listings-grid">
-      {% endif %}
-
-        <article class="db-listing-card">
-
-          <!-- Image -->
-          <div class="db-card-img">
-            {% if residence.front_image %}
-              <img src="{{ residence.front_image.url }}" alt="{{ residence.name }}" loading="lazy">
-            {% else %}
-              <div class="db-card-img-placeholder">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span>No photo uploaded</span>
+        {% if residences %}
+        <div class="pod-listings-grid">
+          {% for r in residences %}
+          <div class="pod-listing-card">
+            <div class="pod-listing-img">
+              {% if r.front_image %}
+                <img src="{{ r.front_image.url }}" alt="{{ r.name }}" loading="lazy">
+              {% else %}
+                <div class="pod-listing-img-empty">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                </div>
+              {% endif %}
+              {% if r.approved %}
+                <span class="pod-status-pill pod-status-approved">Active</span>
+              {% else %}
+                <span class="pod-status-pill pod-status-pending">Pending</span>
+              {% endif %}
+            </div>
+            <div class="pod-listing-body">
+              <div class="pod-listing-loc">{{ r.town }}{% if r.county %}, {{ r.county }}{% endif %}</div>
+              <h3 class="pod-listing-title">{{ r.name }}</h3>
+              <div class="pod-listing-price">KSh {{ r.rent_price|floatformat:"0" }} <span>/ month</span></div>
+              <div class="pod-listing-meta">
+                <span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  {{ r.views_count }}
+                </span>
+                <span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                  {{ r.favorited_by.count }}
+                </span>
+                <a href="{% url 'residence_detail' r.id %}" style="margin-left:auto; color:var(--pod-primary); font-weight:700; text-decoration:none;">View →</a>
               </div>
-            {% endif %}
-
-            <!-- Approval badge -->
-            {% if residence.approved %}
-              <span class="db-status-badge db-badge-approved">Approved</span>
-            {% else %}
-              <span class="db-status-badge db-badge-pending">Pending Review</span>
-            {% endif %}
-
-            {% if residence.is_premium %}
-              <span class="db-status-badge" style="background:#FEF3C7; color:#D97706; border:1px solid #FDE68A; top:42px; font-weight:700;">⭐ Premium</span>
-            {% endif %}
-            {% if residence.is_hidden %}
-              <span class="db-status-badge" style="background:#FEE2E2; color:#DC2626; border:1px solid #FECACA; top:72px;">👁 Hidden</span>
-            {% endif %}
-            {% if residence.is_paused %}
-              <span class="db-status-badge" style="background:#FFF7ED; color:#EA580C; border:1px solid #FED7AA; top:102px;">⏸ Paused</span>
-            {% endif %}
-
-            <!-- Views -->
-            <div class="db-views-badge">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-              {{ residence.views_count }} views
             </div>
           </div>
-
-          <!-- Body -->
-          <div class="db-card-body">
-
-            <div class="db-card-location">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              {{ residence.town }}{% if residence.county %}, {{ residence.county }}{% endif %}
-            </div>
-
-            <h3 class="db-card-title">{{ residence.name }}</h3>
-
-            <!-- Attributes -->
-            <div class="db-card-attrs">
-              <span class="db-attr-chip">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-                {{ residence.get_house_type_display }}
-              </span>
-              {% if residence.phone_number %}
-              <span class="db-attr-chip">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.18 6.18l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                {{ residence.phone_number }}
-              </span>
-              {% endif %}
-            </div>
-
-            <!-- Price -->
-            <div class="db-card-price">
-              <span class="db-price-value">KSh {{ residence.rent_price|floatformat:"0" }}</span>
-              <span class="db-price-unit">/ month</span>
-            </div>
-
-            <!-- Rating -->
-            {% with rating=residence.average_rating %}
-            <div class="db-card-rating">
-              <div class="db-stars">
-                {% for i in "12345" %}
-                  {% if forloop.counter <= rating %}
-                    <span class="db-star-filled">★</span>
-                  {% else %}
-                    <span class="db-star-empty">★</span>
-                  {% endif %}
-                {% endfor %}
-              </div>
-              {% if rating > 0 %}
-                <span class="db-rating-val">{{ rating }}</span>
-                <span class="db-rating-count">({{ residence.reviews.count }} review{{ residence.reviews.count|pluralize }})</span>
-              {% else %}
-                <span class="db-rating-count" style="font-style:italic;">No reviews yet</span>
-              {% endif %}
-            </div>
-            {% endwith %}
-
-            <!-- Amenity dots -->
-            <div class="db-card-amenities">
-              {% if residence.water_available %}
-              <span class="db-amenity-dot">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-                Water
-              </span>
-              {% endif %}
-              {% if residence.fibre_available %}
-              <span class="db-amenity-dot">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
-                Fibre
-              </span>
-              {% endif %}
-              {% if residence.gated_community %}
-              <span class="db-amenity-dot">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                Gated
-              </span>
-              {% endif %}
-              {% if residence.cctv_available %}
-              <span class="db-amenity-dot">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
-                CCTV
-              </span>
-              {% endif %}
-            </div>
-
-            <!-- Card actions -->
-            <div class="db-card-footer" style="gap:10px; display:flex; width:100%;">
-              <a href="{% url 'residence_detail' residence.id %}" class="db-btn-sm db-btn-outline" style="flex:1; justify-content:center; text-align:center;">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                View
-              </a>
-              
-              {% if not residence.is_premium %}
-                {% if residence.boost_requested %}
-                  <button class="db-btn-sm" style="background:#EDE9FE; color:#7C3AED; border:1px solid #C4B5FD; cursor:default; flex:1; font-weight:600; font-family:var(--font-body); display:inline-flex; align-items:center; justify-content:center; gap:4px; border-radius:var(--r);" disabled>
-                    🚀 Requested
-                  </button>
-                {% else %}
-                  <a href="{% url 'request_boost' residence.id %}" class="db-btn-sm" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A); color:#92400E; border:1px solid #FDE68A; flex:1; text-align:center; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:4px; border-radius:var(--r);">
-                    🚀 Boost
-                  </a>
-                {% endif %}
-              {% endif %}
-            </div>
-
-          </div><!-- /.db-card-body -->
-        </article>
-
-      {% empty %}
-        <!-- Empty state -->
-        <div class="db-empty">
-          <div class="db-empty-icon">
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="pod-empty">
+          <div class="pod-empty-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
-          <h3>No listings yet</h3>
-          <p>You haven't submitted any residences. Add your first one and start reaching tenants across Kenya.</p>
-          <a href="{% url 'add_residence' %}" class="db-btn-sm db-btn-teal" style="display:inline-flex;">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
-            Add Your First Listing
-          </a>
-          <div style="margin-top:20px;">
-            <a href="{% url 'edit_profile' %}" class="db-btn-sm db-btn-outline" style="display:inline-flex;">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-              Complete Your Profile First
-            </a>
+          <h3>No Listings Yet</h3>
+          <p>Start by adding your first residence to reach tenants across Kenya.</p>
+          <div class="pod-empty-actions">
+            <a href="{% url 'add_residence' %}" class="pod-btn-primary">Add New Listing</a>
+            <a href="{% url 'about' %}" class="pod-btn-outline">Learn More</a>
           </div>
         </div>
+        {% endif %}
+      </div>
 
-      {% endfor %}
+      <!-- Recent Activity -->
+      <div class="pod-section">
+        <div class="pod-section-head"><h2>Recent Activity</h2></div>
+        <div class="pod-card">
+          {% if recent_activity %}
+          <div class="pod-activity-list">
+            {% for note in recent_activity %}
+            <div class="pod-activity-item">
+              <div class="pod-activity-dot">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              </div>
+              <div>
+                <div class="pod-activity-text">{{ note.message }}</div>
+                <div class="pod-activity-time">{{ note.created_at|timesince }} ago</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p style="font-size:0.85rem; color:var(--pod-muted); margin:0;">Nothing yet — activity on your listings will show up here.</p>
+          {% endif %}
+        </div>
+      </div>
 
-      {% if residences %}
-      </div><!-- /.db-listings-grid -->
-      {% endif %}
+    </div><!-- /.pod-inner -->
+  </div><!-- /.pod-main -->
 
-    </div><!-- /.db-section -->
-  </div><!-- /.db-inner -->
-</div><!-- /.db-wrap -->
+  <!-- Mobile bottom nav -->
+  <nav class="pod-mobile-nav">
+    <a href="{% url 'dashboard' %}" class="active">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      Dashboard
+    </a>
+    <a href="#pod-listings">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Listings
+    </a>
+    <a href="{% url 'my_favorites' %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      Saved
+    </a>
+    <a href="{% url 'edit_profile' %}">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
+  </nav>
+  <a href="{% url 'add_residence' %}" class="pod-mobile-fab" aria-label="Add listing">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+  </a>
 
+</div><!-- /.pod-scope -->
+
+{{ weekly_views|json_script:"pod-weekly-views" }}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
-  // Calculate total views and average rating in JS for accuracy
-  document.addEventListener('DOMContentLoaded', function() {
-    // Inline views data from Django
-    const residencesData = [
-      {% for r in residences %}
-        { views: {{ r.views_count }}, rating: {{ r.average_rating }} }{% if not forloop.last %},{% endif %}
-      {% endfor %}
-    ];
-
-    if (residencesData.length > 0) {
-      const totalViews = residencesData.reduce((s, r) => s + r.views, 0);
-      const ratings = residencesData.filter(r => r.rating > 0).map(r => r.rating);
-      const avgRating = ratings.length
-        ? (ratings.reduce((s, r) => s + r, 0) / ratings.length).toFixed(1)
-        : '—';
-
-      const viewsEl = document.getElementById('total-views');
-      const ratingEl = document.getElementById('avg-rating');
-      if (viewsEl) viewsEl.textContent = totalViews.toLocaleString();
-      if (ratingEl) ratingEl.textContent = avgRating;
+  document.addEventListener('DOMContentLoaded', function () {
+    const weekly = JSON.parse(document.getElementById('pod-weekly-views').textContent);
+    const ctx = document.getElementById('podViewsChart');
+    if (ctx && weekly.length) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: weekly.map(w => w.label),
+          datasets: [{
+            data: weekly.map(w => w.views),
+            borderColor: '#16A34A',
+            backgroundColor: 'rgba(22,163,74,0.08)',
+            fill: true,
+            tension: 0.35,
+            pointRadius: 3,
+            pointBackgroundColor: '#16A34A',
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+            y: { grid: { color: '#F1F5F9' }, ticks: { font: { size: 10 } }, beginAtZero: true }
+          }
+        }
+      });
     }
   });
 </script>
-
 {% endblock %}

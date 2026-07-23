@@ -540,12 +540,80 @@ def listing_terms(request):
     })
 
 
+# ── Replace your existing `dashboard` view in core/views.py with this one ──
+# It keeps the same URL/name, just adds the context the new template needs.
+# Everything here is built from models that already exist (Residence, Favorite,
+# Review, Notification, Profile) — no new migrations required.
+
 @login_required
 def dashboard(request):
     if request.user.email == 'homefinder.ke.help@gmail.com':
         return redirect('admin_dashboard')
-    residences = Residence.objects.filter(owner=request.user)
-    return render(request, 'core/dashboard.html', {'residences': residences})
+
+    from django.db.models import Avg, Count, Sum
+    from datetime import timedelta
+
+    residences = Residence.objects.filter(owner=request.user).order_by('-created_at')
+
+    agg = residences.aggregate(
+        total_views=Sum('views_count'),
+        avg_rating=Avg('reviews__rating'),
+    )
+    total_listings = residences.count()
+    active_listings = residences.filter(approved=True, is_hidden=False, is_paused=False).count()
+    pending_listings = residences.filter(approved=False).count()
+    total_views = agg['total_views'] or 0
+    avg_rating = round(agg['avg_rating'], 1) if agg['avg_rating'] else None
+
+    total_favorites = Favorite.objects.filter(residence__owner=request.user).count()
+    total_reviews = Review.objects.filter(residence__owner=request.user).count()
+
+    # ── Profile completion checklist ──
+    profile = getattr(request.user, 'profile', None)
+    checklist = [
+        {'label': 'Profile photo', 'done': bool(profile and profile.profile_picture)},
+        {'label': 'Phone number added', 'done': bool(profile and profile.phone_number)},
+        {'label': 'Bio added', 'done': bool(profile and profile.bio)},
+        {'label': 'Email on file', 'done': bool(request.user.email)},
+        {'label': 'First listing added', 'done': total_listings > 0},
+    ]
+    done_count = sum(1 for c in checklist if c['done'])
+    profile_completion = round((done_count / len(checklist)) * 100)
+
+    # ── Recent activity (from Notification model) ──
+    recent_activity = request.user.notifications.all().order_by('-created_at')[:6]
+
+    # ── Simple views trend for the last 8 weeks (based on created_at cohorts) ──
+    # Residence doesn't track per-day views historically, so this buckets each
+    # listing's current views_count by the week it was created — a reasonable
+    # proxy chart until real time-series view tracking exists.
+    today = timezone.now().date()
+    weeks = []
+    for i in range(7, -1, -1):
+        week_start = today - timedelta(days=today.weekday() + i * 7)
+        week_end = week_start + timedelta(days=6)
+        views_in_week = residences.filter(
+            created_at__date__gte=week_start, created_at__date__lte=week_end
+        ).aggregate(total=Sum('views_count'))['total'] or 0
+        weeks.append({'label': week_start.strftime('%b %d'), 'views': views_in_week})
+
+    context = {
+        'residences': residences,
+        'stats': {
+            'total_listings': total_listings,
+            'active_listings': active_listings,
+            'pending_listings': pending_listings,
+            'total_views': total_views,
+            'total_favorites': total_favorites,
+            'total_reviews': total_reviews,
+            'avg_rating': avg_rating,
+        },
+        'checklist': checklist,
+        'profile_completion': profile_completion,
+        'recent_activity': recent_activity,
+        'weekly_views': weeks,
+    }
+    return render(request, 'core/dashboard.html', context)
 
 
 from django.core.exceptions import PermissionDenied
