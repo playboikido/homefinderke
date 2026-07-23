@@ -1,162 +1,958 @@
+{% extends 'base.html' %}
+
+{% block title %}My Dashboard — HomeFinder Kenya{% endblock %}
+
+{% block content %}
+
 <style>
-    .biz-wrap { max-width:760px; margin:0 auto; padding:32px 20px 60px; }
-    .biz-wrap.biz-wide { max-width:1080px; }
+  /* ── Google Fonts ─────────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
-    .biz-topbar {
-        text-align:center; color:var(--primary); font-weight:700; font-size:0.85rem;
-        margin-bottom:20px; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:0.06em;
-    }
-    .biz-back-link { margin-bottom:16px; }
-    .biz-back-link a { color:var(--primary); text-decoration:none; font-size:0.85rem; font-weight:600; }
-    .biz-back-link a:hover { text-decoration:underline; }
+  /* ── Design Tokens ─────────────────────────────────────────── */
+  :root {
+    --c-primary:     #0F766E;
+    --c-primary-dk:  #0D5E58;
+    --c-secondary:   #14B8A6;
+    --c-accent:      #0369A1;
+    --c-bg:          #F0FDFA;
+    --c-fg:          #134E4A;
+    --c-surface:     #FFFFFF;
+    --c-muted:       #E8F0F3;
+    --c-border:      #99F6E4;
+    --c-text:        #1C4A47;
+    --c-subtle:      #5EAFA8;
+    --c-danger:      #DC2626;
+    --c-gold:        #D97706;
+    --c-gold-bg:     #FEF3C7;
+    --c-green-bg:    #DCFCE7;
+    --c-green-text:  #166534;
+    --c-pending-bg:  #FEF3C7;
+    --c-pending-txt: #92400E;
 
-    .biz-progress { display:flex; gap:6px; margin-bottom:28px; }
-    .biz-progress span { flex:1; height:6px; border-radius:var(--radius-full); background:var(--muted); }
-    .biz-progress span.done, .biz-progress span.active { background:var(--primary); }
+    --font-body:     'Fira Sans', system-ui, sans-serif;
+    --font-mono:     'Fira Code', monospace;
 
-    .biz-card {
-        background:var(--bg-card); border-radius:var(--radius-xl); padding:32px;
-        box-shadow:var(--shadow-lg); margin-bottom:20px; border:1px solid var(--border);
-    }
-    .biz-card h1 { font-size:1.4rem; color:var(--fg); margin-bottom:6px; }
-    .biz-card h2 {
-        font-size:0.85rem; color:var(--primary); margin:22px 0 12px; text-transform:uppercase;
-        letter-spacing:0.05em; font-family:var(--font-mono);
-    }
-    .biz-card h2:first-of-type { margin-top:4px; }
-    .biz-subtitle { color:var(--fg-muted); margin-bottom:22px; font-size:0.88rem; }
+    --r-sm:   6px;
+    --r:      12px;
+    --r-lg:   18px;
+    --r-xl:   24px;
+    --r-full: 9999px;
 
-    .biz-card label { display:block; margin-bottom:6px; font-weight:600; color:var(--text); font-size:0.88rem; }
-    .biz-card input, .biz-card textarea, .biz-card select {
-        width:100%; padding:12px; border:1px solid var(--border); border-radius:var(--radius);
-        font-size:0.92rem; margin-bottom:16px; outline:none; background:var(--bg-card);
-        color:var(--fg); font-family:var(--font-body);
-    }
-    .biz-card input:focus, .biz-card textarea:focus, .biz-card select:focus { border-color:var(--primary); }
-    .biz-errorlist { color:var(--danger); list-style:none; margin-bottom:10px; font-size:0.8rem; }
+    --shadow-sm: 0 1px 3px rgba(15,118,110,0.08), 0 1px 2px rgba(15,118,110,0.04);
+    --shadow:    0 4px 12px rgba(15,118,110,0.10), 0 2px 4px rgba(15,118,110,0.05);
+    --shadow-lg: 0 12px 32px rgba(15,118,110,0.14), 0 4px 8px rgba(15,118,110,0.06);
+    --ease: cubic-bezier(0.4,0,0.2,1);
+  }
+  [data-theme="dark"] {
+    --c-primary:     #14B8A6;
+    --c-primary-dk:  #0F766E;
+    --c-secondary:   #2DD4BF;
+    --c-accent:      #38BDF8;
+    --c-bg:          #0F172A;
+    --c-fg:          #E2E8F0;
+    --c-surface:     #1E293B;
+    --c-muted:       #334155;
+    --c-border:      #334155;
+    --c-text:        #CBD5E1;
+    --c-subtle:      #94A3B8;
+    --c-danger:      #F87171;
+    --c-gold:        #FBBF24;
+    --c-gold-bg:     #422006;
+    --c-green-bg:    #052E1C;
+    --c-green-text: #4ADE80;
+    --c-pending-bg:  #422006;
+    --c-pending-txt: #FBBF24;
+  }
 
-    .biz-checkbox-row { display:flex; align-items:center; gap:8px; margin-bottom:16px; }
-    .biz-checkbox-row input { width:auto; margin:0; }
-    .biz-checkbox-row.biz-delete-row label { color:var(--danger); }
+  /* ── Scope ──────────────────────────────────────────────────── */
+  .db-wrap {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    min-height: 100vh;
+    color: var(--c-text);
+    -webkit-font-smoothing: antialiased;
+  }
 
-    .biz-btn, .biz-card button {
-        padding:13px 22px; border-radius:var(--radius); border:none; font-weight:700;
-        font-size:0.9rem; cursor:pointer; text-decoration:none; display:inline-block; font-family:var(--font-body);
-    }
-    .biz-btn-primary { background:var(--primary); color:#fff; }
-    .biz-btn-primary:hover { background:var(--primary-dark); }
-    .biz-btn-ghost { background:transparent; color:var(--fg-muted); border:1px solid var(--border); }
-    .biz-btn-ghost:hover { background:var(--muted); }
-    .biz-form-actions { display:flex; justify-content:flex-end; gap:12px; margin-top:8px; }
+  /* ── Layout ─────────────────────────────────────────────────── */
+  .db-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+  }
 
-    .biz-header {
-        display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
-        background:linear-gradient(135deg, var(--fg) 0%, var(--primary) 60%, var(--secondary) 100%);
-        border-radius:var(--radius-xl); padding:26px 30px; margin-bottom:22px; color:#fff;
-        box-shadow:var(--shadow-lg);
-    }
-    .biz-header h1 { font-size:1.4rem; margin-bottom:8px; color:#fff; }
-    .biz-badges { display:flex; gap:8px; flex-wrap:wrap; }
-    .biz-badge { display:inline-block; padding:4px 12px; border-radius:var(--radius-full); font-size:0.72rem; font-weight:700; }
-    .biz-badge-verified { background:var(--green-bg); color:var(--green-text); }
-    .biz-badge-rejected { background:#FEE2E2; color:#991B1B; }
-    .biz-badge-pending  { background:var(--gold-bg); color:#92400E; }
-    .biz-badge-plan     { background:rgba(255,255,255,.18); color:#fff; }
+  /* ── Hero Banner ─────────────────────────────────────────────── */
+  .db-hero {
+    background: linear-gradient(135deg, var(--c-fg) 0%, var(--c-primary) 60%, var(--c-secondary) 100%);
+    padding: 48px 24px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .db-hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(20,184,166,.18), transparent 65%);
+    top: -200px; right: -150px;
+    pointer-events: none;
+  }
+  .db-hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .db-hero-left {}
+  .db-hero-greeting {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--c-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+    font-family: var(--font-mono);
+  }
+  .db-hero-title {
+    font-family: var(--font-mono);
+    font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+    font-weight: 700;
+    color: #FFFFFF;
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+  .db-hero-sub {
+    color: rgba(255,255,255,0.65);
+    font-size: 0.9rem;
+    max-width: 420px;
+  }
+  .db-hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .db-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: var(--r);
+    font-size: 0.875rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 200ms var(--ease);
+    white-space: nowrap;
+  }
+  .db-btn-primary {
+    background: var(--c-surface);
+    color: var(--c-fg);
+    box-shadow: var(--shadow);
+  }
+  .db-btn-primary:hover {
+    background: var(--c-bg);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .db-btn-ghost {
+    background: rgba(255,255,255,0.12);
+    color: #FFFFFF;
+    border: 1.5px solid rgba(255,255,255,0.25);
+  }
+  .db-btn-ghost:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+  }
 
-    .biz-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:16px; margin-bottom:22px; }
-    .biz-stat { background:var(--bg-card); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow); border:1px solid var(--border); }
-    .biz-stat .biz-value { font-size:1.6rem; font-weight:700; color:var(--primary); font-family:var(--font-mono); }
-    .biz-stat .biz-label { font-size:0.78rem; color:var(--fg-muted); margin-top:4px; }
+  /* ── Stats Bar ──────────────────────────────────────────────── */
+  .db-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin: -28px 24px 0;
+    position: relative;
+    z-index: 10;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 24px;
+    margin-top: -28px;
+  }
+  .db-stat-card {
+    background: var(--c-surface);
+    border-radius: var(--r-lg);
+    padding: 20px 22px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(153,246,228,0.4);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 200ms var(--ease), box-shadow 200ms var(--ease);
+  }
+  .db-stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+  .db-stat-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--r);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .db-stat-icon svg { width: 22px; height: 22px; }
+  .db-stat-icon--teal  { background: #CCFBF1; color: var(--c-primary); }
+  .db-stat-icon--blue  { background: #DBEAFE; color: var(--c-accent); }
+  .db-stat-icon--gold  { background: var(--c-gold-bg); color: var(--c-gold); }
+  .db-stat-icon--green { background: var(--c-green-bg); color: var(--c-green-text); }
+  .db-stat-value {
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    line-height: 1;
+  }
+  .db-stat-label {
+    font-size: 0.75rem;
+    color: var(--c-subtle);
+    font-weight: 500;
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
 
-    .biz-actions { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:14px; margin-bottom:22px; }
-    .biz-action-btn {
-        display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
-        background:var(--bg-card); border-radius:var(--radius-lg); padding:20px 12px; text-decoration:none;
-        box-shadow:var(--shadow); border:1px solid var(--border);
-        transition:var(--transition);
-    }
-    .biz-action-btn:hover { border-color:var(--primary); transform:translateY(-2px); }
-    .biz-action-btn .biz-icon { font-size:22px; }
-    .biz-action-btn .biz-action-label { font-size:0.8rem; font-weight:700; color:var(--fg); text-align:center; }
-    .biz-action-btn.biz-primary { background:var(--primary); }
-    .biz-action-btn.biz-primary .biz-action-label { color:#fff; }
+  /* ── Section Title ──────────────────────────────────────────── */
+  .db-section {
+    margin-top: 40px;
+  }
+  .db-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid var(--c-border);
+  }
+  .db-section-title {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .db-section-title::before {
+    content: '';
+    width: 4px; height: 18px;
+    background: var(--c-primary);
+    border-radius: 2px;
+    display: block;
+  }
 
-    .biz-inquiry { padding:12px 0; border-bottom:1px solid var(--border); }
-    .biz-inquiry:last-child { border-bottom:none; }
-    .biz-empty { color:var(--fg-muted); font-size:0.85rem; }
+  /* ── Profile Card ───────────────────────────────────────────── */
+  .db-profile-card {
+    background: var(--c-surface);
+    border-radius: var(--r-xl);
+    padding: 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(153,246,228,0.35);
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .db-avatar {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--c-border);
+    box-shadow: 0 0 0 4px rgba(15,118,110,0.08);
+    flex-shrink: 0;
+  }
+  .db-avatar-placeholder {
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--c-primary), var(--c-secondary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #FFFFFF;
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .db-profile-info { flex: 1; min-width: 200px; }
+  .db-profile-name {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    margin-bottom: 4px;
+  }
+  .db-profile-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 8px;
+  }
+  .db-profile-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--c-subtle);
+  }
+  .db-profile-meta-item svg { width: 14px; height: 14px; color: var(--c-primary); flex-shrink: 0; }
+  .db-profile-bio {
+    font-size: 0.875rem;
+    color: var(--c-subtle);
+    margin-top: 10px;
+    font-style: italic;
+    line-height: 1.6;
+    max-width: 400px;
+  }
+  .db-profile-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
 
-    .biz-unlock { text-align:center; }
-    .biz-unlock h2 { margin-bottom:8px; }
+  .db-btn-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--r);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 180ms var(--ease);
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .db-btn-sm svg { width: 14px; height: 14px; }
+  .db-btn-outline {
+    border-color: var(--c-border);
+    color: var(--c-primary);
+    background: transparent;
+  }
+  .db-btn-outline:hover { background: var(--c-muted); border-color: var(--c-primary); }
+  .db-btn-teal {
+    background: var(--c-primary);
+    color: #FFFFFF;
+  }
+  .db-btn-teal:hover { background: var(--c-primary-dk); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .db-btn-red {
+    background: #FEE2E2;
+    color: var(--c-danger);
+  }
+  .db-btn-red:hover { background: var(--c-danger); color: #FFF; }
 
-    .biz-product-box { border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; margin-bottom:16px; }
+  /* ── Listing Cards Grid ─────────────────────────────────────── */
+  .db-listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+  }
 
-    .biz-plans-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; }
-    .biz-plan-card {
-        background:var(--bg-card); border-radius:var(--radius-xl); padding:26px 22px;
-        box-shadow:var(--shadow-lg); border:2px solid transparent; display:flex; flex-direction:column;
-    }
-    .biz-plan-card.biz-current { border-color:var(--primary); }
-    .biz-plan-name { font-size:1.05rem; font-weight:700; color:var(--fg); margin-bottom:4px; }
-    .biz-plan-price { font-size:1.5rem; font-weight:700; color:var(--primary); margin-bottom:2px; font-family:var(--font-mono); }
-    .biz-plan-price small { font-size:0.75rem; font-weight:400; color:var(--fg-muted); }
-    .biz-plan-yearly { font-size:0.72rem; color:var(--fg-muted); margin-bottom:16px; }
-    .biz-plan-limits { list-style:none; margin-bottom:20px; flex-grow:1; }
-    .biz-plan-limits li { font-size:0.78rem; color:var(--text); padding:6px 0; border-bottom:1px solid var(--border); }
-    .biz-plan-limits li:last-child { border-bottom:none; }
-    .biz-current-badge {
-        display:inline-block; background:var(--green-bg); color:var(--green-text); font-size:0.72rem; font-weight:700;
-        padding:4px 12px; border-radius:var(--radius-full); margin-bottom:14px; align-self:flex-start;
-    }
+  .db-listing-card {
+    background: var(--c-surface);
+    border-radius: var(--r-xl);
+    border: 1px solid rgba(153,246,228,0.35);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: transform 250ms var(--ease), box-shadow 250ms var(--ease);
+    display: flex;
+    flex-direction: column;
+  }
+  .db-listing-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+  }
 
-    .biz-shell { display:flex; min-height:100vh; }
-    .biz-sidebar {
-        width:220px; flex-shrink:0; background:var(--fg); color:#fff; display:flex;
-        flex-direction:column; padding:20px 14px; position:sticky; top:0; height:100vh;
-    }
-    .biz-sidebar-logo { font-weight:700; font-size:1.05rem; padding:10px 10px 24px; }
-    .biz-sidebar-nav { display:flex; flex-direction:column; gap:4px; flex-grow:1; }
-    .biz-nav-item {
-        display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:var(--radius);
-        color:rgba(255,255,255,.75); text-decoration:none; font-size:0.85rem; font-weight:600;
-    }
-    .biz-nav-item:hover { background:rgba(255,255,255,.08); color:#fff; }
-    .biz-nav-item.active { background:var(--primary); color:#fff; }
-    .biz-nav-disabled { opacity:.4; cursor:not-allowed; }
-    .biz-nav-logout { margin-top:12px; border-top:1px solid rgba(255,255,255,.12); padding-top:16px; }
-    .biz-main { flex-grow:1; padding:28px 32px 60px; max-width:1200px; }
+  /* Card image */
+  .db-card-img {
+    height: 180px;
+    position: relative;
+    overflow: hidden;
+    background: var(--c-muted);
+    flex-shrink: 0;
+  }
+  .db-card-img img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 350ms var(--ease);
+    display: block;
+  }
+  .db-listing-card:hover .db-card-img img { transform: scale(1.05); }
 
-    .biz-dash-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:22px; flex-wrap:wrap; gap:12px; }
-    .biz-dash-header h1 { font-size:1.4rem; color:var(--fg); margin-bottom:4px; }
-    .biz-dash-user { display:flex; align-items:center; gap:12px; }
-    .biz-dash-avatar {
-        width:38px; height:38px; border-radius:50%; background:var(--primary); color:#fff;
-        display:flex; align-items:center; justify-content:center; font-weight:700;
-    }
+  .db-card-img-placeholder {
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--c-subtle);
+    background: linear-gradient(135deg, #E8F8F6, #D4F0EC);
+  }
+  .db-card-img-placeholder svg { width: 36px; height: 36px; opacity: 0.5; }
+  .db-card-img-placeholder span { font-size: 0.72rem; font-weight: 500; }
 
-    .biz-grid-5 { grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); }
-    .biz-trend { font-size:0.7rem; margin-top:6px; font-weight:600; }
-    .biz-trend.up { color:var(--green-text, #16A34A); }
-    .biz-trend.down { color:var(--danger); }
+  /* Status badge */
+  .db-status-badge {
+    position: absolute;
+    top: 12px; left: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: var(--r-full);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    backdrop-filter: blur(8px);
+  }
+  .db-status-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: block;
+  }
+  .db-badge-approved  { background: rgba(220,252,231,0.95); color: var(--c-green-text); }
+  .db-badge-approved::before  { background: #22C55E; }
+  .db-badge-pending   { background: rgba(254,243,199,0.95); color: var(--c-pending-txt); }
+  .db-badge-pending::before   { background: var(--c-gold); }
 
-    .biz-dash-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px; margin-bottom:20px; }
-    .biz-chart-card .biz-sparkline { width:100%; height:140px; }
-    .biz-top-product { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); font-size:0.85rem; }
-    .biz-top-product:last-child { border-bottom:none; }
-    .biz-sub-status { display:flex; justify-content:space-between; align-items:center; }
+  /* Views badge */
+  .db-views-badge {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    background: rgba(0,0,0,0.55);
+    color: #FFFFFF;
+    padding: 3px 9px;
+    border-radius: var(--r-full);
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    backdrop-filter: blur(4px);
+  }
+  .db-views-badge svg { width: 11px; height: 11px; }
 
-    @media (max-width:820px) {
-        .biz-shell { flex-direction:column; }
-        .biz-sidebar { width:100%; height:auto; flex-direction:row; overflow-x:auto; position:static; }
-        .biz-sidebar-logo { display:none; }
-        .biz-sidebar-nav { flex-direction:row; }
-        .biz-nav-logout { margin:0; border:none; padding:10px 12px; }
-        .biz-main { padding:20px 16px 80px; }
-    }
+  /* Card body */
+  .db-card-body {
+    padding: 18px 20px 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .db-card-location {
+    font-size: 0.72rem;
+    color: var(--c-subtle);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .db-card-location svg { width: 11px; height: 11px; }
+  .db-card-title {
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--c-fg);
+    margin-bottom: 12px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
-    .biz-see-more {
-        background:none; border:none; color:var(--primary); font-size:0.78rem; font-weight:700;
-        cursor:pointer; padding:0 0 12px; text-align:left;
-    }
-    .biz-plan-extra { display:none; }
-    .biz-plan-extra.open { display:block; }
+  /* Attributes row */
+  .db-card-attrs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .db-attr-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--c-muted);
+    color: var(--c-text);
+    padding: 3px 9px;
+    border-radius: var(--r-full);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .db-attr-chip svg { width: 11px; height: 11px; color: var(--c-primary); }
+
+  /* Price */
+  .db-card-price {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+  .db-price-value {
+    font-family: var(--font-mono);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--c-primary);
+  }
+  .db-price-unit {
+    font-size: 0.75rem;
+    color: var(--c-subtle);
+  }
+
+  /* Rating mini */
+  .db-card-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 14px;
+  }
+  .db-stars { display: flex; gap: 1px; }
+  .db-star-filled { color: #F59E0B; font-size: 0.8rem; }
+  .db-star-empty  { color: #D1FAE5; font-size: 0.8rem; }
+  .db-rating-val  { font-size: 0.8rem; font-weight: 700; color: var(--c-text); font-family: var(--font-mono); }
+  .db-rating-count{ font-size: 0.72rem; color: var(--c-subtle); }
+
+  /* Amenity dots */
+  .db-card-amenities {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .db-amenity-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    color: var(--c-primary);
+    font-weight: 600;
+  }
+  .db-amenity-dot svg { width: 12px; height: 12px; }
+
+  /* Card footer */
+  .db-card-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--c-border);
+    margin-top: auto;
+  }
+  .db-card-footer .db-btn-sm { justify-content: center; }
+
+  /* ── Empty State ─────────────────────────────────────────────── */
+  .db-empty {
+    background: var(--c-surface);
+    border-radius: var(--r-xl);
+    padding: 64px 32px;
+    text-align: center;
+    border: 2px dashed var(--c-border);
+  }
+  .db-empty-icon {
+    width: 72px; height: 72px;
+    background: var(--c-muted);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: var(--c-subtle);
+  }
+  .db-empty-icon svg { width: 32px; height: 32px; }
+  .db-empty h3 {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    color: var(--c-fg);
+    margin-bottom: 8px;
+  }
+  .db-empty p {
+    color: var(--c-subtle);
+    font-size: 0.875rem;
+    margin-bottom: 24px;
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .db-stats { grid-template-columns: repeat(2, 1fr); margin-top: 20px; }
+    .db-hero-inner { flex-direction: column; align-items: flex-start; }
+    .db-profile-card { flex-direction: column; align-items: flex-start; }
+    .db-profile-actions { align-items: flex-start; flex-direction: row; }
+  }
+  @media (max-width: 600px) {
+    .db-stats { grid-template-columns: 1fr 1fr; }
+    .db-listings-grid { grid-template-columns: 1fr; }
+    .db-hero { padding: 36px 16px 32px; }
+    .db-inner { padding: 0 16px 48px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0.01ms !important; }
+  }
 </style>
+
+<div class="db-wrap">
+
+  <!-- ── Hero Banner ──────────────────────────────────────────── -->
+  <div class="db-hero">
+    <div class="db-hero-inner">
+      <div class="db-hero-left">
+        <p class="db-hero-greeting">Owner Dashboard</p>
+        <h1 class="db-hero-title">
+          Welcome back,<br>{{ request.user.get_full_name|default:request.user.username }}
+        </h1>
+        <p class="db-hero-sub">Manage your listings, track views, and connect with potential tenants.</p>
+      </div>
+      <div class="db-hero-actions">
+        <a href="{% url 'add_residence' %}" class="db-btn db-btn-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14M5 12h14"/></svg>
+          Add New Listing
+        </a>
+        <a href="{% url 'my_favorites' %}" class="db-btn db-btn-ghost">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          My Favourites
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Stats Bar ─────────────────────────────────────────────── -->
+  <div class="db-inner" style="padding-top: 0;">
+
+    <div class="db-stats">
+      <div class="db-stat-card">
+        <div class="db-stat-icon db-stat-icon--teal">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </div>
+        <div>
+          <div class="db-stat-value">{{ residences.count }}</div>
+          <div class="db-stat-label">Total Listings</div>
+        </div>
+      </div>
+
+      <div class="db-stat-card">
+        <div class="db-stat-icon db-stat-icon--green">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <div>
+          <div class="db-stat-value">{{ residences|length }}</div>
+          <div class="db-stat-label">Active</div>
+        </div>
+      </div>
+
+      <div class="db-stat-card">
+        <div class="db-stat-icon db-stat-icon--blue">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <div>
+          <div class="db-stat-value" id="total-views">
+            {% with total=0 %}
+              {% for r in residences %}
+                {% with total=total|add:r.views_count %}{% endwith %}
+              {% endfor %}
+              {{ residences|length }}
+            {% endwith %}
+          </div>
+          <div class="db-stat-label">Total Views</div>
+        </div>
+      </div>
+
+      <div class="db-stat-card">
+        <div class="db-stat-icon db-stat-icon--gold">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        </div>
+        <div>
+          <div class="db-stat-value" id="avg-rating">—</div>
+          <div class="db-stat-label">Avg. Rating</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Profile ──────────────────────────────────────────────── -->
+    <div class="db-section">
+      <div class="db-section-head">
+        <h2 class="db-section-title">My Profile</h2>
+      </div>
+
+      <div class="db-profile-card">
+
+        <!-- Avatar -->
+        {% if request.user.profile.profile_picture %}
+          <img
+            class="db-avatar"
+            src="{{ request.user.profile.profile_picture.url }}"
+            alt="{{ request.user.username }} profile photo"
+          >
+        {% else %}
+          <div class="db-avatar-placeholder" aria-hidden="true">
+            {{ request.user.username|slice:":1"|upper }}
+          </div>
+        {% endif %}
+
+        <!-- Info -->
+        <div class="db-profile-info">
+          <div class="db-profile-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+          <div class="db-profile-meta">
+            <div class="db-profile-meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              @{{ request.user.username }}
+            </div>
+            {% if request.user.email %}
+            <div class="db-profile-meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              {{ request.user.email }}
+            </div>
+            {% endif %}
+            {% if request.user.profile.phone_number %}
+            <div class="db-profile-meta-item">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.18 6.18l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              {{ request.user.profile.phone_number }}
+            </div>
+            {% endif %}
+          </div>
+          {% if request.user.profile.bio %}
+          <p class="db-profile-bio">"{{ request.user.profile.bio }}"</p>
+          {% endif %}
+        </div>
+
+        <!-- Actions -->
+        <div class="db-profile-actions">
+          <a href="{% url 'edit_profile' %}" class="db-btn-sm db-btn-teal">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit Profile
+          </a>
+          <a href="{% url 'my_favorites' %}" class="db-btn-sm db-btn-outline">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            Favourites
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── My Listings ───────────────────────────────────────────── -->
+    <div class="db-section">
+      <div class="db-section-head">
+        <h2 class="db-section-title">My Listings</h2>
+        <a href="{% url 'add_residence' %}" class="db-btn-sm db-btn-teal">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M12 5v14M5 12h14"/></svg>
+          Add Listing
+        </a>
+      </div>
+
+      {% for residence in residences %}
+
+      {% if forloop.first %}
+      <div class="db-listings-grid">
+      {% endif %}
+
+        <article class="db-listing-card">
+
+          <!-- Image -->
+          <div class="db-card-img">
+            {% if residence.front_image %}
+              <img src="{{ residence.front_image.url }}" alt="{{ residence.name }}" loading="lazy">
+            {% else %}
+              <div class="db-card-img-placeholder">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>No photo uploaded</span>
+              </div>
+            {% endif %}
+
+            <!-- Approval badge -->
+            {% if residence.approved %}
+              <span class="db-status-badge db-badge-approved">Approved</span>
+            {% else %}
+              <span class="db-status-badge db-badge-pending">Pending Review</span>
+            {% endif %}
+
+            {% if residence.is_premium %}
+              <span class="db-status-badge" style="background:#FEF3C7; color:#D97706; border:1px solid #FDE68A; top:42px; font-weight:700;">⭐ Premium</span>
+            {% endif %}
+            {% if residence.is_hidden %}
+              <span class="db-status-badge" style="background:#FEE2E2; color:#DC2626; border:1px solid #FECACA; top:72px;">👁 Hidden</span>
+            {% endif %}
+            {% if residence.is_paused %}
+              <span class="db-status-badge" style="background:#FFF7ED; color:#EA580C; border:1px solid #FED7AA; top:102px;">⏸ Paused</span>
+            {% endif %}
+
+            <!-- Views -->
+            <div class="db-views-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              {{ residence.views_count }} views
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div class="db-card-body">
+
+            <div class="db-card-location">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{ residence.town }}{% if residence.county %}, {{ residence.county }}{% endif %}
+            </div>
+
+            <h3 class="db-card-title">{{ residence.name }}</h3>
+
+            <!-- Attributes -->
+            <div class="db-card-attrs">
+              <span class="db-attr-chip">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                {{ residence.get_house_type_display }}
+              </span>
+              {% if residence.phone_number %}
+              <span class="db-attr-chip">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.18 6.18l.82-.82a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                {{ residence.phone_number }}
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Price -->
+            <div class="db-card-price">
+              <span class="db-price-value">KSh {{ residence.rent_price|floatformat:"0" }}</span>
+              <span class="db-price-unit">/ month</span>
+            </div>
+
+            <!-- Rating -->
+            {% with rating=residence.average_rating %}
+            <div class="db-card-rating">
+              <div class="db-stars">
+                {% for i in "12345" %}
+                  {% if forloop.counter <= rating %}
+                    <span class="db-star-filled">★</span>
+                  {% else %}
+                    <span class="db-star-empty">★</span>
+                  {% endif %}
+                {% endfor %}
+              </div>
+              {% if rating > 0 %}
+                <span class="db-rating-val">{{ rating }}</span>
+                <span class="db-rating-count">({{ residence.reviews.count }} review{{ residence.reviews.count|pluralize }})</span>
+              {% else %}
+                <span class="db-rating-count" style="font-style:italic;">No reviews yet</span>
+              {% endif %}
+            </div>
+            {% endwith %}
+
+            <!-- Amenity dots -->
+            <div class="db-card-amenities">
+              {% if residence.water_available %}
+              <span class="db-amenity-dot">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                Water
+              </span>
+              {% endif %}
+              {% if residence.fibre_available %}
+              <span class="db-amenity-dot">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+                Fibre
+              </span>
+              {% endif %}
+              {% if residence.gated_community %}
+              <span class="db-amenity-dot">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Gated
+              </span>
+              {% endif %}
+              {% if residence.cctv_available %}
+              <span class="db-amenity-dot">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                CCTV
+              </span>
+              {% endif %}
+            </div>
+
+            <!-- Card actions -->
+            <div class="db-card-footer" style="gap:10px; display:flex; width:100%;">
+              <a href="{% url 'residence_detail' residence.id %}" class="db-btn-sm db-btn-outline" style="flex:1; justify-content:center; text-align:center;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                View
+              </a>
+              
+              {% if not residence.is_premium %}
+                {% if residence.boost_requested %}
+                  <button class="db-btn-sm" style="background:#EDE9FE; color:#7C3AED; border:1px solid #C4B5FD; cursor:default; flex:1; font-weight:600; font-family:var(--font-body); display:inline-flex; align-items:center; justify-content:center; gap:4px; border-radius:var(--r);" disabled>
+                    🚀 Requested
+                  </button>
+                {% else %}
+                  <a href="{% url 'request_boost' residence.id %}" class="db-btn-sm" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A); color:#92400E; border:1px solid #FDE68A; flex:1; text-align:center; font-weight:600; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; gap:4px; border-radius:var(--r);">
+                    🚀 Boost
+                  </a>
+                {% endif %}
+              {% endif %}
+            </div>
+
+          </div><!-- /.db-card-body -->
+        </article>
+
+      {% empty %}
+        <!-- Empty state -->
+        <div class="db-empty">
+          <div class="db-empty-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <h3>No listings yet</h3>
+          <p>You haven't submitted any residences. Add your first one and start reaching tenants across Kenya.</p>
+          <a href="{% url 'add_residence' %}" class="db-btn-sm db-btn-teal" style="display:inline-flex;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
+            Add Your First Listing
+          </a>
+          <div style="margin-top:20px;">
+            <a href="{% url 'edit_profile' %}" class="db-btn-sm db-btn-outline" style="display:inline-flex;">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Complete Your Profile First
+            </a>
+          </div>
+        </div>
+
+      {% endfor %}
+
+      {% if residences %}
+      </div><!-- /.db-listings-grid -->
+      {% endif %}
+
+    </div><!-- /.db-section -->
+  </div><!-- /.db-inner -->
+</div><!-- /.db-wrap -->
+
+<script>
+  // Calculate total views and average rating in JS for accuracy
+  document.addEventListener('DOMContentLoaded', function() {
+    // Inline views data from Django
+    const residencesData = [
+      {% for r in residences %}
+        { views: {{ r.views_count }}, rating: {{ r.average_rating }} }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ];
+
+    if (residencesData.length > 0) {
+      const totalViews = residencesData.reduce((s, r) => s + r.views, 0);
+      const ratings = residencesData.filter(r => r.rating > 0).map(r => r.rating);
+      const avgRating = ratings.length
+        ? (ratings.reduce((s, r) => s + r, 0) / ratings.length).toFixed(1)
+        : '—';
+
+      const viewsEl = document.getElementById('total-views');
+      const ratingEl = document.getElementById('avg-rating');
+      if (viewsEl) viewsEl.textContent = totalViews.toLocaleString();
+      if (ratingEl) ratingEl.textContent = avgRating;
+    }
+  });
+</script>
+
+{% endblock %}
