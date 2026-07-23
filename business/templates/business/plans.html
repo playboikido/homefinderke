@@ -39,13 +39,19 @@
                 {% endif %}
 
                 <ul class="biz-plan-limits">
-                    <li>{% if plan.limits.products %}Up to {{ plan.limits.products }} products{% else %}Unlimited products{% endif %}</li>
-                    <li>{% if plan.limits.gallery %}Up to {{ plan.limits.gallery }} gallery photos{% else %}Unlimited gallery photos{% endif %}</li>
-                    <li>{% if plan.limits.staff %}Up to {{ plan.limits.staff }} staff member{{ plan.limits.staff|pluralize }}{% else %}Unlimited staff members{% endif %}</li>
-                    <li>{% if plan.slug == 'starter' %}Basic dashboard only{% else %}Full analytics dashboard{% endif %}</li>
-                    <li>{% if plan.slug == 'premium' or plan.slug == 'enterprise' %}✓ Priority placement & sponsor badge{% else %}—{% endif %}</li>
-                    <li>{% if plan.slug == 'premium' or plan.slug == 'enterprise' %}✓ Homepage promotion eligibility{% else %}—{% endif %}</li>
+                    {% for item in plan.headline_features %}
+                        <li>{{ item }}</li>
+                    {% endfor %}
                 </ul>
+
+                {% if plan.extra_features %}
+                    <button type="button" class="biz-see-more" onclick="this.nextElementSibling.classList.toggle('open'); this.textContent = this.nextElementSibling.classList.contains('open') ? 'See less −' : 'See more +';">See more +</button>
+                    <ul class="biz-plan-limits biz-plan-extra">
+                        {% for item in plan.extra_features %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
 
                 {% if plan.is_current %}
                     <a class="biz-btn biz-btn-ghost">Current Plan</a>

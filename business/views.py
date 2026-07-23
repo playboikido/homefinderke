@@ -12,7 +12,7 @@ from .forms import (
     BusinessProductFormSet, BusinessVerificationForm,
 )
 from .models import (
-    PLAN_CHOICES, PLAN_LIMITS, PLAN_PRICING,
+    PLAN_CHOICES, PLAN_FEATURE_COPY, PLAN_HEADLINE_COUNT, PLAN_LIMITS, PLAN_PRICING,
     Business, BusinessPayment, BusinessProduct, BusinessSubscription, BusinessVerificationDocument,
 )
 
@@ -362,6 +362,8 @@ def plans_view(request):
             'yearly': PLAN_PRICING[slug]['yearly'],
             'limits': PLAN_LIMITS[slug],
             'is_current': business.plan == slug,
+            'headline_features': PLAN_FEATURE_COPY[slug][:PLAN_HEADLINE_COUNT],
+            'extra_features': PLAN_FEATURE_COPY[slug][PLAN_HEADLINE_COUNT:],
         }
         for slug, label in PLAN_CHOICES
     ]

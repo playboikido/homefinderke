@@ -47,6 +47,45 @@ PLAN_FEATURES = {
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
                    'multi_location', 'account_manager'},
 }
+# Human-readable feature bullets shown on the plans page.
+# HEADLINE_COUNT items show by default; the rest appear behind "See more".
+PLAN_FEATURE_COPY = {
+    'starter': [
+        'Up to 5 product listings',
+        'Up to 10 gallery photos',
+        'Basic dashboard (views & inquiries)',
+        '1 staff account',
+        'Standard directory listing',
+    ],
+    'standard': [
+        'Up to 100 product listings',
+        'Unlimited gallery photos',
+        'Full analytics dashboard',
+        'Phone & WhatsApp click tracking',
+        'Reply to customer reviews',
+        '1 staff account',
+        'Standard directory listing',
+    ],
+    'premium': [
+        'Unlimited product listings',
+        'Unlimited gallery photos',
+        'Full analytics + advanced reports',
+        'Phone & WhatsApp click tracking',
+        'Reply to customer reviews',
+        'Priority placement in search & category results',
+        'Sponsor badge on directory pages',
+        'Eligible for homepage promotion',
+        'Up to 5 staff accounts',
+    ],
+    'enterprise': [
+        'Everything in Premium',
+        'Unlimited staff accounts',
+        'Multiple business locations',
+        'Dedicated account manager',
+        'Custom contract & billing terms',
+    ],
+}
+PLAN_HEADLINE_COUNT = 3  # bullets visible before "See more"
 
 PLAN_PRICING = {
     'starter': {'monthly': 0, 'yearly': 0},
