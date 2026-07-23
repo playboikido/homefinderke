@@ -1,21 +1,53 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, render
 
 from .forms import (
-    BusinessInfoForm,
-    BusinessContactForm,
-    BusinessLocationForm,
-    BusinessProductFormSet,
-    BusinessVerificationForm,
+    BusinessContactForm, BusinessEditForm, BusinessInfoForm, BusinessLocationForm,
+    BusinessProductFormSet, BusinessVerificationForm,
 )
-from .models import Business, BusinessInquiry, BusinessAnalyticsEvent
+from .models import (
+    PLAN_CHOICES, PLAN_LIMITS, PLAN_PRICING,
+    Business, BusinessPayment, BusinessProduct, BusinessSubscription, BusinessVerificationDocument,
+)
+
+STEP_URLS = {
+    1: 'business:onboarding_info',
+    2: 'business:onboarding_contact',
+    3: 'business:onboarding_location',
+    4: 'business:onboarding_products',
+    5: 'business:onboarding_verification',
+}
 
 
-def choose(request):
+def choose_view(request):
     """Split-screen entry point: Resident vs Business."""
     next_url = request.GET.get('next', '')
     return render(request, 'business/choose.html', {'next_url': next_url})
+
+
+def _get_business_or_redirect(request):
+    """Returns the caller's own business, or None. Caller decides where to send a None."""
+    return request.user.businesses.first()
+
+
+def _guard_step(business, requested_step):
+    """
+    Block access to any step ahead of the frontier the business has actually
+    reached. Once onboarding is fully complete, every step becomes editable
+    (going back to fix something is fine; skipping ahead on the way there is not).
+    """
+    if business.onboarding_complete:
+        return None
+    if requested_step > business.onboarding_step:
+        return redirect(STEP_URLS[business.onboarding_step])
+    return None
+
+
+def _advance_step(business, completed_step):
+    if business.onboarding_step == completed_step and not business.onboarding_complete:
+        business.onboarding_step = completed_step + 1
+    business.save()
 
 
 @login_required
@@ -28,20 +60,9 @@ def onboarding_start(request):
             profile.account_type = 'business'
             profile.save(update_fields=['account_type'])
 
-    step_urls = {
-        1: 'business:onboarding_info',
-        2: 'business:onboarding_contact',
-        3: 'business:onboarding_location',
-        4: 'business:onboarding_products',
-        5: 'business:onboarding_verification',
-    }
     if business.onboarding_complete:
         return redirect('business:dashboard')
-    return redirect(step_urls.get(business.onboarding_step, 'business:onboarding_info'))
-
-
-def _get_business_or_redirect(request):
-    return request.user.businesses.first()
+    return redirect(STEP_URLS[business.onboarding_step])
 
 
 @login_required
@@ -49,16 +70,20 @@ def onboarding_info(request):
     business = _get_business_or_redirect(request)
     if not business:
         return redirect('business:onboarding_start')
+    guard = _guard_step(business, 1)
+    if guard:
+        return guard
+
     if request.method == 'POST':
         form = BusinessInfoForm(request.POST, request.FILES, instance=business)
         if form.is_valid():
-            business = form.save(commit=False)
-            business.onboarding_step = max(business.onboarding_step, 2)
-            business.save()
+            form.save()
+            _advance_step(business, 1)
             return redirect('business:onboarding_contact')
     else:
         form = BusinessInfoForm(instance=business)
-    return render(request, 'business/onboarding/step1_info.html', {'form': form, 'step': 1})
+
+    return render(request, 'business/onboarding/step1_info.html', {'form': form, 'step': 1, 'business': business})
 
 
 @login_required
@@ -66,16 +91,20 @@ def onboarding_contact(request):
     business = _get_business_or_redirect(request)
     if not business:
         return redirect('business:onboarding_start')
+    guard = _guard_step(business, 2)
+    if guard:
+        return guard
+
     if request.method == 'POST':
         form = BusinessContactForm(request.POST, instance=business)
         if form.is_valid():
-            business = form.save(commit=False)
-            business.onboarding_step = max(business.onboarding_step, 3)
-            business.save()
+            form.save()
+            _advance_step(business, 2)
             return redirect('business:onboarding_location')
     else:
         form = BusinessContactForm(instance=business)
-    return render(request, 'business/onboarding/step2_contact.html', {'form': form, 'step': 2})
+
+    return render(request, 'business/onboarding/step2_contact.html', {'form': form, 'step': 2, 'business': business})
 
 
 @login_required
@@ -83,16 +112,20 @@ def onboarding_location(request):
     business = _get_business_or_redirect(request)
     if not business:
         return redirect('business:onboarding_start')
+    guard = _guard_step(business, 3)
+    if guard:
+        return guard
+
     if request.method == 'POST':
         form = BusinessLocationForm(request.POST, instance=business)
         if form.is_valid():
-            business = form.save(commit=False)
-            business.onboarding_step = max(business.onboarding_step, 4)
-            business.save()
+            form.save()
+            _advance_step(business, 3)
             return redirect('business:onboarding_products')
     else:
         form = BusinessLocationForm(instance=business)
-    return render(request, 'business/onboarding/step3_location.html', {'form': form, 'step': 3})
+
+    return render(request, 'business/onboarding/step3_location.html', {'form': form, 'step': 3, 'business': business})
 
 
 @login_required
@@ -100,30 +133,42 @@ def onboarding_products(request):
     business = _get_business_or_redirect(request)
     if not business:
         return redirect('business:onboarding_start')
+    guard = _guard_step(business, 4)
+    if guard:
+        return guard
+
+    queryset = BusinessProduct.objects.filter(business=business)
+    limit = business.plan_limits['products']
+
     if request.method == 'POST':
         if 'skip' in request.POST:
-            business.onboarding_step = max(business.onboarding_step, 5)
-            business.save(update_fields=['onboarding_step'])
+            _advance_step(business, 4)
             return redirect('business:onboarding_verification')
-        formset = BusinessProductFormSet(
-            request.POST, request.FILES,
-            queryset=business.products.all(),
-        )
+
+        formset = BusinessProductFormSet(request.POST, request.FILES, queryset=queryset)
         if formset.is_valid():
-            products = formset.save(commit=False)
-            for p in products:
-                p.business = business
-                p.save()
-            for p in formset.deleted_objects:
-                p.delete()
-            business.onboarding_step = max(business.onboarding_step, 5)
-            business.save(update_fields=['onboarding_step'])
-            return redirect('business:onboarding_verification')
+            existing_active = business.products.filter(is_available=True).count()
+            new_count = sum(
+                1 for f in formset.forms
+                if f.cleaned_data and not f.cleaned_data.get('DELETE')
+                and f.cleaned_data.get('name') and not f.cleaned_data.get('id')
+            )
+            if limit is not None and (existing_active + new_count) > limit:
+                messages.error(request, f"Your current plan allows up to {limit} products. Upgrade to add more.")
+            else:
+                products = formset.save(commit=False)
+                for product in products:
+                    product.business = business
+                    product.save()
+                for obj in formset.deleted_objects:
+                    obj.delete()
+                _advance_step(business, 4)
+                return redirect('business:onboarding_verification')
     else:
-        formset = BusinessProductFormSet(queryset=business.products.all())
-    limit = business.plan_limits['products']
+        formset = BusinessProductFormSet(queryset=queryset)
+
     return render(request, 'business/onboarding/step4_products.html', {
-        'formset': formset, 'step': 4, 'product_limit': limit,
+        'formset': formset, 'step': 4, 'business': business, 'product_limit': limit,
     })
 
 
@@ -132,23 +177,36 @@ def onboarding_verification(request):
     business = _get_business_or_redirect(request)
     if not business:
         return redirect('business:onboarding_start')
+    guard = _guard_step(business, 5)
+    if guard:
+        return guard
+
     if request.method == 'POST':
         if 'skip' in request.POST:
             business.onboarding_complete = True
             business.save(update_fields=['onboarding_complete'])
-            messages.success(request, 'Your business workspace is ready. You can submit verification documents anytime from Settings.')
+            messages.success(request, "Your business workspace is ready. You can submit verification documents anytime from Settings.")
             return redirect('business:dashboard')
+
         form = BusinessVerificationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save(business)
+            # doc_type choices on BusinessVerificationDocument match these field
+            # names exactly, so no translation map is needed.
+            for field_name in ('registration_certificate', 'kra_pin', 'business_permit', 'national_id'):
+                uploaded = form.cleaned_data.get(field_name)
+                if uploaded:
+                    BusinessVerificationDocument.objects.update_or_create(
+                        business=business, doc_type=field_name, defaults={'file': uploaded},
+                    )
             business.onboarding_complete = True
             business.verification_status = 'pending'
             business.save(update_fields=['onboarding_complete', 'verification_status'])
-            messages.success(request, 'Documents submitted. Your business is now pending verification.')
+            messages.success(request, "Documents submitted. Your business is now pending verification.")
             return redirect('business:dashboard')
     else:
         form = BusinessVerificationForm()
-    return render(request, 'business/onboarding/step5_verification.html', {'form': form, 'step': 5})
+
+    return render(request, 'business/onboarding/step5_verification.html', {'form': form, 'step': 5, 'business': business})
 
 
 @login_required
@@ -157,7 +215,7 @@ def dashboard(request):
     if not business:
         return redirect('business:onboarding_start')
     if not business.onboarding_complete:
-        return redirect('business:onboarding_start')
+        return redirect(STEP_URLS[business.onboarding_step])
 
     stats = {
         'profile_views': business.analytics_events.filter(event_type='profile_view').count(),
@@ -168,8 +226,125 @@ def dashboard(request):
         'saved_count': business.favorited_by.count(),
         'review_count': business.review_count,
         'average_rating': business.average_rating,
+        'product_count': business.product_count,
     }
     recent_inquiries = business.inquiries.all()[:5]
+
     return render(request, 'business/dashboard.html', {
         'business': business, 'stats': stats, 'recent_inquiries': recent_inquiries,
     })
+
+
+@login_required
+def business_edit(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if request.method == 'POST':
+        form = BusinessEditForm(request.POST, request.FILES, instance=business)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Business details updated.")
+            return redirect('business:dashboard')
+    else:
+        form = BusinessEditForm(instance=business)
+
+    return render(request, 'business/edit.html', {'form': form, 'business': business})
+
+
+@login_required
+def products_manage(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    queryset = BusinessProduct.objects.filter(business=business)
+    limit = business.plan_limits['products']
+
+    if request.method == 'POST':
+        formset = BusinessProductFormSet(request.POST, request.FILES, queryset=queryset)
+        if formset.is_valid():
+            existing_active = business.products.filter(is_available=True).count()
+            new_count = sum(
+                1 for f in formset.forms
+                if f.cleaned_data and not f.cleaned_data.get('DELETE')
+                and f.cleaned_data.get('name') and not f.cleaned_data.get('id')
+            )
+            if limit is not None and (existing_active + new_count) > limit:
+                messages.error(request, f"Your current plan allows up to {limit} products. Upgrade to add more.")
+            else:
+                products = formset.save(commit=False)
+                for product in products:
+                    product.business = business
+                    product.save()
+                for obj in formset.deleted_objects:
+                    obj.delete()
+                messages.success(request, "Products updated.")
+                return redirect('business:products')
+    else:
+        formset = BusinessProductFormSet(queryset=queryset)
+
+    return render(request, 'business/products.html', {
+        'formset': formset, 'business': business, 'product_limit': limit,
+    })
+
+
+@login_required
+def plans_view(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+
+    plans = [
+        {
+            'slug': slug,
+            'name': label,
+            'monthly': PLAN_PRICING[slug]['monthly'],
+            'yearly': PLAN_PRICING[slug]['yearly'],
+            'limits': PLAN_LIMITS[slug],
+            'is_current': business.plan == slug,
+        }
+        for slug, label in PLAN_CHOICES
+    ]
+    return render(request, 'business/plans.html', {'business': business, 'plans': plans})
+
+
+@login_required
+def request_upgrade(request, plan_slug):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+
+    valid_slugs = {slug for slug, _ in PLAN_CHOICES}
+    if plan_slug not in valid_slugs:
+        messages.error(request, "That plan doesn't exist.")
+        return redirect('business:plans')
+
+    if plan_slug == 'starter':
+        business.plan = 'starter'
+        business.save(update_fields=['plan'])
+        BusinessSubscription.objects.update_or_create(
+            business=business, defaults={'plan': 'starter', 'status': 'active'},
+        )
+        messages.success(request, "You're now on the Starter plan.")
+        return redirect('business:dashboard')
+
+    price = PLAN_PRICING[plan_slug]['monthly']
+    BusinessPayment.objects.create(
+        business=business,
+        purpose='subscription_monthly',
+        method='mpesa',
+        amount=price or 0,
+        status='pending',
+    )
+    messages.success(
+        request,
+        f"Upgrade request for {dict(PLAN_CHOICES)[plan_slug]} received — our team will reach out shortly "
+        f"by phone or WhatsApp to complete payment{' (custom pricing — we\u2019ll confirm the amount with you)' if price is None else ''}.",
+    )
+    return redirect('business:dashboard')

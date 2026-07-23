@@ -31,7 +31,9 @@ class BusinessContactForm(forms.ModelForm):
 
     class Meta:
         model = Business
-        fields = ['phone_number', 'whatsapp_input', 'email', 'website', 'facebook', 'instagram', 'tiktok']
+        # whatsapp_number is auto-filled from phone_number in Business.save()
+        # if left blank, so it stays optional here.
+        fields = ['phone_number', 'whatsapp_number', 'email', 'website', 'facebook', 'instagram', 'tiktok']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -76,3 +78,29 @@ class BusinessVerificationForm(forms.Form):
         required=False, validators=[FileExtensionValidator(ALLOWED_DOC_EXTENSIONS), validate_doc_size])
     national_id = forms.FileField(
         required=False, validators=[FileExtensionValidator(ALLOWED_DOC_EXTENSIONS), validate_doc_size])
+
+
+class BusinessEditForm(forms.ModelForm):
+    REQUIRED_FIELDS = [
+        'name', 'category', 'description', 'cover_image',
+        'phone_number',
+        'county', 'town', 'estate', 'street', 'latitude', 'longitude', 'opens_at', 'closes_at',
+    ]
+
+    class Meta:
+        model = Business
+        fields = [
+            'name', 'category', 'description', 'logo', 'cover_image',
+            'phone_number', 'whatsapp_number', 'email', 'website', 'facebook', 'instagram', 'tiktok',
+            'county', 'town', 'estate', 'street', 'service_counties',
+            'latitude', 'longitude', 'opens_at', 'closes_at', 'closed_weekdays',
+        ]
+        widgets = {
+            'opens_at': forms.TimeInput(attrs={'type': 'time'}),
+            'closes_at': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.REQUIRED_FIELDS:
+            self.fields[field_name].required = True

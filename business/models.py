@@ -34,6 +34,13 @@ PLAN_LIMITS = {
     'enterprise': {'products': None, 'gallery': None, 'staff': None},
 }
 
+PLAN_PRICING = {
+    'starter': {'monthly': 0, 'yearly': 0},
+    'standard': {'monthly': 1500, 'yearly': 15000},
+    'premium': {'monthly': 4000, 'yearly': 40000},
+    'enterprise': {'monthly': None, 'yearly': None},  # custom / sales-assisted
+}
+
 VERIFICATION_STATUS_CHOICES = [
     ('pending', 'Pending'),
     ('verified', 'Verified'),
