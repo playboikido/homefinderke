@@ -160,6 +160,61 @@ class ProfileForm(forms.ModelForm):
             ),
         }   
 
+
+from django.contrib.auth.models import User
+
+
+class SettingsUserForm(forms.ModelForm):
+    """Full Name / Username / Email fields for Settings > My Profile.
+    These live on Django's User model, not Profile."""
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'email']
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'First name'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Last name'}),
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if User.objects.exclude(pk=self.instance.pk).filter(username__iexact=username).exists():
+            raise forms.ValidationError('That username is already taken.')
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.exclude(pk=self.instance.pk).filter(email__iexact=email).exists():
+            raise forms.ValidationError('That email is already in use on another account.')
+        return email
+
+
+class SettingsProfileForm(forms.ModelForm):
+    """Profile Photo / Cover Photo / Phone / County / Town / Bio / Language
+    for Settings > My Profile (Residence Workspace)."""
+
+    class Meta:
+        model = Profile
+        fields = [
+            'profile_picture',
+            'cover_photo',
+            'phone_number',
+            'county',
+            'town',
+            'bio',
+            'language',
+        ]
+        widgets = {
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '07XX XXX XXX'}),
+            'county': forms.Select(attrs={'class': 'form-control'}),
+            'town': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Kilimani'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'maxlength': 300}),
+            'language': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django_recaptcha.fields import ReCaptchaField

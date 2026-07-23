@@ -104,6 +104,12 @@ urlpatterns = [
         ),
 
     path(
+        'settings/profile/',
+        views.settings_profile,
+        name='settings_profile'
+        ),
+
+    path(
         'notifications/',
         views.notifications,
         name='notifications'

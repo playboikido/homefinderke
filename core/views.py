@@ -19,7 +19,7 @@ from .models import Review
 from .forms import ReviewForm
 from django.db.models import Sum, Prefetch
 from django.core.paginator import Paginator
-from .forms import ProfileForm
+from .forms import ProfileForm, SettingsUserForm, SettingsProfileForm
 from .models import Residence, Profile
 from django.core.mail import send_mail
 from django.conf import settings
@@ -1017,6 +1017,33 @@ def edit_profile(request):
         form = ProfileForm(instance=profile)
 
     return render(request, 'core/edit_profile.html', {'form': form})
+
+
+@login_required
+def settings_profile(request):
+    """Settings > My Profile (Residence Workspace).
+    Handles both the User fields (name/username/email) and the
+    Profile fields (photos/phone/county/town/bio/language) in one save.
+    """
+    profile = request.user.profile
+
+    if request.method == 'POST':
+        user_form = SettingsUserForm(request.POST, instance=request.user)
+        profile_form = SettingsProfileForm(request.POST, request.FILES, instance=profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated.')
+            return redirect('settings_profile')
+    else:
+        user_form = SettingsUserForm(instance=request.user)
+        profile_form = SettingsProfileForm(instance=profile)
+
+    return render(request, 'core/settings/profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'active_section': 'profile',
+    })
 
 
 @login_required

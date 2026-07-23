@@ -397,6 +397,16 @@ class Profile(models.Model):
     ACCOUNT_TYPE_CHOICES = [('resident', 'Resident'), ('business', 'Business')]
     account_type = models.CharField(max_length=10, choices=ACCOUNT_TYPE_CHOICES, default='resident')
 
+    cover_photo = models.ImageField(
+        upload_to='profiles/covers/',
+        blank=True,
+        null=True
+    )
+    county = models.CharField(max_length=100, choices=COUNTY_CHOICES, blank=True)
+    town = models.CharField(max_length=100, blank=True)
+    LANGUAGE_CHOICES = [('en', 'English'), ('sw', 'Kiswahili')]
+    language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES, default='en')
+
     def save(self, *args, **kwargs):
         if self.profile_picture and hasattr(self.profile_picture, 'file'):
             compressed = compress_image(self.profile_picture)

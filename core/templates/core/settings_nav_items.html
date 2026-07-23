@@ -1,0 +1,34 @@
+{% comment %}
+Included twice from settings_base.html:
+  - as mobile pill tabs (sidebar not set)
+  - as desktop sidebar links (sidebar=True)
+Only "profile" is wired to a real view in Phase 1 — the rest are
+disabled placeholders so the shell is visible now and each section
+can be turned on without touching this file's structure again.
+{% endcomment %}
+{% if sidebar %}
+  <a href="{% url 'settings_profile' %}" class="settings-sidebar-link {% if active_section == 'profile' %}active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
+    My Profile
+  </a>
+  <span class="settings-sidebar-link disabled">Security <span class="soon-badge">Soon</span></span>
+  <span class="settings-sidebar-link disabled">Notifications <span class="soon-badge">Soon</span></span>
+  <span class="settings-sidebar-link disabled">Privacy <span class="soon-badge">Soon</span></span>
+  <span class="settings-sidebar-link disabled">Appearance <span class="soon-badge">Soon</span></span>
+  <span class="settings-sidebar-link disabled">Saved Items <span class="soon-badge">Soon</span></span>
+  <span class="settings-sidebar-link disabled">Verification <span class="soon-badge">Soon</span></span>
+  <span class="settings-sidebar-link disabled">Connected Devices <span class="soon-badge">Soon</span></span>
+  <span class="settings-sidebar-link disabled">Help &amp; Support <span class="soon-badge">Soon</span></span>
+  <span class="settings-sidebar-link disabled">Danger Zone <span class="soon-badge">Soon</span></span>
+{% else %}
+  <a href="{% url 'settings_profile' %}" class="settings-tab {% if active_section == 'profile' %}active{% endif %}">My Profile</a>
+  <span class="settings-tab disabled">Security</span>
+  <span class="settings-tab disabled">Notifications</span>
+  <span class="settings-tab disabled">Privacy</span>
+  <span class="settings-tab disabled">Appearance</span>
+  <span class="settings-tab disabled">Saved Items</span>
+  <span class="settings-tab disabled">Verification</span>
+  <span class="settings-tab disabled">Devices</span>
+  <span class="settings-tab disabled">Help</span>
+  <span class="settings-tab disabled">Danger Zone</span>
+{% endif %}
