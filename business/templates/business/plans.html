@@ -42,6 +42,9 @@
                     <li>{% if plan.limits.products %}Up to {{ plan.limits.products }} products{% else %}Unlimited products{% endif %}</li>
                     <li>{% if plan.limits.gallery %}Up to {{ plan.limits.gallery }} gallery photos{% else %}Unlimited gallery photos{% endif %}</li>
                     <li>{% if plan.limits.staff %}Up to {{ plan.limits.staff }} staff member{{ plan.limits.staff|pluralize }}{% else %}Unlimited staff members{% endif %}</li>
+                    <li>{% if plan.slug == 'starter' %}Basic dashboard only{% else %}Full analytics dashboard{% endif %}</li>
+                    <li>{% if plan.slug == 'premium' or plan.slug == 'enterprise' %}✓ Priority placement & sponsor badge{% else %}—{% endif %}</li>
+                    <li>{% if plan.slug == 'premium' or plan.slug == 'enterprise' %}✓ Homepage promotion eligibility{% else %}—{% endif %}</li>
                 </ul>
 
                 {% if plan.is_current %}

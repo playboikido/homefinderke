@@ -250,7 +250,7 @@ def dashboard(request):
         'inquiries': trend(inquiries=True),
     }
 
-    show_analytics = business.plan != 'starter'
+    show_analytics = business.has_feature('analytics')
     chart_points, chart_max = '', 0
     if show_analytics:
         events = (business.analytics_events

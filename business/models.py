@@ -28,10 +28,24 @@ PLAN_CHOICES = [
 ]
 
 PLAN_LIMITS = {
-    'starter': {'products': 5, 'gallery': 10, 'staff': 1},
-    'standard': {'products': 100, 'gallery': None, 'staff': 1},
-    'premium': {'products': None, 'gallery': None, 'staff': 5},
-    'enterprise': {'products': None, 'gallery': None, 'staff': None},
+    'starter':    {'products': 5,   'gallery': 10,   'staff': 1},
+    'standard':   {'products': 100, 'gallery': None, 'staff': 1},
+    'premium':    {'products': None,'gallery': None, 'staff': 5},
+    'enterprise': {'products': None,'gallery': None, 'staff': None},
+}
+
+# Boolean/behavioral features layered on top of the numeric limits above.
+# This is the single source of truth — dashboard views, resident-facing
+# querysets, and templates should all check business.has_feature('x')
+# rather than comparing business.plan directly.
+PLAN_FEATURES = {
+    'starter':    {'analytics', 'reviews_view'},
+    'standard':   {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking'},
+    'premium':    {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking',
+                   'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics'},
+    'enterprise': {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking',
+                   'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
+                   'multi_location', 'account_manager'},
 }
 
 PLAN_PRICING = {
@@ -129,11 +143,24 @@ class Business(models.Model):
             self.slug = slug
         if self.phone_number and not self.whatsapp_number:
             self.whatsapp_number = normalize_ke_whatsapp_number(self.phone_number)
+        # Premium/Enterprise auto-qualify for sponsor placement on public pages.
+        # A staff member can still manually unfeature a business by editing
+        # is_featured directly in the admin — this only auto-*enables* it.
+        if self.plan in ('premium', 'enterprise'):
+            self.is_featured = True
+        elif self.pk:
+            old_plan = Business.objects.filter(pk=self.pk).values_list('plan', flat=True).first()
+            if old_plan in ('premium', 'enterprise'):
+                self.is_featured = False
         super().save(*args, **kwargs)
 
     @property
     def plan_limits(self):
         return PLAN_LIMITS.get(self.plan, PLAN_LIMITS['starter'])
+
+    def has_feature(self, feature):
+        """Single check used everywhere: dashboard gating AND resident-facing pages."""
+        return feature in PLAN_FEATURES.get(self.plan, PLAN_FEATURES['starter'])
 
     @property
     def is_open_now(self):
