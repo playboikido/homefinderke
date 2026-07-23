@@ -229,9 +229,11 @@ def dashboard(request):
         'product_count': business.product_count,
     }
     recent_inquiries = business.inquiries.all()[:5]
+    show_analytics = business.plan != 'starter'
 
     return render(request, 'business/dashboard.html', {
         'business': business, 'stats': stats, 'recent_inquiries': recent_inquiries,
+        'show_analytics': show_analytics,
     })
 
 

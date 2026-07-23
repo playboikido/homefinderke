@@ -1,110 +1,55 @@
+{% extends "core/base.html" %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upgrade Plan | {{ business.name }} | HomeFinderKE Business</title>
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family:Arial, Helvetica, sans-serif; }
-        body { background:#F4F7F6; padding:40px 20px; }
-        .wrap { max-width:1000px; margin:0 auto; }
-        .topbar { text-align:center; color:#0F766E; font-weight:bold; font-size:15px; margin-bottom:20px; }
-        .back-link { margin-bottom:16px; }
-        .back-link a { color:#0F766E; text-decoration:none; font-size:14px; font-weight:bold; }
-        .back-link a:hover { text-decoration:underline; }
 
-        .intro { text-align:center; margin-bottom:32px; }
-        .intro h1 { font-size:26px; color:#0F172A; margin-bottom:8px; }
-        .intro p { color:#667; font-size:15px; }
+{% block title %}Upgrade Plan | {{ business.name }}{% endblock %}
 
-        .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; }
+{% block extra_head %}
+{% include "business/_styles.html" %}
+{% endblock %}
 
-        .plan-card {
-            background:#fff; border-radius:20px; padding:28px 24px;
-            box-shadow:0 8px 30px rgba(0,0,0,.06); border:2px solid transparent;
-            display:flex; flex-direction:column;
-        }
-        .plan-card.current { border-color:#0F766E; }
+{% block content %}
+<div class="biz-wrap biz-wide">
+    <div class="biz-topbar">HomeFinderKE Business Workspace</div>
+    <div class="biz-back-link"><a href="{% url 'business:dashboard' %}">&larr; Back to Dashboard</a></div>
 
-        .plan-name { font-size:19px; font-weight:bold; color:#0F172A; margin-bottom:4px; }
-        .plan-price { font-size:26px; font-weight:bold; color:#0F766E; margin-bottom:2px; }
-        .plan-price small { font-size:13px; font-weight:normal; color:#667; }
-        .plan-yearly { font-size:12px; color:#999; margin-bottom:16px; }
-
-        .plan-limits { list-style:none; margin-bottom:20px; flex-grow:1; }
-        .plan-limits li { font-size:13px; color:#333; padding:6px 0; border-bottom:1px solid #f1f1f1; }
-        .plan-limits li:last-child { border-bottom:none; }
-
-        .current-badge {
-            display:inline-block; background:#DCFCE7; color:#166534; font-size:12px; font-weight:bold;
-            padding:4px 12px; border-radius:99px; margin-bottom:16px; align-self:flex-start;
-        }
-
-        button, .btn {
-            padding:14px 20px; border-radius:10px; border:none; font-weight:bold;
-            font-size:14px; cursor:pointer; text-decoration:none; display:block; text-align:center;
-        }
-        .btn-primary { background:#0F766E; color:#fff; }
-        .btn-primary:hover { background:#0a5c56; }
-        .btn-ghost { background:transparent; color:#667; border:1px solid #ddd; }
-
-        .messages { margin-bottom:20px; }
-        .messages li { list-style:none; background:#DCFCE7; color:#166534; padding:12px 16px; border-radius:10px; margin-bottom:8px; }
-        .messages li.error { background:#FEE2E2; color:#991B1B; }
-    </style>
-</head>
-<body>
-<div class="wrap">
-    <div class="topbar">HomeFinderKE Business Workspace</div>
-    <div class="back-link"><a href="{% url 'business:dashboard' %}">&larr; Back to Dashboard</a></div>
-
-    {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <li{% if message.tags == 'error' %} class="error"{% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
-
-    <div class="intro">
-        <h1>Choose Your Plan</h1>
-        <p>Upgrade anytime — Standard and Premium requests are confirmed by our team via M-Pesa or WhatsApp.</p>
+    <div style="text-align:center; margin-bottom:28px;">
+        <h1 style="font-size:1.6rem; color:var(--fg); margin-bottom:8px;">Choose Your Plan</h1>
+        <p class="biz-empty">Upgrade anytime — Standard and Premium requests are confirmed by our team via M-Pesa or WhatsApp.</p>
     </div>
 
-    <div class="grid">
+    <div class="biz-plans-grid">
         {% for plan in plans %}
-            <div class="plan-card{% if plan.is_current %} current{% endif %}">
+            <div class="biz-plan-card{% if plan.is_current %} biz-current{% endif %}">
                 {% if plan.is_current %}
-                    <span class="current-badge">Current Plan</span>
+                    <span class="biz-current-badge">Current Plan</span>
                 {% endif %}
 
-                <div class="plan-name">{{ plan.name }}</div>
+                <div class="biz-plan-name">{{ plan.name }}</div>
 
                 {% if plan.slug == 'enterprise' %}
-                    <div class="plan-price">Custom</div>
-                    <div class="plan-yearly">Sales-assisted pricing</div>
+                    <div class="biz-plan-price">Custom</div>
+                    <div class="biz-plan-yearly">Sales-assisted pricing</div>
                 {% else %}
-                    <div class="plan-price">
+                    <div class="biz-plan-price">
                         {% if plan.monthly %}KES {{ plan.monthly }}<small> / month</small>{% else %}Free{% endif %}
                     </div>
-                    <div class="plan-yearly">
+                    <div class="biz-plan-yearly">
                         {% if plan.yearly %}or KES {{ plan.yearly }} / year{% endif %}
                     </div>
                 {% endif %}
 
-                <ul class="plan-limits">
+                <ul class="biz-plan-limits">
                     <li>{% if plan.limits.products %}Up to {{ plan.limits.products }} products{% else %}Unlimited products{% endif %}</li>
                     <li>{% if plan.limits.gallery %}Up to {{ plan.limits.gallery }} gallery photos{% else %}Unlimited gallery photos{% endif %}</li>
                     <li>{% if plan.limits.staff %}Up to {{ plan.limits.staff }} staff member{{ plan.limits.staff|pluralize }}{% else %}Unlimited staff members{% endif %}</li>
                 </ul>
 
                 {% if plan.is_current %}
-                    <a class="btn btn-ghost">Current Plan</a>
+                    <a class="biz-btn biz-btn-ghost">Current Plan</a>
                 {% else %}
                     <form method="POST" action="{% url 'business:request_upgrade' plan.slug %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn-primary">
+                        <button type="submit" class="biz-btn biz-btn-primary" style="width:100%;">
                             {% if plan.slug == 'starter' %}Switch to Starter{% elif plan.slug == 'enterprise' %}Contact Us{% else %}Request Upgrade{% endif %}
                         </button>
                     </form>
@@ -113,5 +58,4 @@
         {% endfor %}
     </div>
 </div>
-</body>
-</html>
+{% endblock %}
