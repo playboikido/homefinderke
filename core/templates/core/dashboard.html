@@ -125,8 +125,38 @@
   .pod-hero p { font-size: 0.88rem; color: var(--pod-muted); margin: 0; }
   .pod-date-filter {
     border: 1px solid var(--pod-border); background: #fff; border-radius: 12px; padding: 9px 14px;
-    font-size: 0.82rem; font-weight: 600; font-family: inherit; color: var(--pod-text);
+    font-size: 0.82rem; font-weight: 600; font-family: inherit; color: var(--pod-text); cursor: pointer;
   }
+  .pod-date-filter:hover { border-color: var(--pod-primary); }
+
+  /* ── Profile dropdown ─────────────────────────────────── */
+  .pod-user-wrap { position: relative; }
+  .pod-user-toggle {
+    display: flex; align-items: center; gap: 10px; background: none; border: none; cursor: pointer;
+    padding: 4px 6px 4px 4px; border-radius: 12px; font-family: inherit;
+  }
+  .pod-user-toggle:hover { background: #EEF2F7; }
+  .pod-user-toggle svg.pod-chevron { width: 14px; height: 14px; color: var(--pod-muted); transition: transform .15s; }
+  .pod-user-wrap.open .pod-chevron { transform: rotate(180deg); }
+  .pod-user-menu {
+    display: none; position: absolute; top: calc(100% + 8px); right: 0; width: 240px;
+    background: #fff; border: 1px solid var(--pod-border); border-radius: var(--pod-r);
+    box-shadow: var(--pod-shadow-lg); padding: 8px; z-index: 40;
+  }
+  .pod-user-wrap.open .pod-user-menu { display: block; }
+  .pod-user-menu-header { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 4px; }
+  .pod-user-menu-header .pod-avatar { width: 40px; height: 40px; }
+  .pod-user-menu-header strong { display: block; font-size: 0.85rem; }
+  .pod-user-menu-header span { display: block; font-size: 0.72rem; color: var(--pod-muted); word-break: break-all; }
+  .pod-user-menu-divider { height: 1px; background: var(--pod-border); margin: 6px 4px; }
+  .pod-user-menu a {
+    display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px;
+    text-decoration: none; color: var(--pod-text); font-size: 0.84rem; font-weight: 600;
+  }
+  .pod-user-menu a:hover { background: #F1F5F9; }
+  .pod-user-menu a.pod-logout-link { color: var(--pod-danger); }
+  .pod-user-menu a.pod-logout-link:hover { background: #FEE2E2; }
+  .pod-user-menu svg { width: 16px; height: 16px; flex-shrink: 0; }
 
   /* ── Stat cards ───────────────────────────────────────── */
   .pod-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; margin-bottom: 22px; }
@@ -328,15 +358,46 @@
         <a href="{% url 'add_residence' %}" class="pod-icon-btn" aria-label="Add listing" style="background:var(--pod-primary); color:#fff; border-color:var(--pod-primary);">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
         </a>
-        <div class="pod-user">
-          {% if request.user.profile.profile_picture %}
-            <img class="pod-avatar" src="{{ request.user.profile.profile_picture.url }}" alt="">
-          {% else %}
-            <div class="pod-avatar">{{ request.user.username|slice:":1"|upper }}</div>
-          {% endif %}
-          <div class="pod-user-meta">
-            <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-            <span>Property Owner</span>
+        <div class="pod-user-wrap" id="podUserWrap">
+          <button type="button" class="pod-user-toggle" id="podUserToggle" aria-haspopup="true" aria-expanded="false">
+            {% if request.user.profile.profile_picture %}
+              <img class="pod-avatar" src="{{ request.user.profile.profile_picture.url }}" alt="">
+            {% else %}
+              <div class="pod-avatar">{{ request.user.username|slice:":1"|upper }}</div>
+            {% endif %}
+            <div class="pod-user-meta">
+              <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+              <span>Property Owner</span>
+            </div>
+            <svg class="pod-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+
+          <div class="pod-user-menu" id="podUserMenu" role="menu">
+            <div class="pod-user-menu-header">
+              {% if request.user.profile.profile_picture %}
+                <img class="pod-avatar" src="{{ request.user.profile.profile_picture.url }}" alt="">
+              {% else %}
+                <div class="pod-avatar">{{ request.user.username|slice:":1"|upper }}</div>
+              {% endif %}
+              <div>
+                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                <span>{{ request.user.email|default:"No email on file" }}</span>
+              </div>
+            </div>
+            <div class="pod-user-menu-divider"></div>
+            <a href="{% url 'owner_profile' request.user.id %}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              View My Profile
+            </a>
+            <a href="{% url 'edit_profile' %}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Account Settings
+            </a>
+            <div class="pod-user-menu-divider"></div>
+            <a href="{% url 'account_logout' %}" class="pod-logout-link">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Logout
+            </a>
           </div>
         </div>
       </div>
@@ -350,8 +411,12 @@
           <h1>Good {% now "G" as h %}{% if h|add:0 < 12 %}morning{% elif h|add:0 < 18 %}afternoon{% else %}evening{% endif %}, {{ request.user.first_name|default:request.user.username }} 👋</h1>
           <p>Here's what's happening with your properties today.</p>
         </div>
-        <select class="pod-date-filter" disabled>
-          <option>All Time</option>
+        <select class="pod-date-filter" onchange="window.location.href='{% url 'dashboard' %}?period=' + this.value">
+          <option value="today" {% if selected_period == 'today' %}selected{% endif %}>Today</option>
+          <option value="week" {% if selected_period == 'week' %}selected{% endif %}>This Week</option>
+          <option value="month" {% if selected_period == 'month' %}selected{% endif %}>This Month</option>
+          <option value="year" {% if selected_period == 'year' %}selected{% endif %}>This Year</option>
+          <option value="all" {% if selected_period == 'all' or not selected_period %}selected{% endif %}>All Time</option>
         </select>
       </div>
 
@@ -413,7 +478,7 @@
         <div class="pod-card">
           <div class="pod-card-head">
             <h2>Views Overview</h2>
-            <span style="font-size:0.72rem; color:var(--pod-muted); font-weight:600;">Last 8 weeks</span>
+            <span style="font-size:0.72rem; color:var(--pod-muted); font-weight:600;">{{ selected_period_label|default:"All Time" }}</span>
           </div>
           <canvas id="podViewsChart" height="150"></canvas>
         </div>
@@ -569,6 +634,29 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
+    // Profile dropdown
+    const wrap = document.getElementById('podUserWrap');
+    const toggle = document.getElementById('podUserToggle');
+    if (wrap && toggle) {
+      toggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        const isOpen = wrap.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', isOpen);
+      });
+      document.addEventListener('click', function (e) {
+        if (!wrap.contains(e.target)) {
+          wrap.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          wrap.classList.remove('open');
+          toggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
     const weekly = JSON.parse(document.getElementById('pod-weekly-views').textContent);
     const ctx = document.getElementById('podViewsChart');
     if (ctx && weekly.length) {
