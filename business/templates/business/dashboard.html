@@ -109,4 +109,14 @@
         {% for inquiry in recent_inquiries %}
             <div class="inquiry">
                 <strong>{{ inquiry.customer_name }}</strong> — {{ inquiry.message|truncatewords:20 }}
-                <div style="font-size:12px; color:#999;">{{ inquiry.created_at|date:"M j, Y" }} ·
+                <div style="font-size:12px; color:#999;">{{ inquiry.created_at|date:"M j, Y" }} · {{ inquiry.get_status_display }}</div>
+            </div>
+        {% empty %}
+            <p class="empty">No inquiries yet.</p>
+        {% endfor %}
+    </div>
+
+    <p class="empty">Gallery and detailed analytics are coming in a future update.</p>
+</div>
+</body>
+</html>
