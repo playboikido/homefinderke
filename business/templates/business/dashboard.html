@@ -1,64 +1,86 @@
-{% extends "base.html" %}
-{% load static %}
-
+{% extends "business/_dash_base.html" %}
 {% block title %}{{ business.name }} Dashboard{% endblock %}
 
-{% block extra_head %}
-{% include "business/_styles.html" %}
-{% endblock %}
-
-{% block content %}
-<div class="biz-wrap biz-wide">
-    <div class="biz-topbar">HomeFinderKE Business Workspace</div>
-
-    <div class="biz-header">
-        <div>
-            <h1>{{ business.name }}</h1>
-            <div class="biz-badges">
-                <span class="biz-badge {% if business.verification_status == 'verified' %}biz-badge-verified{% elif business.verification_status == 'rejected' %}biz-badge-rejected{% else %}biz-badge-pending{% endif %}">
-                    {{ business.get_verification_status_display }}
-                </span>
-                <span class="biz-badge biz-badge-plan">{{ business.get_plan_display }} Plan</span>
-            </div>
-        </div>
+{% block dash_content %}
+<div class="biz-dash-header">
+    <div>
+        <h1>Good Morning, {{ business.owner.first_name|default:business.owner.username }} 👋</h1>
+        <p class="biz-empty">Here's what's happening with your business today.</p>
     </div>
+    <div class="biz-dash-user">
+        <span class="biz-badge {% if business.verification_status == 'verified' %}biz-badge-verified{% elif business.verification_status == 'rejected' %}biz-badge-rejected{% else %}biz-badge-pending{% endif %}">
+            {{ business.get_verification_status_display }}
+        </span>
+        <div class="biz-dash-avatar">{{ business.name|first }}</div>
+    </div>
+</div>
 
-    <div class="biz-grid">
-        <div class="biz-stat"><div class="biz-value">{{ stats.product_count }}</div><div class="biz-label">Active Products</div></div>
-        <div class="biz-stat"><div class="biz-value">{{ stats.inquiries }}</div><div class="biz-label">Customer Inquiries</div></div>
+<div class="biz-grid biz-grid-5">
+    <div class="biz-stat">
+        <div class="biz-value">{{ stats.profile_views }}</div>
+        <div class="biz-label">Profile Views</div>
+        {% if show_analytics %}<div class="biz-trend {% if trends.profile_views >= 0 %}up{% else %}down{% endif %}">{{ trends.profile_views }}% vs last 30 days</div>{% endif %}
+    </div>
+    <div class="biz-stat">
+        <div class="biz-value">{{ stats.inquiries }}</div>
+        <div class="biz-label">Inquiries</div>
+        <div class="biz-trend {% if trends.inquiries >= 0 %}up{% else %}down{% endif %}">{{ trends.inquiries }}% vs last 30 days</div>
+    </div>
+    {% if show_analytics %}
+    <div class="biz-stat">
+        <div class="biz-value">{{ stats.phone_clicks }}</div>
+        <div class="biz-label">Phone Clicks</div>
+        <div class="biz-trend {% if trends.phone_clicks >= 0 %}up{% else %}down{% endif %}">{{ trends.phone_clicks }}% vs last 30 days</div>
+    </div>
+    <div class="biz-stat">
+        <div class="biz-value">{{ stats.whatsapp_clicks }}</div>
+        <div class="biz-label">WhatsApp Clicks</div>
+        <div class="biz-trend {% if trends.whatsapp_clicks >= 0 %}up{% else %}down{% endif %}">{{ trends.whatsapp_clicks }}% vs last 30 days</div>
+    </div>
+    {% endif %}
+    <div class="biz-stat">
+        <div class="biz-value">{{ stats.average_rating|default:"—" }}{% if stats.average_rating %} ★{% endif %}</div>
+        <div class="biz-label">Reviews ({{ stats.review_count }})</div>
+    </div>
+</div>
 
-        {% if show_analytics %}
-            <div class="biz-stat"><div class="biz-value">{{ stats.profile_views }}</div><div class="biz-label">Profile Views</div></div>
-            <div class="biz-stat"><div class="biz-value">{{ stats.phone_clicks }}</div><div class="biz-label">Phone Clicks</div></div>
-            <div class="biz-stat"><div class="biz-value">{{ stats.whatsapp_clicks }}</div><div class="biz-label">WhatsApp Clicks</div></div>
-            <div class="biz-stat"><div class="biz-value">{{ stats.website_visits }}</div><div class="biz-label">Website Visits</div></div>
-            <div class="biz-stat"><div class="biz-value">{{ stats.saved_count }}</div><div class="biz-label">Saved by Users</div></div>
-            <div class="biz-stat"><div class="biz-value">{{ stats.review_count }}</div><div class="biz-label">Reviews{% if stats.average_rating %} ({{ stats.average_rating }}★){% endif %}</div></div>
+{% if not show_analytics %}
+    <div class="biz-card biz-unlock">
+        <h2>🔒 Unlock Full Analytics</h2>
+        <p class="biz-empty" style="margin-bottom:16px;">Phone/WhatsApp clicks, the views chart and top products are available on Standard and above.</p>
+        <a href="{% url 'business:plans' %}" class="biz-btn biz-btn-primary">Upgrade Now</a>
+    </div>
+{% endif %}
+
+<div class="biz-dash-row">
+    {% if show_analytics %}
+    <div class="biz-card biz-chart-card">
+        <h2>Profile Views (Last 30 Days)</h2>
+        {% if chart_points %}
+        <svg viewBox="0 0 560 140" class="biz-sparkline" preserveAspectRatio="none">
+            <polyline points="{{ chart_points }}" fill="none" stroke="var(--primary)" stroke-width="2.5" />
+        </svg>
+        {% else %}
+            <p class="biz-empty">No views yet in the last 30 days.</p>
         {% endif %}
     </div>
-
-    {% if not show_analytics %}
-        <div class="biz-card biz-unlock">
-            <h2>🔒 Unlock Full Analytics</h2>
-            <p class="biz-empty" style="margin-bottom:16px;">Profile views, phone/WhatsApp clicks, website visits, saved counts and reviews are available on Standard and above.</p>
-            <a href="{% url 'business:plans' %}" class="biz-btn biz-btn-primary">Upgrade Now</a>
-        </div>
-    {% endif %}
-
-    <div class="biz-actions">
-        <a href="{% url 'business:edit' %}" class="biz-action-btn">
-            <span class="biz-icon">✏️</span><span class="biz-action-label">Edit Business</span>
-        </a>
-        <a href="{% url 'business:products' %}" class="biz-action-btn">
-            <span class="biz-icon">🛍️</span><span class="biz-action-label">Manage Products</span>
-        </a>
-        <a href="{% url 'business:plans' %}" class="biz-action-btn biz-primary">
-            <span class="biz-icon">⭐</span><span class="biz-action-label">Upgrade Plan</span>
-        </a>
-    </div>
-
     <div class="biz-card">
-        <h2>Recent Customer Inquiries</h2>
+        <h2>Top Products</h2>
+        {% for product in top_products %}
+            <div class="biz-top-product">
+                <span>{{ product.name }}</span>
+                <strong>{{ product.views_count }}</strong>
+            </div>
+        {% empty %}
+            <p class="biz-empty">No products yet.</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<div class="biz-dash-row">
+    <div class="biz-card">
+        <h2>Recent Inquiries</h2>
         {% for inquiry in recent_inquiries %}
             <div class="biz-inquiry">
                 <strong>{{ inquiry.customer_name }}</strong> — {{ inquiry.message|truncatewords:20 }}
@@ -69,6 +91,35 @@
         {% endfor %}
     </div>
 
-    <p class="biz-empty">Gallery and detailed analytics are coming in a future update.</p>
+    <div class="biz-card">
+        <h2>Subscription Status</h2>
+        <div class="biz-sub-status">
+            <div>
+                <div class="biz-plan-name">{{ business.get_plan_display }} Plan</div>
+                {% if subscription and subscription.renewal_date %}
+                    <div class="biz-empty">Renews on {{ subscription.renewal_date|date:"M j, Y" }}</div>
+                {% endif %}
+            </div>
+            <span class="biz-badge {% if subscription.status == 'active' %}biz-badge-verified{% else %}biz-badge-rejected{% endif %}">
+                {{ subscription.get_status_display|default:"Active" }}
+            </span>
+        </div>
+        <a href="{% url 'business:plans' %}" class="biz-btn biz-btn-primary" style="margin-top:16px;">Manage Plan</a>
+    </div>
+
+    <div class="biz-card">
+        <h2>Notifications</h2>
+        {% for note in notifications %}
+            <div class="biz-inquiry">{{ note.icon }} {{ note.text }}</div>
+        {% empty %}
+            <p class="biz-empty">You're all caught up.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="biz-actions">
+    <a href="{% url 'business:edit' %}" class="biz-action-btn"><span class="biz-icon">✏️</span><span class="biz-action-label">Edit Business</span></a>
+    <a href="{% url 'business:products' %}" class="biz-action-btn"><span class="biz-icon">🛍️</span><span class="biz-action-label">Manage Products</span></a>
+    <a href="{% url 'business:plans' %}" class="biz-action-btn biz-primary"><span class="biz-icon">⭐</span><span class="biz-action-label">Upgrade Plan</span></a>
 </div>
 {% endblock %}

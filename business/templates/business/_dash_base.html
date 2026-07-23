@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extra_head %}
+{% include "business/_styles.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="biz-shell">
+    <aside class="biz-sidebar">
+        <div class="biz-sidebar-logo">🏠 HomeFinderKE</div>
+        <nav class="biz-sidebar-nav">
+            <a href="{% url 'business:dashboard' %}" class="biz-nav-item {% if active_tab == 'dashboard' %}active{% endif %}"><span>📊</span> Dashboard</a>
+            <a href="{% url 'business:edit' %}" class="biz-nav-item {% if active_tab == 'business' %}active{% endif %}"><span>🏢</span> My Business</a>
+            <a href="{% url 'business:products' %}" class="biz-nav-item {% if active_tab == 'products' %}active{% endif %}"><span>🛍️</span> Products</a>
+            <span class="biz-nav-item biz-nav-disabled"><span>🖼️</span> Gallery</span>
+            <span class="biz-nav-item biz-nav-disabled"><span>💬</span> Inquiries</span>
+            <span class="biz-nav-item biz-nav-disabled"><span>⭐</span> Reviews</span>
+            <span class="biz-nav-item biz-nav-disabled"><span>📈</span> Analytics</span>
+            <a href="{% url 'business:plans' %}" class="biz-nav-item {% if active_tab == 'plans' %}active{% endif %}"><span>💳</span> Subscription</a>
+            <span class="biz-nav-item biz-nav-disabled"><span>🧾</span> Payments</span>
+            <span class="biz-nav-item biz-nav-disabled"><span>✅</span> Verification</span>
+            <span class="biz-nav-item biz-nav-disabled"><span>⚙️</span> Settings</span>
+        </nav>
+        <a href="{% url 'account_logout' %}" class="biz-nav-item biz-nav-logout"><span>🚪</span> Logout</a>
+    </aside>
+    <div class="biz-main">
+        {% block dash_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

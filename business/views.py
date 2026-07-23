@@ -1,6 +1,11 @@
+from datetime import timedelta
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count
+from django.db.models.functions import TruncDate
 from django.shortcuts import redirect, render
+from django.utils import timezone
 
 from .forms import (
     BusinessContactForm, BusinessEditForm, BusinessInfoForm, BusinessLocationForm,
@@ -217,6 +222,16 @@ def dashboard(request):
     if not business.onboarding_complete:
         return redirect(STEP_URLS[business.onboarding_step])
 
+    now = timezone.now()
+    last_30, prev_30 = now - timedelta(days=30), now - timedelta(days=60)
+
+    def trend(event_type=None, inquiries=False):
+        qs = business.inquiries if inquiries else business.analytics_events.filter(event_type=event_type)
+        current = qs.filter(created_at__gte=last_30).count()
+        previous = qs.filter(created_at__gte=prev_30, created_at__lt=last_30).count()
+        pct = round(((current - previous) / previous) * 100) if previous else (100 if current else 0)
+        return pct
+
     stats = {
         'profile_views': business.analytics_events.filter(event_type='profile_view').count(),
         'phone_clicks': business.analytics_events.filter(event_type='phone_click').count(),
@@ -228,14 +243,51 @@ def dashboard(request):
         'average_rating': business.average_rating,
         'product_count': business.product_count,
     }
-    recent_inquiries = business.inquiries.all()[:5]
+    trends = {
+        'profile_views': trend('profile_view'),
+        'phone_clicks': trend('phone_click'),
+        'whatsapp_clicks': trend('whatsapp_click'),
+        'inquiries': trend(inquiries=True),
+    }
+
     show_analytics = business.plan != 'starter'
+    chart_points, chart_max = '', 0
+    if show_analytics:
+        events = (business.analytics_events
+                  .filter(event_type='profile_view', created_at__gte=last_30)
+                  .annotate(day=TruncDate('created_at'))
+                  .values('day').annotate(count=Count('id')))
+        by_day = {e['day']: e['count'] for e in events}
+        today = now.date()
+        daily = [by_day.get(today - timedelta(days=i), 0) for i in range(29, -1, -1)]
+        chart_max = max(daily) or 1
+        width, height, step = 560, 140, 560 / 29
+        chart_points = ' '.join(
+            f"{round(i * step, 1)},{round(height - (v / chart_max) * (height - 20) - 10, 1)}"
+            for i, v in enumerate(daily)
+        )
+
+    top_products = business.products.order_by('-views_count')[:4]
+    recent_inquiries = business.inquiries.all()[:5]
+    subscription = getattr(business, 'subscription', None)
+
+    notifications = []
+    for inquiry in business.inquiries.filter(status='new')[:3]:
+        notifications.append({'icon': '💬', 'text': f'New inquiry from {inquiry.customer_name}', 'date': inquiry.created_at})
+    if subscription and subscription.renewal_date:
+        days_left = (subscription.renewal_date - now.date()).days
+        if 0 <= days_left <= 14:
+            notifications.append({'icon': '⏰', 'text': f'{business.get_plan_display()} plan renews in {days_left} days', 'date': now})
+    if business.verification_status == 'pending':
+        notifications.append({'icon': '✅', 'text': 'Verification documents are under review', 'date': now})
+    notifications.sort(key=lambda n: n['date'], reverse=True)
 
     return render(request, 'business/dashboard.html', {
-        'business': business, 'stats': stats, 'recent_inquiries': recent_inquiries,
-        'show_analytics': show_analytics,
+        'business': business, 'stats': stats, 'trends': trends,
+        'recent_inquiries': recent_inquiries, 'show_analytics': show_analytics,
+        'top_products': top_products, 'chart_points': chart_points, 'chart_max': chart_max,
+        'notifications': notifications, 'subscription': subscription, 'active_tab': 'dashboard',
     })
-
 
 @login_required
 def business_edit(request):
