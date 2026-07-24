@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0051_notificationpreference'),
+        ('core', '0051_profile_compact_mode_profile_hide_email_and_more'),
     ]
 
     operations = [
