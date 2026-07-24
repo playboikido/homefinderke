@@ -134,6 +134,12 @@ urlpatterns = [
         ),
 
     path(
+        'settings/saved/',
+        views.settings_saved,
+        name='settings_saved'
+        ),
+
+    path(
         'notifications/',
         views.notifications,
         name='notifications'

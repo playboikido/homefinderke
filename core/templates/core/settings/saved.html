@@ -1,0 +1,188 @@
+{% extends 'core/settings_base.html' %}
+{% load static %}
+
+{% block title %}Saved Items — Settings — HomeFinder KE{% endblock %}
+
+{% block settings_content %}
+<style>
+  .saved-list { display: flex; flex-direction: column; }
+  .saved-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .saved-item:last-child { border-bottom: none; }
+  .saved-thumb {
+    width: 52px; height: 52px;
+    border-radius: var(--radius);
+    object-fit: cover;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+  .saved-info { flex: 1; min-width: 0; }
+  .saved-name { font-weight: 600; font-size: 0.88rem; color: var(--fg); }
+  .saved-meta { font-size: 0.78rem; color: var(--fg-muted); }
+  .saved-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .link-btn {
+    color: var(--primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .link-danger {
+    color: var(--danger);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 26px 10px;
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+  }
+</style>
+
+<div class="settings-card">
+  <div class="settings-section-title">Saved Residences</div>
+  <div class="settings-section-desc">Listings you've favorited.</div>
+  {% if favorites %}
+    <div class="saved-list">
+      {% for fav in favorites %}
+        <div class="saved-item">
+          {% if fav.residence.front_image %}
+            <img class="saved-thumb" src="{{ fav.residence.front_image.url }}" alt="{{ fav.residence.name }}">
+          {% else %}
+            <div class="saved-thumb"></div>
+          {% endif %}
+          <div class="saved-info">
+            <div class="saved-name">{{ fav.residence.name }}</div>
+            <div class="saved-meta">{{ fav.residence.town }}, {{ fav.residence.county }} · KSh {{ fav.residence.rent_price }}</div>
+          </div>
+          <div class="saved-actions">
+            <a href="{% url 'residence_detail' fav.residence.id %}" class="link-btn">View</a>
+            <a href="{% url 'remove_favorite' fav.id %}" class="link-danger">Remove</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">No saved residences yet.</div>
+  {% endif %}
+</div>
+
+<div class="settings-card">
+  <div class="settings-section-title">Saved Movers &amp; Furniture Vendors</div>
+  <div class="settings-section-desc">Service providers you've favorited.</div>
+  {% if mover_favorites or vendor_favorites %}
+    <div class="saved-list">
+      {% for fav in mover_favorites %}
+        <div class="saved-item">
+          {% if fav.mover.logo %}
+            <img class="saved-thumb" src="{{ fav.mover.logo.url }}" alt="{{ fav.mover.name }}">
+          {% else %}
+            <div class="saved-thumb"></div>
+          {% endif %}
+          <div class="saved-info">
+            <div class="saved-name">{{ fav.mover.name }}</div>
+            <div class="saved-meta">Mover</div>
+          </div>
+          <div class="saved-actions">
+            <a href="{% url 'mover_detail' fav.mover.id %}" class="link-btn">View</a>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove_mover_favorite">
+              <input type="hidden" name="id" value="{{ fav.id }}">
+              <button type="submit" class="link-danger">Remove</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+      {% for fav in vendor_favorites %}
+        <div class="saved-item">
+          {% if fav.vendor.image %}
+            <img class="saved-thumb" src="{{ fav.vendor.image.url }}" alt="{{ fav.vendor.name }}">
+          {% else %}
+            <div class="saved-thumb"></div>
+          {% endif %}
+          <div class="saved-info">
+            <div class="saved-name">{{ fav.vendor.name }}</div>
+            <div class="saved-meta">Furniture Vendor</div>
+          </div>
+          <div class="saved-actions">
+            <a href="{% url 'furniture_vendor_detail' fav.vendor.id %}" class="link-btn">View</a>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove_vendor_favorite">
+              <input type="hidden" name="id" value="{{ fav.id }}">
+              <button type="submit" class="link-danger">Remove</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">No saved movers or furniture vendors yet.</div>
+  {% endif %}
+</div>
+
+<div class="settings-card">
+  <div class="settings-section-title">Saved Searches</div>
+  <div class="settings-section-desc">Get notified when a new listing matches these.</div>
+  {% if saved_searches %}
+    <div class="saved-list">
+      {% for s in saved_searches %}
+        <div class="saved-item">
+          <div class="saved-info">
+            <div class="saved-name">
+              {{ s.keyword|default:"Any keyword" }}
+              {% if not s.is_active %}<span style="color:var(--fg-muted); font-weight:400;">(inactive)</span>{% endif %}
+            </div>
+            <div class="saved-meta">
+              {{ s.town|default:"Any town" }}, {{ s.county|default:"any county" }}
+              {% if s.min_rent or s.max_rent %} · KSh {{ s.min_rent|default:"0" }}–{{ s.max_rent|default:"any" }}{% endif %}
+            </div>
+          </div>
+          <div class="saved-actions">
+            <a href="{% url 'delete_saved_search' s.id %}" class="link-danger">Remove</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">No saved searches yet.</div>
+  {% endif %}
+</div>
+
+<div class="settings-card">
+  <div class="settings-section-title">Recently Viewed</div>
+  <div class="settings-section-desc">The last residences you looked at.</div>
+  {% if recently_viewed %}
+    <div class="saved-list">
+      {% for view in recently_viewed %}
+        <div class="saved-item">
+          {% if view.residence.front_image %}
+            <img class="saved-thumb" src="{{ view.residence.front_image.url }}" alt="{{ view.residence.name }}">
+          {% else %}
+            <div class="saved-thumb"></div>
+          {% endif %}
+          <div class="saved-info">
+            <div class="saved-name">{{ view.residence.name }}</div>
+            <div class="saved-meta">Viewed {{ view.last_viewed|timesince }} ago</div>
+          </div>
+          <div class="saved-actions">
+            <a href="{% url 'residence_detail' view.residence.id %}" class="link-btn">View</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">No recently viewed residences yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

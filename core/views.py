@@ -1172,6 +1172,35 @@ def settings_privacy(request):
     })
 
 
+@login_required
+def settings_saved(request):
+    """Settings > Saved Items (Residence Workspace).
+    Aggregates existing Favorite / MoverFavorite / FurnitureVendorFavorite /
+    SavedSearch / ResidenceView models — no new tables needed.
+    Removing a mover/vendor favorite is handled here (no existing endpoint
+    for that); removing a residence favorite or saved search links out to
+    the existing remove_favorite / delete_saved_search views.
+    """
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'remove_mover_favorite':
+            MoverFavorite.objects.filter(user=request.user, id=request.POST.get('id')).delete()
+            messages.success(request, 'Removed from saved movers.')
+        elif action == 'remove_vendor_favorite':
+            FurnitureVendorFavorite.objects.filter(user=request.user, id=request.POST.get('id')).delete()
+            messages.success(request, 'Removed from saved furniture vendors.')
+        return redirect('settings_saved')
+
+    return render(request, 'core/settings/saved.html', {
+        'active_section': 'saved',
+        'favorites': Favorite.objects.filter(user=request.user).select_related('residence').order_by('-created_at'),
+        'mover_favorites': MoverFavorite.objects.filter(user=request.user).select_related('mover').order_by('-created_at'),
+        'vendor_favorites': FurnitureVendorFavorite.objects.filter(user=request.user).select_related('vendor').order_by('-created_at'),
+        'saved_searches': SavedSearch.objects.filter(user=request.user).order_by('-created_at'),
+        'recently_viewed': ResidenceView.objects.filter(user=request.user).select_related('residence').order_by('-last_viewed')[:10],
+    })
+
+
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import PermissionDenied
