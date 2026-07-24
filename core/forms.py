@@ -131,7 +131,7 @@ class ReviewForm(forms.ModelForm):
             ),
         }
 
-from .models import Profile
+from .models import Profile, NotificationPreference
 
 
 class ProfileForm(forms.ModelForm):
@@ -162,6 +162,45 @@ class ProfileForm(forms.ModelForm):
 
 
 from django.contrib.auth.models import User
+
+
+class PrivacyForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['profile_visibility', 'hide_phone', 'hide_email']
+        widgets = {
+            'profile_visibility': forms.RadioSelect(),
+            'hide_phone': forms.CheckboxInput(),
+            'hide_email': forms.CheckboxInput(),
+        }
+
+
+class AppearanceForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['theme_preference', 'reduce_motion', 'compact_mode']
+        widgets = {
+            'theme_preference': forms.RadioSelect(),
+            'reduce_motion': forms.CheckboxInput(),
+            'compact_mode': forms.CheckboxInput(),
+        }
+
+
+class NotificationPreferenceForm(forms.ModelForm):
+    class Meta:
+        model = NotificationPreference
+        fields = [
+            'email_notifications',
+            'sms_notifications',
+            'push_notifications',
+            'favourite_residence_updates',
+            'new_inquiry_alerts',
+            'new_review_alerts',
+            'newsletter',
+            'marketing_emails',
+            'notification_sounds',
+        ]
+        widgets = {name: forms.CheckboxInput() for name in fields}
 
 
 class SettingsUserForm(forms.ModelForm):

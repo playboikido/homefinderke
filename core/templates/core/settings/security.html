@@ -1,0 +1,173 @@
+{% extends 'core/settings_base.html' %}
+{% load static %}
+
+{% block title %}Security — Settings — HomeFinder KE{% endblock %}
+
+{% block settings_content %}
+<style>
+  .sec-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-row:last-child { border-bottom: none; }
+  .sec-row-title { font-weight: 600; color: var(--fg); font-size: 0.92rem; }
+  .sec-row-desc { font-size: 0.8rem; color: var(--fg-muted); margin-top: 2px; }
+
+  .badge-on {
+    background: rgba(22,163,74,0.12);
+    color: #16A34A;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+  }
+  .badge-off {
+    background: var(--muted);
+    color: var(--fg-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 1.5px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+  }
+  .btn-outline:hover { background: var(--primary); color: #fff; }
+
+  .btn-danger-outline {
+    background: transparent;
+    color: var(--danger);
+    border: 1.5px solid var(--danger);
+    border-radius: var(--radius);
+    padding: 8px 16px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .btn-danger-outline:hover { background: var(--danger); color: #fff; }
+
+  .device-list { display: flex; flex-direction: column; }
+  .device-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .device-item:last-child { border-bottom: none; }
+  .device-icon {
+    width: 38px; height: 38px;
+    border-radius: var(--radius);
+    background: var(--muted);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .device-info { flex: 1; min-width: 0; }
+  .device-name { font-size: 0.88rem; font-weight: 600; color: var(--fg); }
+  .device-meta { font-size: 0.76rem; color: var(--fg-muted); }
+  .device-current {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(15,118,110,0.1);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    margin-left: 8px;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 30px 10px;
+    color: var(--fg-muted);
+    font-size: 0.85rem;
+  }
+</style>
+
+<div class="settings-card">
+  <div class="settings-section-title">Password &amp; Two-Factor Authentication</div>
+  <div class="settings-section-desc">Manage how you sign in to your account.</div>
+
+  <div class="sec-row">
+    <div>
+      <div class="sec-row-title">Password</div>
+      <div class="sec-row-desc">Change your account password.</div>
+    </div>
+    <a href="{% url 'account_change_password' %}" class="btn-outline">Change Password</a>
+  </div>
+
+  <div class="sec-row">
+    <div>
+      <div class="sec-row-title">
+        Two-Factor Authentication
+        {% if mfa_enabled %}
+          <span class="badge-on">Enabled</span>
+        {% else %}
+          <span class="badge-off">Disabled</span>
+        {% endif %}
+      </div>
+      <div class="sec-row-desc">Add an extra layer of security using an authenticator app.</div>
+    </div>
+    <a href="{% url 'mfa_index' %}" class="btn-outline">
+      {% if mfa_enabled %}Manage 2FA{% else %}Set Up 2FA{% endif %}
+    </a>
+  </div>
+</div>
+
+<div class="settings-card">
+  <div class="settings-section-title">Trusted Devices &amp; Login Activity</div>
+  <div class="settings-section-desc">Devices and locations that have signed in to your account.</div>
+
+  {% if devices %}
+    <div class="device-list">
+      {% for device in devices %}
+        <div class="device-item">
+          <div class="device-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--fg-muted)" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M10 18h4"/></svg>
+          </div>
+          <div class="device-info">
+            <div class="device-name">
+              {{ device.user_agent|truncatechars:48 }}
+              {% if device.fingerprint == request.session.device_fingerprint %}
+                <span class="device-current">This device</span>
+              {% endif %}
+            </div>
+            <div class="device-meta">{{ device.ip_address }} · last active {{ device.last_seen|timesince }} ago</div>
+          </div>
+          <form method="post" onsubmit="return confirm('Remove this device? It will need to verify again on its next login.');">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="remove_device">
+            <input type="hidden" name="device_id" value="{{ device.id }}">
+            <button type="submit" class="btn-danger-outline">Remove</button>
+          </form>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">No device activity recorded yet.</div>
+  {% endif %}
+</div>
+
+<div class="settings-card">
+  <div class="settings-section-title">Logout Other Devices</div>
+  <div class="settings-section-desc">Sign out of HomeFinder KE everywhere except this device.</div>
+  <form method="post" onsubmit="return confirm('This will log you out on every other device and browser. Continue?');">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="logout_other_devices">
+    <button type="submit" class="btn-danger-outline">Logout Other Devices</button>
+  </form>
+</div>
+{% endblock %}

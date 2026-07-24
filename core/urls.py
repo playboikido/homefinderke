@@ -110,6 +110,30 @@ urlpatterns = [
         ),
 
     path(
+        'settings/security/',
+        views.settings_security,
+        name='settings_security'
+        ),
+
+    path(
+        'settings/notifications/',
+        views.settings_notifications,
+        name='settings_notifications'
+        ),
+
+    path(
+        'settings/appearance/',
+        views.settings_appearance,
+        name='settings_appearance'
+        ),
+
+    path(
+        'settings/privacy/',
+        views.settings_privacy,
+        name='settings_privacy'
+        ),
+
+    path(
         'notifications/',
         views.notifications,
         name='notifications'

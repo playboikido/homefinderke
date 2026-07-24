@@ -407,6 +407,16 @@ class Profile(models.Model):
     LANGUAGE_CHOICES = [('en', 'English'), ('sw', 'Kiswahili')]
     language = models.CharField(max_length=5, choices=LANGUAGE_CHOICES, default='en')
 
+    THEME_CHOICES = [('system', 'System'), ('light', 'Light'), ('dark', 'Dark')]
+    theme_preference = models.CharField(max_length=6, choices=THEME_CHOICES, default='system')
+    reduce_motion = models.BooleanField(default=False)
+    compact_mode = models.BooleanField(default=False)
+
+    VISIBILITY_CHOICES = [('public', 'Public'), ('private', 'Private')]
+    profile_visibility = models.CharField(max_length=7, choices=VISIBILITY_CHOICES, default='public')
+    hide_phone = models.BooleanField(default=False)
+    hide_email = models.BooleanField(default=True)
+
     def save(self, *args, **kwargs):
         if self.profile_picture and hasattr(self.profile_picture, 'file'):
             compressed = compress_image(self.profile_picture)
@@ -603,6 +613,29 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - Notification"
+
+
+class NotificationPreference(models.Model):
+    """Settings > Notifications toggles (Residence Workspace)."""
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notification_preference'
+    )
+
+    email_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
+    push_notifications = models.BooleanField(default=True)
+    favourite_residence_updates = models.BooleanField(default=True)
+    new_inquiry_alerts = models.BooleanField(default=True)
+    new_review_alerts = models.BooleanField(default=True)
+    newsletter = models.BooleanField(default=True)
+    marketing_emails = models.BooleanField(default=False)
+    notification_sounds = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.user.username} - Notification Preferences"
 
 @receiver(post_save, sender=Residence)
 def create_approval_notification(sender, instance, created, **kwargs):

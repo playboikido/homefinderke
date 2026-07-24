@@ -28,6 +28,8 @@ def check_new_device_login(sender, request, user, **kwargs):
         defaults={"ip_address": ip_address, "user_agent": user_agent},
     )
 
+    request.session["device_fingerprint"] = fingerprint
+
     if created:
         try:
             send_mail(

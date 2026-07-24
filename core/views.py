@@ -19,8 +19,12 @@ from .models import Review
 from .forms import ReviewForm
 from django.db.models import Sum, Prefetch
 from django.core.paginator import Paginator
-from .forms import ProfileForm, SettingsUserForm, SettingsProfileForm
-from .models import Residence, Profile
+from .forms import ProfileForm, SettingsUserForm, SettingsProfileForm, NotificationPreferenceForm, AppearanceForm, PrivacyForm
+from .models import Residence, Profile, NotificationPreference
+from accounts.models import KnownDevice
+from django.contrib.sessions.models import Session
+from django.utils import timezone
+from allauth.mfa.models import Authenticator
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage, MoverFavorite, FurnitureVendorFavorite, MoverReview, FurnitureVendorReview
@@ -925,10 +929,18 @@ def owner_profile(request, user_id):
     residences = Residence.objects.filter(owner=owner, approved=True)
     profile, created = Profile.objects.get_or_create(user=owner)
 
+    is_owner_viewing = request.user.is_authenticated and request.user.id == owner.id
+    is_private = (
+        profile.profile_visibility == 'private'
+        and not is_owner_viewing
+        and not request.user.is_staff
+    )
+
     context = {
         'owner': owner,
         'profile': profile,
         'residences': residences,
+        'is_private': is_private,
     }
     return render(request, 'core/owner_profile.html', context)
 
@@ -1047,10 +1059,117 @@ def settings_profile(request):
 
 
 @login_required
+def settings_security(request):
+    """Settings > Security (Residence Workspace).
+    Surfaces allauth's existing password-change + TOTP 2FA views,
+    plus a read-only Login Activity / Trusted Devices list built on
+    the existing accounts.KnownDevice model, plus a
+    Logout Other Devices action (deletes all other DB sessions for
+    this user, keeping the current one).
+    """
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'logout_other_devices':
+            current_key = request.session.session_key
+            count = 0
+            for s in Session.objects.filter(expire_date__gte=timezone.now()):
+                data = s.get_decoded()
+                if str(data.get('_auth_user_id')) == str(request.user.id) and s.session_key != current_key:
+                    s.delete()
+                    count += 1
+            messages.success(request, f'Logged out of {count} other device(s).')
+
+        elif action == 'remove_device':
+            KnownDevice.objects.filter(user=request.user, id=request.POST.get('device_id')).delete()
+            messages.success(request, 'Device removed.')
+
+        return redirect('settings_security')
+
+    devices = KnownDevice.objects.filter(user=request.user).order_by('-last_seen')
+    mfa_enabled = Authenticator.objects.filter(user=request.user, type=Authenticator.Type.TOTP).exists()
+
+    return render(request, 'core/settings/security.html', {
+        'active_section': 'security',
+        'devices': devices,
+        'mfa_enabled': mfa_enabled,
+    })
+
+
+@login_required
 def notifications(request):
     notifications = request.user.notifications.all().order_by('-created_at')
     notifications.update(is_read=True)
     return render(request, 'notifications.html', {'notifications': notifications})
+
+
+@login_required
+def settings_notifications(request):
+    """Settings > Notifications (Residence Workspace)."""
+    prefs, _ = NotificationPreference.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = NotificationPreferenceForm(request.POST, instance=prefs)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Notification preferences updated.')
+            return redirect('settings_notifications')
+    else:
+        form = NotificationPreferenceForm(instance=prefs)
+
+    return render(request, 'core/settings/notifications.html', {
+        'form': form,
+        'active_section': 'notifications',
+    })
+
+
+@login_required
+def settings_appearance(request):
+    """Settings > Appearance (Residence Workspace).
+    Theme + Reduce Motion are applied site-wide via base.html reading
+    request.user.profile.theme_preference / reduce_motion.
+    Compact Mode is stored here but, for now, only affects the
+    Settings pages themselves — not yet wired site-wide.
+    """
+    profile = request.user.profile
+
+    if request.method == 'POST':
+        form = AppearanceForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Appearance preferences updated.')
+            return redirect('settings_appearance')
+    else:
+        form = AppearanceForm(instance=profile)
+
+    return render(request, 'core/settings/appearance.html', {
+        'form': form,
+        'active_section': 'appearance',
+    })
+
+
+@login_required
+def settings_privacy(request):
+    """Settings > Privacy (Residence Workspace).
+    Profile Visibility and Hide Phone are actually enforced in
+    owner_profile(). Hide Email is stored but not yet enforced
+    anywhere, since email isn't shown publicly on the site today.
+    """
+    profile = request.user.profile
+
+    if request.method == 'POST':
+        form = PrivacyForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Privacy settings updated.')
+            return redirect('settings_privacy')
+    else:
+        form = PrivacyForm(instance=profile)
+
+    return render(request, 'core/settings/privacy.html', {
+        'form': form,
+        'active_section': 'privacy',
+    })
 
 
 from django.shortcuts import render

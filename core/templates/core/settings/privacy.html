@@ -1,0 +1,156 @@
+{% extends 'core/settings_base.html' %}
+{% load static %}
+
+{% block title %}Privacy — Settings — HomeFinder KE{% endblock %}
+
+{% block settings_content %}
+<style>
+  .theme-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .theme-option {
+    position: relative;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .theme-option input { position: absolute; opacity: 0; }
+  .theme-option:has(input:checked) {
+    border-color: var(--primary);
+    background: rgba(15,118,110,0.06);
+  }
+  .theme-option-label { font-weight: 700; font-size: 0.88rem; color: var(--fg); }
+  .theme-option-desc { font-size: 0.76rem; color: var(--fg-muted); margin-top: 2px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row-title { font-weight: 600; color: var(--fg); font-size: 0.9rem; }
+  .toggle-row-desc { font-size: 0.78rem; color: var(--fg-muted); margin-top: 2px; }
+
+  .switch { position: relative; display: inline-block; width: 44px; height: 26px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-track {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--muted);
+    border-radius: 999px;
+    transition: var(--transition);
+  }
+  .switch-track::before {
+    content: "";
+    position: absolute;
+    height: 20px; width: 20px;
+    left: 3px; bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: var(--transition);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .switch input:checked + .switch-track { background: var(--primary); }
+  .switch input:checked + .switch-track::before { transform: translateX(18px); }
+
+  .soon-inline {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    background: var(--muted);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    margin-left: 8px;
+  }
+
+  .sticky-save-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 11px 22px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--primary-dark); }
+</style>
+
+<form method="post">
+  {% csrf_token %}
+
+  <div class="settings-card">
+    <div class="settings-section-title">Profile Visibility</div>
+    <div class="settings-section-desc">Controls who can view your public profile page.</div>
+
+    <div class="theme-options">
+      {% for radio in form.profile_visibility %}
+        <label class="theme-option">
+          {{ radio.tag }}
+          <div class="theme-option-label">{{ radio.choice_label }}</div>
+          <div class="theme-option-desc">
+            {% if radio.data.value == 'public' %}Anyone can view your profile{% else %}Only you can view your profile{% endif %}
+          </div>
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-section-title">Contact Information</div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-row-title">Hide Phone Number</div>
+        <div class="toggle-row-desc">Hide your phone number from your public profile page.</div>
+      </div>
+      <label class="switch">{{ form.hide_phone }}<span class="switch-track"></span></label>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-row-title">
+          Hide Email
+          <span class="soon-inline">Not shown publicly yet</span>
+        </div>
+        <div class="toggle-row-desc">Your email isn't displayed anywhere on the site yet — this is saved for when it is.</div>
+      </div>
+      <label class="switch">{{ form.hide_email }}<span class="switch-track"></span></label>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-section-title">
+      Activity Status, Location Sharing &amp; Search Visibility
+      <span class="soon-inline">Not available yet</span>
+    </div>
+    <div class="settings-section-desc">
+      HomeFinder KE doesn't have online-activity indicators, personal location sharing, or profile search/discovery yet,
+      so there's nothing for these settings to control. They'll appear here once those features exist.
+    </div>
+  </div>
+
+  <div class="sticky-save-bar">
+    <button type="submit" class="btn-primary">Save Changes</button>
+  </div>
+</form>
+{% endblock %}

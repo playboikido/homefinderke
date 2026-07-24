@@ -1,0 +1,161 @@
+{% extends 'core/settings_base.html' %}
+{% load static %}
+
+{% block title %}Appearance — Settings — HomeFinder KE{% endblock %}
+
+{% block settings_content %}
+<style>
+  .theme-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .theme-option {
+    position: relative;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .theme-option input { position: absolute; opacity: 0; }
+  .theme-option:has(input:checked) {
+    border-color: var(--primary);
+    background: rgba(15,118,110,0.06);
+  }
+  .theme-swatch {
+    width: 100%;
+    height: 44px;
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+  }
+  .theme-swatch.light { background: #F8FAFC; }
+  .theme-swatch.dark { background: #071416; }
+  .theme-swatch.system { background: linear-gradient(90deg, #F8FAFC 50%, #071416 50%); }
+  .theme-option-label { font-size: 0.82rem; font-weight: 600; color: var(--fg); }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-row-title { font-weight: 600; color: var(--fg); font-size: 0.9rem; }
+  .toggle-row-desc { font-size: 0.78rem; color: var(--fg-muted); margin-top: 2px; }
+
+  .switch { position: relative; display: inline-block; width: 44px; height: 26px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch-track {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--muted);
+    border-radius: 999px;
+    transition: var(--transition);
+  }
+  .switch-track::before {
+    content: "";
+    position: absolute;
+    height: 20px; width: 20px;
+    left: 3px; bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: var(--transition);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .switch input:checked + .switch-track { background: var(--primary); }
+  .switch input:checked + .switch-track::before { transform: translateX(18px); }
+
+  .soon-inline {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--fg-muted);
+    background: var(--muted);
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    margin-left: 8px;
+  }
+
+  .sticky-save-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 11px 22px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--primary-dark); }
+</style>
+
+<form method="post">
+  {% csrf_token %}
+
+  <div class="settings-card">
+    <div class="settings-section-title">Theme</div>
+    <div class="settings-section-desc">Choose how HomeFinder KE looks on this and every device you log into.</div>
+
+    <div class="theme-options">
+      {% for radio in form.theme_preference %}
+        <label class="theme-option">
+          {{ radio.tag }}
+          <div class="theme-swatch {{ radio.data.value }}"></div>
+          <div class="theme-option-label">{{ radio.choice_label }}</div>
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-section-title">Motion &amp; Density</div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-row-title">Reduce Motion</div>
+        <div class="toggle-row-desc">Minimize animations and transitions across the site.</div>
+      </div>
+      <label class="switch">{{ form.reduce_motion }}<span class="switch-track"></span></label>
+    </div>
+
+    <div class="toggle-row">
+      <div>
+        <div class="toggle-row-title">
+          Compact Mode
+          <span class="soon-inline">Settings pages only, for now</span>
+        </div>
+        <div class="toggle-row-desc">Tighter spacing. Currently applies to Settings only — not yet site-wide.</div>
+      </div>
+      <label class="switch">{{ form.compact_mode }}<span class="switch-track"></span></label>
+    </div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-section-title">
+      Accent Color &amp; Font Size
+      <span class="soon-inline">Soon</span>
+    </div>
+    <div class="settings-section-desc">Custom accent colors and adjustable font sizing are planned for a future update.</div>
+  </div>
+
+  <div class="sticky-save-bar">
+    <button type="submit" class="btn-primary">Save Changes</button>
+  </div>
+</form>
+{% endblock %}

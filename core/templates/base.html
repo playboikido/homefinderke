@@ -8,10 +8,18 @@
     <meta name="description" content="{% block meta_description %}Find apartments, bedsits, roommates, and houses for rent in Kenya. Compare prices, check verification status, and connect directly with verified property owners on HomeFinder KE.{% endblock %}">
     <script>
         (function () {
-            const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            if (darkQuery.matches) {
+            const serverTheme = "{{ request.user.profile.theme_preference|default:'system' }}";
+            if (serverTheme === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
+            } else if (serverTheme === 'system') {
+                const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                if (darkQuery.matches) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                }
             }
+            {% if request.user.is_authenticated and request.user.profile.reduce_motion %}
+            document.documentElement.setAttribute('data-reduce-motion', 'true');
+            {% endif %}
         })();
     </script>
 
@@ -93,6 +101,15 @@
 
         html {
             color-scheme: light;
+        }
+
+        html[data-reduce-motion="true"] *,
+        html[data-reduce-motion="true"] *::before,
+        html[data-reduce-motion="true"] *::after {
+            animation-duration: 0.001ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.001ms !important;
+            scroll-behavior: auto !important;
         }
 
         html[data-theme="dark"] {

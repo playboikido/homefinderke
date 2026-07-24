@@ -1,0 +1,225 @@
+{% extends 'core/settings_base.html' %}
+{% load static %}
+
+{% block title %}My Profile — Settings — HomeFinder KE{% endblock %}
+
+{% block settings_content %}
+<style>
+  .cover-upload {
+    position: relative;
+    height: 140px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, var(--fg) 0%, var(--primary) 60%, var(--secondary) 100%);
+    margin-bottom: -44px;
+    overflow: hidden;
+  }
+  .cover-upload img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .cover-upload-btn {
+    position: absolute;
+    right: 12px; bottom: 12px;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-full);
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .avatar-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    padding: 0 8px 20px;
+  }
+  .avatar-upload {
+    position: relative;
+    width: 88px; height: 88px;
+    border-radius: 50%;
+    border: 4px solid var(--bg-card);
+    background: var(--muted);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .avatar-upload img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-edit-badge {
+    position: absolute;
+    right: 0; bottom: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--bg-card);
+    cursor: pointer;
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  @media (min-width: 640px) {
+    .field-grid.two-col { grid-template-columns: 1fr 1fr; }
+  }
+  .field-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 6px;
+  }
+  .field-label .req { color: var(--danger); }
+  .settings-card .form-control {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    transition: var(--transition);
+  }
+  .settings-card .form-control:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(15,118,110,0.12);
+  }
+  .field-error {
+    color: var(--danger);
+    font-size: 0.78rem;
+    margin-top: 4px;
+  }
+  .sticky-save-bar {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-lg);
+    border-radius: var(--radius-lg);
+    padding: 14px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: -4px;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 11px 22px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .btn-primary:hover { background: var(--primary-dark); }
+
+  .cover-upload-btn input[type="file"],
+  .avatar-edit-badge input[type="file"] {
+    position: absolute;
+    width: 1px; height: 1px;
+    opacity: 0;
+    overflow: hidden;
+  }
+</style>
+
+<form method="post" enctype="multipart/form-data" novalidate>
+  {% csrf_token %}
+
+  <div class="settings-card" style="padding-top:0; overflow:visible;">
+    <div class="cover-upload">
+      {% if profile_form.instance.cover_photo %}
+        <img src="{{ profile_form.instance.cover_photo.url }}" alt="Cover photo">
+      {% endif %}
+      <label class="cover-upload-btn">
+        Change Cover
+        {{ profile_form.cover_photo }}
+      </label>
+    </div>
+    <div class="avatar-row">
+      <div class="avatar-upload">
+        {% if profile_form.instance.profile_picture %}
+          <img src="{{ profile_form.instance.profile_picture.url }}" alt="Profile photo">
+        {% endif %}
+        <label class="avatar-edit-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          {{ profile_form.profile_picture }}
+        </label>
+      </div>
+      <div>
+        <div style="font-weight:700; color:var(--fg);">{{ user_form.instance.get_full_name|default:user_form.instance.username }}</div>
+        <div style="font-size:0.82rem; color:var(--fg-muted);">@{{ user_form.instance.username }}</div>
+      </div>
+    </div>
+    {% if profile_form.profile_picture.errors or profile_form.cover_photo.errors %}
+      <div class="field-error">{{ profile_form.profile_picture.errors|join:" " }} {{ profile_form.cover_photo.errors|join:" " }}</div>
+    {% endif %}
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-section-title">Basic Information</div>
+    <div class="settings-section-desc">This is how other users on HomeFinder KE will see you.</div>
+
+    <div class="field-grid two-col" style="margin-bottom:16px;">
+      <div>
+        <label class="field-label">First Name</label>
+        {{ user_form.first_name }}
+        {% if user_form.first_name.errors %}<div class="field-error">{{ user_form.first_name.errors|join:" " }}</div>{% endif %}
+      </div>
+      <div>
+        <label class="field-label">Last Name</label>
+        {{ user_form.last_name }}
+        {% if user_form.last_name.errors %}<div class="field-error">{{ user_form.last_name.errors|join:" " }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="field-grid two-col" style="margin-bottom:16px;">
+      <div>
+        <label class="field-label">Username</label>
+        {{ user_form.username }}
+        {% if user_form.username.errors %}<div class="field-error">{{ user_form.username.errors|join:" " }}</div>{% endif %}
+      </div>
+      <div>
+        <label class="field-label">Phone Number</label>
+        {{ profile_form.phone_number }}
+        {% if profile_form.phone_number.errors %}<div class="field-error">{{ profile_form.phone_number.errors|join:" " }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label class="field-label">Email Address</label>
+      {{ user_form.email }}
+      {% if user_form.email.errors %}<div class="field-error">{{ user_form.email.errors|join:" " }}</div>{% endif %}
+    </div>
+
+    <div class="field-grid two-col" style="margin-bottom:16px;">
+      <div>
+        <label class="field-label">County</label>
+        {{ profile_form.county }}
+      </div>
+      <div>
+        <label class="field-label">Town</label>
+        {{ profile_form.town }}
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px;">
+      <label class="field-label">Language</label>
+      {{ profile_form.language }}
+    </div>
+
+    <div>
+      <label class="field-label">Bio</label>
+      {{ profile_form.bio }}
+      {% if profile_form.bio.errors %}<div class="field-error">{{ profile_form.bio.errors|join:" " }}</div>{% endif %}
+    </div>
+  </div>
+
+  <div class="sticky-save-bar">
+    <button type="submit" class="btn-primary">Save Changes</button>
+  </div>
+</form>
+{% endblock %}

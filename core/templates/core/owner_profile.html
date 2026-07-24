@@ -6,6 +6,11 @@
 
 {% block content %}
 
+{% if is_private %}
+<h1>👤 {{ owner.username }}</h1>
+<p>This profile is private.</p>
+{% else %}
+
 <h1>👤 {{ owner.username }}</h1>
 
 {% if profile.profile_picture %}
@@ -25,7 +30,9 @@
 <p>
     <strong>Phone:</strong>
 
-    {% if profile.phone_number %}
+    {% if profile.hide_phone %}
+        Hidden
+    {% elif profile.phone_number %}
         {{ profile.phone_number }}
     {% else %}
         Not provided
@@ -85,5 +92,7 @@
     </p>
 
 {% endfor %}
+
+{% endif %}
 
 {% endblock %}
