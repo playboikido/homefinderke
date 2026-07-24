@@ -1,0 +1,69 @@
+{% extends 'core/settings_base.html' %}
+{% load static %}
+
+{% block title %}Help & Support — Settings — HomeFinder KE{% endblock %}
+
+{% block settings_content %}
+<style>
+  .help-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+  }
+  .help-row:last-child { border-bottom: none; }
+  .help-row-title { font-weight: 600; color: var(--fg); font-size: 0.9rem; }
+  .help-row-desc { font-size: 0.78rem; color: var(--fg-muted); margin-top: 2px; }
+  .help-row-arrow { color: var(--fg-muted); flex-shrink: 0; }
+</style>
+
+<div class="settings-card">
+  <div class="settings-section-title">Get Help</div>
+
+  <a href="{% url 'about' %}#contact" class="help-row">
+    <div>
+      <div class="help-row-title">Contact Support</div>
+      <div class="help-row-desc">Send us a message and we'll get back to you.</div>
+    </div>
+    <span class="help-row-arrow">→</span>
+  </a>
+
+  <a href="mailto:homefinder.ke.help@gmail.com" class="help-row">
+    <div>
+      <div class="help-row-title">Email Us Directly</div>
+      <div class="help-row-desc">homefinder.ke.help@gmail.com</div>
+    </div>
+    <span class="help-row-arrow">→</span>
+  </a>
+</div>
+
+<div class="settings-card">
+  <div class="settings-section-title">About HomeFinder KE</div>
+
+  <a href="{% url 'about' %}" class="help-row">
+    <div>
+      <div class="help-row-title">About HomeFinder KE</div>
+      <div class="help-row-desc">Learn more about the platform.</div>
+    </div>
+    <span class="help-row-arrow">→</span>
+  </a>
+
+  <a href="{% url 'terms_of_service' %}" class="help-row">
+    <div>
+      <div class="help-row-title">Terms of Service</div>
+    </div>
+    <span class="help-row-arrow">→</span>
+  </a>
+
+  <a href="{% url 'privacy_policy' %}" class="help-row">
+    <div>
+      <div class="help-row-title">Privacy Policy</div>
+    </div>
+    <span class="help-row-arrow">→</span>
+  </a>
+</div>
+{% endblock %}

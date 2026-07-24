@@ -140,6 +140,30 @@ urlpatterns = [
         ),
 
     path(
+        'settings/help/',
+        views.settings_help,
+        name='settings_help'
+        ),
+
+    path(
+        'settings/verification/',
+        views.settings_verification,
+        name='settings_verification'
+        ),
+
+    path(
+        'settings/danger/',
+        views.settings_danger,
+        name='settings_danger'
+        ),
+
+    path(
+        'settings/export-data/',
+        views.settings_export_data,
+        name='settings_export_data'
+        ),
+
+    path(
         'notifications/',
         views.notifications,
         name='notifications'

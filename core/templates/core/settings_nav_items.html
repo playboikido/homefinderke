@@ -2,17 +2,18 @@
 Included twice from settings_base.html:
   - as mobile pill tabs (sidebar not set)
   - as desktop sidebar links (sidebar=True)
-Only "profile" is wired to a real view in Phase 1 — the rest are
-disabled placeholders so the shell is visible now and each section
-can be turned on without touching this file's structure again.
+Every section is now live. "Connected Devices" from the original brief
+was folded into "Security" rather than built as a separate page, since
+Security already covers Trusted Devices, Login Activity, and Logout
+Other Devices in full — a second nav item pointing at the same page
+would just be confusing, not helpful.
 {% endcomment %}
-
 {% if sidebar %}
   <a href="{% url 'settings_profile' %}" class="settings-sidebar-link {% if active_section == 'profile' %}active{% endif %}">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1"/></svg>
     My Profile
   </a>
- <a href="{% url 'settings_security' %}" class="settings-sidebar-link {% if active_section == 'security' %}active{% endif %}">
+  <a href="{% url 'settings_security' %}" class="settings-sidebar-link {% if active_section == 'security' %}active{% endif %}">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
     Security
   </a>
@@ -32,10 +33,18 @@ can be turned on without touching this file's structure again.
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
     Saved Items
   </a>
-  <span class="settings-sidebar-link disabled">Verification <span class="soon-badge">Soon</span></span>
-  <span class="settings-sidebar-link disabled">Connected Devices <span class="soon-badge">Soon</span></span>
-  <span class="settings-sidebar-link disabled">Help &amp; Support <span class="soon-badge">Soon</span></span>
-  <span class="settings-sidebar-link disabled">Danger Zone <span class="soon-badge">Soon</span></span>
+  <a href="{% url 'settings_verification' %}" class="settings-sidebar-link {% if active_section == 'verification' %}active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>
+    Verification
+  </a>
+  <a href="{% url 'settings_help' %}" class="settings-sidebar-link {% if active_section == 'help' %}active{% endif %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+    Help &amp; Support
+  </a>
+  <a href="{% url 'settings_danger' %}" class="settings-sidebar-link {% if active_section == 'danger' %}active{% endif %}" style="color: var(--danger);">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+    Danger Zone
+  </a>
 {% else %}
   <a href="{% url 'settings_profile' %}" class="settings-tab {% if active_section == 'profile' %}active{% endif %}">My Profile</a>
   <a href="{% url 'settings_security' %}" class="settings-tab {% if active_section == 'security' %}active{% endif %}">Security</a>
@@ -43,8 +52,7 @@ can be turned on without touching this file's structure again.
   <a href="{% url 'settings_privacy' %}" class="settings-tab {% if active_section == 'privacy' %}active{% endif %}">Privacy</a>
   <a href="{% url 'settings_appearance' %}" class="settings-tab {% if active_section == 'appearance' %}active{% endif %}">Appearance</a>
   <a href="{% url 'settings_saved' %}" class="settings-tab {% if active_section == 'saved' %}active{% endif %}">Saved Items</a>
-  <span class="settings-tab disabled">Verification</span>
-  <span class="settings-tab disabled">Devices</span>
-  <span class="settings-tab disabled">Help</span>
-  <span class="settings-tab disabled">Danger Zone</span>
+  <a href="{% url 'settings_verification' %}" class="settings-tab {% if active_section == 'verification' %}active{% endif %}">Verification</a>
+  <a href="{% url 'settings_help' %}" class="settings-tab {% if active_section == 'help' %}active{% endif %}">Help</a>
+  <a href="{% url 'settings_danger' %}" class="settings-tab {% if active_section == 'danger' %}active{% endif %}" style="color: var(--danger);">Danger Zone</a>
 {% endif %}

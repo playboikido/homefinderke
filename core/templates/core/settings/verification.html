@@ -1,0 +1,168 @@
+{% extends 'core/settings_base.html' %}
+{% load static %}
+
+{% block title %}Verification — Settings — HomeFinder KE{% endblock %}
+
+{% block settings_content %}
+<style>
+  .progress-track {
+    width: 100%;
+    height: 8px;
+    background: var(--muted);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--primary);
+    border-radius: var(--radius-full);
+    transition: width 300ms var(--ease);
+  }
+  .progress-label {
+    font-size: 0.8rem;
+    color: var(--fg-muted);
+    margin-top: 8px;
+  }
+
+  .verify-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .verify-row:last-child { border-bottom: none; }
+  .verify-row-title { font-weight: 600; color: var(--fg); font-size: 0.9rem; }
+  .verify-row-desc { font-size: 0.78rem; color: var(--fg-muted); margin-top: 2px; }
+
+  .badge-on {
+    background: rgba(22,163,74,0.12);
+    color: #16A34A;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+  }
+  .badge-off {
+    background: var(--muted);
+    color: var(--fg-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+  }
+  .badge-pending {
+    background: rgba(217,119,6,0.12);
+    color: #D97706;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+  }
+  .badge-rejected {
+    background: rgba(220,38,38,0.12);
+    color: var(--danger);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    padding: 10px 18px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .btn-primary:hover { background: var(--primary-dark); }
+
+  .file-input-wrap {
+    margin-top: 12px;
+  }
+  .file-input-wrap input[type="file"] {
+    font-size: 0.82rem;
+    color: var(--fg-muted);
+  }
+</style>
+
+<div class="settings-card">
+  <div class="settings-section-title">Verification Progress</div>
+  <div class="progress-track">
+    <div class="progress-fill" style="width: {{ progress_percent }}%;"></div>
+  </div>
+  <div class="progress-label">{{ progress_percent }}% complete</div>
+</div>
+
+<div class="settings-card">
+  <div class="settings-section-title">Status</div>
+
+  <div class="verify-row">
+    <div>
+      <div class="verify-row-title">Email Status</div>
+      <div class="verify-row-desc">{{ request.user.email }}</div>
+    </div>
+    {% if email_verified %}
+      <span class="badge-on">Verified</span>
+    {% else %}
+      <span class="badge-off">Not Verified</span>
+    {% endif %}
+  </div>
+
+  <div class="verify-row">
+    <div>
+      <div class="verify-row-title">Phone Status</div>
+      <div class="verify-row-desc">Phone verification isn't available yet.</div>
+    </div>
+    <span class="badge-off">Not Available</span>
+  </div>
+
+  <div class="verify-row">
+    <div>
+      <div class="verify-row-title">National ID Status</div>
+      <div class="verify-row-desc">
+        {% if verification.status == 'verified' %}
+          Verified on {{ verification.reviewed_at|date:"M j, Y" }}
+        {% elif verification.status == 'pending' %}
+          Submitted {{ verification.submitted_at|timesince }} ago — under review
+        {% elif verification.status == 'rejected' %}
+          {{ verification.rejection_reason|default:"Your document was rejected. Please resubmit." }}
+        {% else %}
+          No document submitted yet.
+        {% endif %}
+      </div>
+    </div>
+    {% if verification.status == 'verified' %}
+      <span class="badge-on">Verified</span>
+    {% elif verification.status == 'pending' %}
+      <span class="badge-pending">Pending</span>
+    {% elif verification.status == 'rejected' %}
+      <span class="badge-rejected">Rejected</span>
+    {% else %}
+      <span class="badge-off">Not Submitted</span>
+    {% endif %}
+  </div>
+</div>
+
+{% if verification.status != 'verified' and verification.status != 'pending' %}
+<div class="settings-card">
+  <div class="settings-section-title">Upload National ID</div>
+  <div class="settings-section-desc">Upload a clear photo or scan of your National ID for manual review.</div>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="file-input-wrap">
+      {{ form.document }}
+    </div>
+    {% if form.document.errors %}<div style="color:var(--danger); font-size:0.78rem; margin-top:6px;">{{ form.document.errors|join:" " }}</div>{% endif %}
+    <div style="margin-top:14px;">
+      <button type="submit" class="btn-primary">Submit for Review</button>
+    </div>
+  </form>
+</div>
+{% endif %}
+{% endblock %}

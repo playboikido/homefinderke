@@ -131,7 +131,7 @@ class ReviewForm(forms.ModelForm):
             ),
         }
 
-from .models import Profile, NotificationPreference
+from .models import Profile, NotificationPreference, IDVerification
 
 
 class ProfileForm(forms.ModelForm):
@@ -162,6 +162,15 @@ class ProfileForm(forms.ModelForm):
 
 
 from django.contrib.auth.models import User
+
+
+class IDVerificationForm(forms.ModelForm):
+    class Meta:
+        model = IDVerification
+        fields = ['document']
+        widgets = {
+            'document': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
 
 
 class PrivacyForm(forms.ModelForm):

@@ -19,8 +19,8 @@ from .models import Review
 from .forms import ReviewForm
 from django.db.models import Sum, Prefetch
 from django.core.paginator import Paginator
-from .forms import ProfileForm, SettingsUserForm, SettingsProfileForm, NotificationPreferenceForm, AppearanceForm, PrivacyForm
-from .models import Residence, Profile, NotificationPreference
+from .forms import ProfileForm, SettingsUserForm, SettingsProfileForm, NotificationPreferenceForm, AppearanceForm, PrivacyForm, IDVerificationForm
+from .models import Residence, Profile, NotificationPreference, IDVerification
 from accounts.models import KnownDevice
 from django.contrib.sessions.models import Session
 from django.utils import timezone
@@ -1199,6 +1199,143 @@ def settings_saved(request):
         'saved_searches': SavedSearch.objects.filter(user=request.user).order_by('-created_at'),
         'recently_viewed': ResidenceView.objects.filter(user=request.user).select_related('residence').order_by('-last_viewed')[:10],
     })
+
+
+@login_required
+def settings_help(request):
+    """Settings > Help & Support (Residence Workspace).
+    Links out to existing pages (about/terms_of_service/privacy_policy).
+    No FAQ/Help Center page exists yet, and "Rate Application" doesn't
+    apply to a web app, so both are left out rather than faked.
+    """
+    return render(request, 'core/settings/help.html', {
+        'active_section': 'help',
+    })
+
+
+from django.contrib.auth import logout
+from allauth.account.models import EmailAddress
+
+
+@login_required
+def settings_verification(request):
+    """Settings > Verification (Residence Workspace).
+    National ID upload/status is real (IDVerification model, reviewed
+    manually via Django admin for now — a dedicated staff review page
+    is a natural follow-up). Email status reads allauth's existing
+    EmailAddress.verified rather than duplicating that state. Phone
+    verification has no OTP system behind it yet, so it always shows
+    "Not Available" rather than faking a working flow.
+    """
+    verification, _ = IDVerification.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = IDVerificationForm(request.POST, request.FILES, instance=verification)
+        if form.is_valid():
+            verification = form.save(commit=False)
+            verification.status = 'pending'
+            verification.submitted_at = timezone.now()
+            verification.save()
+            messages.success(request, 'Document submitted for review.')
+            return redirect('settings_verification')
+    else:
+        form = IDVerificationForm(instance=verification)
+
+    email_address = EmailAddress.objects.filter(user=request.user, primary=True).first()
+    email_verified = email_address.verified if email_address else False
+
+    checks_passed = sum([
+        email_verified,
+        request.user.profile.phone_verified,
+        verification.status == 'verified',
+    ])
+
+    return render(request, 'core/settings/verification.html', {
+        'active_section': 'verification',
+        'form': form,
+        'verification': verification,
+        'email_verified': email_verified,
+        'progress_percent': int((checks_passed / 3) * 100),
+    })
+
+
+@login_required
+def settings_danger(request):
+    """Settings > Danger Zone (Residence Workspace).
+    Deactivate uses Django's built-in User.is_active (blocks login
+    immediately). Deliberately kept separate from the staff-only
+    Profile.is_suspended flag used for policy enforcement, so a
+    self-deactivation can never be confused with a staff suspension.
+    Reactivation currently requires contacting support — a self-service
+    reactivation link is a separate feature, not built here.
+    Delete Account is a real hard delete (Residence.owner already uses
+    on_delete=CASCADE, matching the hard-delete convention already used
+    for vendor removal elsewhere) and requires the account password to
+    confirm before anything happens.
+    """
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        password = request.POST.get('password', '')
+
+        if not request.user.check_password(password):
+            messages.error(request, 'Incorrect password. No changes were made.')
+            return redirect('settings_danger')
+
+        if action == 'deactivate':
+            request.user.is_active = False
+            request.user.save()
+            logout(request)
+            messages.success(request, 'Your account has been deactivated. Contact homefinder.ke.help@gmail.com to reactivate it.')
+            return redirect('home')
+
+        elif action == 'delete_account':
+            user = request.user
+            logout(request)
+            user.delete()
+            messages.success(request, 'Your account and all associated data have been permanently deleted.')
+            return redirect('home')
+
+    return render(request, 'core/settings/danger.html', {
+        'active_section': 'danger',
+    })
+
+
+@login_required
+def settings_export_data(request):
+    """Settings > Danger Zone > Export Data.
+    Downloads the user's own Profile fields, favorites, saved searches,
+    and owned residence listings as a JSON file.
+    """
+    profile = request.user.profile
+    data = {
+        'account': {
+            'username': request.user.username,
+            'email': request.user.email,
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'date_joined': request.user.date_joined.isoformat(),
+        },
+        'profile': {
+            'phone_number': profile.phone_number,
+            'bio': profile.bio,
+            'county': profile.county,
+            'town': profile.town,
+        },
+        'favorited_residences': list(
+            Favorite.objects.filter(user=request.user).values_list('residence__name', flat=True)
+        ),
+        'saved_searches': list(
+            SavedSearch.objects.filter(user=request.user).values(
+                'keyword', 'county', 'town', 'house_type', 'min_rent', 'max_rent'
+            )
+        ),
+        'owned_residences': list(
+            Residence.objects.filter(owner=request.user).values('name', 'town', 'county', 'rent_price')
+        ),
+    }
+    response = HttpResponse(json.dumps(data, indent=2, default=str), content_type='application/json')
+    response['Content-Disposition'] = 'attachment; filename="homefinderke_my_data.json"'
+    return response
 
 
 from django.shortcuts import render

@@ -417,6 +417,8 @@ class Profile(models.Model):
     hide_phone = models.BooleanField(default=False)
     hide_email = models.BooleanField(default=True)
 
+    phone_verified = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
         if self.profile_picture and hasattr(self.profile_picture, 'file'):
             compressed = compress_image(self.profile_picture)
@@ -636,6 +638,35 @@ class NotificationPreference(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - Notification Preferences"
+
+
+class IDVerification(models.Model):
+    """Settings > Verification (Residence Workspace).
+    Covers the National ID document upload + staff review status.
+    Phone verification has no OTP system behind it yet (see Profile.phone_verified);
+    email verification reads from allauth's existing EmailAddress model instead
+    of duplicating state here.
+    """
+    STATUS_CHOICES = [
+        ('not_submitted', 'Not Submitted'),
+        ('pending', 'Pending Review'),
+        ('verified', 'Verified'),
+        ('rejected', 'Rejected'),
+    ]
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='id_verification'
+    )
+    document = models.FileField(upload_to='verification/id_documents/', blank=True, null=True)
+    status = models.CharField(max_length=13, choices=STATUS_CHOICES, default='not_submitted')
+    rejection_reason = models.CharField(max_length=255, blank=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.user.username} - ID Verification ({self.status})"
 
 @receiver(post_save, sender=Residence)
 def create_approval_notification(sender, instance, created, **kwargs):

@@ -49,3 +49,6 @@ class FurnitureVendorAdmin(admin.ModelAdmin):
 
 from .models import UserReport
 admin.site.register(UserReport)
+
+from .models import IDVerification
+admin.site.register(IDVerification)
