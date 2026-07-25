@@ -1,0 +1,183 @@
+{% extends 'core/settings_base.html' %}
+{% load allauth %}
+{% load i18n %}
+
+{% block title %}Two-Factor Authentication — HomeFinder KE{% endblock %}
+
+{% block content %}
+  {% with active_section='security' %}
+    {{ block.super }}
+  {% endwith %}
+{% endblock %}
+
+{% block settings_content %}
+<div class="settings-card">
+  <div class="settings-section-title">Two-Factor Authentication</div>
+  <div class="settings-section-desc">
+    Add an extra layer of protection to your account. Once enabled, you'll need a second step to log in even if someone gets your password.
+  </div>
+</div>
+
+{% if "totp" in MFA_SUPPORTED_TYPES %}
+<div class="settings-card hfke-mfa-panel">
+  <div class="hfke-mfa-row">
+    <div class="hfke-mfa-info">
+      <div class="hfke-mfa-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+        Authenticator App
+      </div>
+      {% if authenticators.totp %}
+        <div class="hfke-mfa-status hfke-status-on">
+          <span class="hfke-status-dot"></span> Active
+        </div>
+      {% else %}
+        <div class="hfke-mfa-status hfke-status-off">
+          <span class="hfke-status-dot"></span> Not active
+        </div>
+      {% endif %}
+    </div>
+    {% if authenticators.totp %}
+      <a href="{% url 'mfa_deactivate_totp' %}" class="hfke-mfa-btn hfke-btn-danger">Deactivate</a>
+    {% else %}
+      <a href="{% url 'mfa_activate_totp' %}" class="hfke-mfa-btn hfke-btn-primary">Activate</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% if "webauthn" in MFA_SUPPORTED_TYPES %}
+<div class="settings-card hfke-mfa-panel">
+  <div class="hfke-mfa-row">
+    <div class="hfke-mfa-info">
+      <div class="hfke-mfa-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Security Keys
+      </div>
+      {% if authenticators.webauthn|length %}
+        <div class="hfke-mfa-status hfke-status-on">
+          <span class="hfke-status-dot"></span>
+          {% blocktranslate count count=authenticators.webauthn|length %}{{ count }} security key added{% plural %}{{ count }} security keys added{% endblocktranslate %}
+        </div>
+      {% else %}
+        <div class="hfke-mfa-status hfke-status-off">
+          <span class="hfke-status-dot"></span> No security keys added
+        </div>
+      {% endif %}
+    </div>
+    {% if authenticators.webauthn|length %}
+      <a href="{% url 'mfa_list_webauthn' %}" class="hfke-mfa-btn hfke-btn-secondary">Manage</a>
+    {% else %}
+      <a href="{% url 'mfa_add_webauthn' %}" class="hfke-mfa-btn hfke-btn-primary">Add</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% if "recovery_codes" in MFA_SUPPORTED_TYPES %}
+  {% with total_count=authenticators.recovery_codes.generate_codes|length unused_count=authenticators.recovery_codes.get_unused_codes|length %}
+  <div class="settings-card hfke-mfa-panel">
+    <div class="hfke-mfa-row">
+      <div class="hfke-mfa-info">
+        <div class="hfke-mfa-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4z"/></svg>
+          Recovery Codes
+        </div>
+        {% if authenticators.recovery_codes %}
+          <div class="hfke-mfa-status hfke-status-on">
+            <span class="hfke-status-dot"></span>
+            {% blocktranslate count unused_count=unused_count %}{{ unused_count }} of {{ total_count }} codes available{% plural %}{{ unused_count }} of {{ total_count }} codes available{% endblocktranslate %}
+          </div>
+        {% else %}
+          <div class="hfke-mfa-status hfke-status-off">
+            <span class="hfke-status-dot"></span> No recovery codes set up
+          </div>
+        {% endif %}
+      </div>
+      <div class="hfke-mfa-actions">
+        {% if is_mfa_enabled %}
+          {% if authenticators.recovery_codes %}
+            {% if unused_count > 0 and not MFA_RECOVERY_CODES_SHOW_ONCE %}
+              <a href="{% url 'mfa_view_recovery_codes' %}" class="hfke-mfa-btn hfke-btn-secondary">View</a>
+              <a href="{% url 'mfa_download_recovery_codes' %}" class="hfke-mfa-btn hfke-btn-secondary">Download</a>
+            {% endif %}
+          {% endif %}
+          <a href="{% url 'mfa_generate_recovery_codes' %}" class="hfke-mfa-btn hfke-btn-primary">Generate</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endwith %}
+{% endif %}
+
+<style>
+  .hfke-mfa-panel { padding: 20px 24px; }
+
+  .hfke-mfa-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .hfke-mfa-info { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+
+  .hfke-mfa-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--fg);
+  }
+  .hfke-mfa-title svg { width: 20px; height: 20px; stroke: var(--primary); flex-shrink: 0; }
+
+  .hfke-mfa-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.83rem;
+    font-weight: 500;
+    padding-left: 30px;
+  }
+  .hfke-status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .hfke-status-on { color: var(--green-text); }
+  .hfke-status-on .hfke-status-dot { background: #22C55E; }
+  .hfke-status-off { color: var(--fg-muted); }
+  .hfke-status-off .hfke-status-dot { background: var(--fg-muted); }
+
+  .hfke-mfa-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .hfke-mfa-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: var(--transition);
+    border: 1.5px solid transparent;
+  }
+  .hfke-btn-primary { background: var(--primary); color: #fff; }
+  .hfke-btn-primary:hover { background: var(--primary-dark); }
+
+  .hfke-btn-secondary { background: var(--bg-card2); color: var(--primary); border-color: var(--border); }
+  .hfke-btn-secondary:hover { background: var(--muted); }
+
+  .hfke-btn-danger { background: #FEE2E2; color: var(--danger); border-color: #FCA5A5; }
+  .hfke-btn-danger:hover { background: #FECACA; }
+
+  @media (max-width: 560px) {
+    .hfke-mfa-row { flex-direction: column; align-items: flex-start; }
+    .hfke-mfa-btn { width: 100%; text-align: center; }
+    .hfke-mfa-actions { width: 100%; }
+  }
+</style>
+{% endblock %}
