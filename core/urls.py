@@ -42,6 +42,16 @@ urlpatterns = [
         views.reject_residence,
         name='reject_residence'
         ),
+    path(
+        'approve-business/<int:pk>/',
+        views.approve_business,
+        name='approve_business'
+    ),
+    path(
+        'reject-business/<int:pk>/',
+        views.reject_business,
+        name='reject_business'
+    ),
 
 
     path(
@@ -157,7 +167,6 @@ urlpatterns = [
         name='settings_danger'
         ),
 
-
     path(
         'settings/export-data/',
         views.settings_export_data,
@@ -182,6 +191,7 @@ urlpatterns = [
     path('add-furniture-vendor-sponsor/', views.add_furniture_vendor_sponsor, name='add_furniture_vendor_sponsor'),
     path('mover/<int:pk>/', views.mover_detail, name='mover_detail'),
     path('furniture-vendor/<int:pk>/', views.furniture_vendor_detail, name='furniture_vendor_detail'),
+    path('business/<slug:slug>/', views.business_detail, name='business_detail'),
     path('staff-tools/mover/<int:pk>/edit/', views.edit_mover, name='edit_mover'),
     path('staff-tools/mover/<int:pk>/delete/', views.delete_mover, name='delete_mover'),
     path('staff-tools/furniture-vendor/<int:pk>/edit/', views.edit_furniture_vendor, name='edit_furniture_vendor'),
@@ -229,4 +239,3 @@ urlpatterns += static(
     settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT
 )
-

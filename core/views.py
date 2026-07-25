@@ -28,6 +28,7 @@ from allauth.mfa.models import Authenticator
 from django.core.mail import send_mail
 from django.conf import settings
 from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage, MoverFavorite, FurnitureVendorFavorite, MoverReview, FurnitureVendorReview
+from business.models import Business
 from django.contrib import messages
 from .forms import ContactForm
 from django.contrib.auth.decorators import login_required
@@ -284,7 +285,56 @@ def residence_list(request):
     page_obj   = paginator.get_page(request.GET.get('page'))
     return render(request, 'core/residence_list.html', {'page_obj': page_obj})
 
+
+DIRECTORY_CATEGORY_ICONS = {
+    'movers': '🚚', 'furniture': '🛋️', 'curtains': '🪟', 'electronics': '📺',
+    'kitchen': '🍽️', 'mattresses': '🛏️', 'bathroom': '🛁', 'cleaning': '🧹',
+    'lighting': '💡', 'repairs': '🛠️', 'garden': '🌿', 'internet': '🌐',
+    'security': '🔒', 'househelp': '🧑‍🔧', 'carpets': '🧶', 'bedding': '🧺',
+    'other': '📦',
+}
+
+
+class BusinessDirectoryAdapter:
+    """
+    Wraps a Business instance so it can render inside the same directory
+    card loop as Mover/FurnitureVendor in moving_essentials.html without
+    duplicating template markup — just proxies unmatched attributes
+    straight through to the underlying Business.
+    """
+    def __init__(self, business):
+        self._b = business
+        self.distance_km = None
+
+    def __getattr__(self, name):
+        return getattr(self._b, name)
+
+    @property
+    def pk(self):
+        return self._b.pk
+
+    @property
+    def image(self):
+        return self._b.logo or self._b.cover_image
+
+    @property
+    def location(self):
+        parts = [p for p in [self._b.estate, self._b.town, self._b.county] if p]
+        return ', '.join(parts) if parts else (self._b.county or 'Kenya')
+
+    @property
+    def is_major_sponsor(self):
+        return self._b.is_featured
+
+    @property
+    def detail_url(self):
+        return reverse('business_detail', args=[self._b.slug])
+
+
 def moving_essentials(request):
+    from django.db.models import Q
+    from business.models import BusinessProduct, CATEGORY_CHOICES as BUSINESS_CATEGORY_CHOICES
+
     county = request.GET.get('county', '').strip()
     category = request.GET.get('category', '').strip()
     user_lat = request.GET.get('lat')
@@ -296,18 +346,38 @@ def moving_essentials(request):
     vendors_qs = FurnitureVendor.objects.filter(is_approved=True).prefetch_related(
         Prefetch('products', queryset=FurnitureProduct.objects.filter(is_active=True))
     )
+    businesses_qs = Business.objects.filter(is_approved=True, is_active=True).select_related('owner').prefetch_related(
+        Prefetch('products', queryset=BusinessProduct.objects.filter(is_available=True))
+    )
 
     if county:
         movers_qs = movers_qs.filter(service_counties__icontains=county)
         vendors_qs = vendors_qs.filter(service_counties__icontains=county)
+        businesses_qs = businesses_qs.filter(
+            Q(service_counties__icontains=county) | Q(county__icontains=county)
+        )
 
     if category and category != 'movers':
         vendors_qs = vendors_qs.filter(category=category)
+        businesses_qs = businesses_qs.filter(category=category)
     elif category == 'movers':
         vendors_qs = vendors_qs.none()
+        businesses_qs = businesses_qs.filter(category='movers')
 
     movers = list(movers_qs) if category in ('', 'movers') else []
+    for m in movers:
+        m.detail_url = reverse('mover_detail', args=[m.pk])
+
     vendors = list(vendors_qs) if category != 'movers' else []
+    for v in vendors:
+        v.detail_url = reverse('furniture_vendor_detail', args=[v.pk])
+
+    for b in businesses_qs:
+        adapter = BusinessDirectoryAdapter(b)
+        if b.category == 'movers':
+            movers.append(adapter)
+        else:
+            vendors.append(adapter)
 
     if user_lat and user_lng:
         for obj in movers + vendors:
@@ -320,22 +390,28 @@ def moving_essentials(request):
         movers.sort(key=lambda o: (not o.is_major_sponsor, -o.created_at.timestamp()))
         vendors.sort(key=lambda o: (not o.is_major_sponsor, -o.created_at.timestamp()))
 
-    category_counts = (
-        FurnitureVendor.objects.filter(is_approved=True)
-        .values('category').annotate(count=Count('id'))
-    )
-    counts_by_cat = {c['category']: c['count'] for c in category_counts}
-    icons = ['🛋️', '🪟', '📺', '🍽️', '🛏️', '🛁', '🧹', '💡', '🛠️', '🌿']
-    categories = [
-        {'key': k, 'label': label, 'count': counts_by_cat.get(k, 0), 'icon': icon}
-        for (k, label), icon in zip(FurnitureVendor.CATEGORY_CHOICES, icons)
-    ]
-    categories.insert(0, {
-        'key': 'movers',
-        'label': 'Movers',
-        'count': Mover.objects.filter(is_approved=True).count(),
-        'icon': '🚚',
-    })
+    vendor_category_counts = {
+        c['category']: c['count'] for c in
+        FurnitureVendor.objects.filter(is_approved=True).values('category').annotate(count=Count('id'))
+    }
+    business_category_counts = {
+        c['category']: c['count'] for c in
+        Business.objects.filter(is_approved=True, is_active=True).values('category').annotate(count=Count('id'))
+    }
+    mover_count = Mover.objects.filter(is_approved=True).count() + business_category_counts.get('movers', 0)
+
+    categories = []
+    for key, label in BUSINESS_CATEGORY_CHOICES:
+        if key == 'movers':
+            count = mover_count
+        else:
+            count = vendor_category_counts.get(key, 0) + business_category_counts.get(key, 0)
+        categories.append({
+            'key': key, 'label': label, 'count': count,
+            'icon': DIRECTORY_CATEGORY_ICONS.get(key, '📦'),
+        })
+    # Movers first, then everything else in the order defined on the Business model
+    categories.sort(key=lambda c: (c['key'] != 'movers',))
 
     return render(request, 'core/moving_essentials.html', {
         'movers': movers,
@@ -682,7 +758,15 @@ def admin_dashboard(request):
     top_residences = Residence.objects.filter(approved=True).order_by('-views_count')[:5]
     all_users = User.objects.all().order_by('-date_joined')[:100]
 
+    # Businesses (from the business app's self-serve onboarding flow) that
+    # finished onboarding and are waiting on admin approval before they can
+    # appear on the public /moving-essentials/ directory.
+    pending_businesses = Business.objects.filter(
+        is_approved=False, onboarding_complete=True
+    ).select_related('owner').order_by('-created_at')
+
     context = {
+        'pending_businesses':   pending_businesses,
         'pending_residences':   pending_residences,
         'approved_residences':  approved_residences,
         'approved_count':       residence_stats['approved_count'],
@@ -824,6 +908,35 @@ def check_not_suspended(request):
 def reject_residence(request, pk):
     residence = get_object_or_404(Residence, pk=pk)
     residence.delete()
+    return redirect('admin_dashboard')
+
+
+@staff_or_help_admin_required
+def approve_business(request, pk):
+    business = get_object_or_404(Business, pk=pk)
+    business.is_approved = True
+    business.is_active = True
+    business.save(update_fields=['is_approved', 'is_active'])
+    Notification.objects.create(
+        user=business.owner,
+        message=f'🎉 Your business "{business.name}" has been approved and is now live on the directory.'
+    )
+    messages.success(request, f'"{business.name}" approved and is now live.')
+    return redirect('admin_dashboard')
+
+
+@staff_or_help_admin_required
+def reject_business(request, pk):
+    business = get_object_or_404(Business, pk=pk)
+    business.verification_status = 'rejected'
+    business.is_approved = False
+    business.is_active = False
+    business.save(update_fields=['verification_status', 'is_approved', 'is_active'])
+    Notification.objects.create(
+        user=business.owner,
+        message=f'Your business "{business.name}" listing was not approved. Please review your details and contact support if you have questions.'
+    )
+    messages.success(request, f'"{business.name}" rejected.')
     return redirect('admin_dashboard')
 
 
@@ -1979,6 +2092,23 @@ def furniture_vendor_detail(request, pk):
             return redirect('furniture_vendor_detail', pk=vendor.pk)
     reviews = vendor.reviews.select_related('user')[:20]
     return render(request, 'core/furniture_vendor_detail.html', {'vendor': vendor, 'reviews': reviews})
+
+
+def business_detail(request, slug):
+    from business.models import BusinessReview
+    business = get_object_or_404(Business, slug=slug, is_approved=True, is_active=True)
+    if request.method == 'POST' and request.user.is_authenticated:
+        rating = request.POST.get('rating')
+        comment = request.POST.get('comment', '').strip()
+        if rating:
+            BusinessReview.objects.update_or_create(
+                business=business, user=request.user,
+                defaults={'rating': int(rating), 'comment': comment}
+            )
+            messages.success(request, "Thanks for your review!")
+            return redirect('business_detail', slug=business.slug)
+    reviews = business.reviews.select_related('user')[:20]
+    return render(request, 'core/business_detail.html', {'business': business, 'reviews': reviews})
 
 def robots_txt(request):
     base_url = request.build_absolute_uri('/')[:-1]

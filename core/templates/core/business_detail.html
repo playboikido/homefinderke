@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% block title %}{{ business.name }} — HomeFinder Kenya{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+  :root {
+    --bd-primary: #0F766E; --bd-primary-dk: #0D5E58; --bd-secondary: #14B8A6;
+    --bd-bg: #F0FDFA; --bd-fg: #134E4A; --bd-surface: #FFFFFF; --bd-muted: #E8F0F3;
+    --bd-border: #99F6E4; --bd-text: #1C4A47; --bd-subtle: #5EAFA8;
+    --bd-font-body: 'Fira Sans', system-ui, sans-serif; --bd-font-mono: 'Fira Code', monospace;
+    --bd-r: 12px; --bd-r-lg: 18px; --bd-r-xl: 24px;
+    --bd-shadow: 0 4px 12px rgba(15,118,110,0.10); --bd-shadow-lg: 0 12px 32px rgba(15,118,110,0.16);
+  }
+  .bd-wrap { font-family: var(--bd-font-body) !important; background: var(--bd-bg) !important; min-height: 100vh; color: var(--bd-text) !important; }
+  .bd-inner { max-width: 820px; margin: 0 auto; padding: 0 24px 64px; }
+  .bd-hero-outer { padding: 18px 24px 0; }
+  .bd-hero { max-width: 820px; margin: 0 auto; position: relative; min-height: 300px; border-radius: var(--bd-r-xl); overflow: hidden; background: linear-gradient(135deg, var(--bd-fg), var(--bd-primary)); box-shadow: var(--bd-shadow-lg); }
+  .bd-hero-img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; }
+  .bd-hero::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(4,22,20,0.15) 0%, rgba(4,22,20,0.9) 100%); }
+  .bd-hero-topbar { position:absolute; z-index:3; inset:14px 14px auto 14px; display:flex; justify-content:space-between; align-items:center; }
+  .bd-back-pill { display:inline-flex; align-items:center; gap:6px; padding:7px 14px; border-radius:var(--bd-r); font-size:0.78rem; font-weight:600; background:rgba(255,255,255,0.14); color:#fff; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; text-decoration:none; }
+  .bd-back-pill:hover { background:rgba(255,255,255,0.24); }
+  .bd-hero-content { position:absolute; z-index:3; left:0; right:0; bottom:0; padding: 22px 26px; }
+  .bd-hero-namerow { display:flex; align-items:center; gap:16px; margin-bottom:14px; padding-bottom:14px; border-bottom: 1px solid rgba(255,255,255,0.16); }
+  .bd-logo { width:60px; height:60px; border-radius:14px; object-fit:cover; border:2px solid rgba(255,255,255,0.35); flex-shrink:0; }
+  .bd-logo-fallback { width:60px; height:60px; border-radius:14px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--bd-font-mono); font-size:1.5rem; font-weight:700; flex-shrink:0; }
+  .bd-name { font-family: var(--bd-font-mono); font-size: 1.3rem; font-weight:700; color:#fff; }
+  .bd-meta { color: rgba(255,255,255,0.75); font-size:0.85rem; margin-top:4px; }
+  .bd-hero-contact { display:flex; gap:10px; flex-wrap:wrap; }
+  .bd-hero-contact-btn { display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:var(--bd-r); font-size:0.85rem; font-weight:600; border:none; cursor:pointer; text-decoration:none; transition: transform 150ms ease; }
+  .bd-hero-contact-btn:hover { transform: translateY(-1px); }
+  .bd-hc-wa { background:#D1FAE5; color:#065F46; }
+  .bd-hc-phone { background:#DBEAFE; color:#0369A1; }
+  .bd-hc-web { background:rgba(255,255,255,0.92); color:var(--bd-fg); }
+  .bd-toprow { display:flex; justify-content:flex-end; margin-top: 18px; }
+  .bd-share-btn { display:inline-flex; align-items:center; gap:8px; padding:9px 18px; border-radius:var(--bd-r); font-size:0.82rem; font-weight:600; background:var(--bd-surface); color:var(--bd-fg); border:1.5px solid var(--bd-border); cursor:pointer; box-shadow: var(--bd-shadow); transition: all 180ms ease; }
+  .bd-share-btn:hover { background:var(--bd-muted); transform: translateY(-1px); box-shadow: var(--bd-shadow-lg); }
+  .bd-card { background: var(--bd-surface) !important; border-radius: var(--bd-r-lg); border:1.5px solid var(--bd-border); box-shadow: var(--bd-shadow); padding: 24px; margin-top: 16px; transition: box-shadow 200ms ease; }
+  .bd-card:hover { box-shadow: var(--bd-shadow-lg); }
+  .bd-section-title { font-family: var(--bd-font-mono); font-size: 0.9rem; font-weight:700; color: var(--bd-fg) !important; margin-bottom: 14px; display:flex; align-items:center; gap:10px; }
+  .bd-section-title::before { content:''; width:4px; height:16px; background: var(--bd-primary); border-radius:2px; display:block; }
+  .bd-gallery { display:grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .bd-gallery img { width:100%; height:120px; object-fit:cover; border-radius: var(--bd-r); border:1.5px solid var(--bd-border); cursor:pointer; transition: transform 200ms ease, border-color 200ms ease; }
+  .bd-gallery img:hover { transform: translateY(-3px); border-color: var(--bd-primary); }
+  .bd-products { display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
+  .bd-product { border:1.5px solid var(--bd-border); border-radius: var(--bd-r); padding: 12px; }
+  .bd-product img { width:100%; height:100px; object-fit:cover; border-radius: 8px; margin-bottom:8px; }
+  .bd-product-name { font-weight:600; font-size:0.85rem; }
+  .bd-product-price { font-family: var(--bd-font-mono); color: var(--bd-primary); font-weight:700; font-size:0.85rem; margin-top:4px; }
+  .bd-lightbox { display:none; position:fixed; inset:0; background:rgba(4,22,20,0.92); z-index:1000; align-items:center; justify-content:center; padding:30px; }
+  .bd-lightbox.open { display:flex; }
+  .bd-lightbox img { max-width:100%; max-height:100%; border-radius:var(--bd-r-lg); object-fit:contain; }
+  .bd-lightbox-close { position:absolute; top:20px; right:24px; background:rgba(255,255,255,0.14); border:1.5px solid rgba(255,255,255,0.3); color:#fff; width:42px; height:42px; border-radius:50%; font-size:1.5rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+</style>
+
+<div class="bd-wrap">
+  <div class="bd-hero-outer">
+    <div class="bd-hero">
+      {% if business.gallery_images.all %}
+        <img class="bd-hero-img" src="{{ business.gallery_images.first.image.url }}" alt="{{ business.name }}">
+      {% elif business.cover_image %}
+        <img class="bd-hero-img" src="{{ business.cover_image.url }}" alt="{{ business.name }}">
+      {% elif business.logo %}
+        <img class="bd-hero-img" src="{{ business.logo.url }}" alt="{{ business.name }}">
+      {% endif %}
+      <div class="bd-hero-topbar">
+        <a href="javascript:history.back()" class="bd-back-pill" aria-label="Go back">← Back</a>
+        {% if business.is_featured %}<span class="bd-back-pill">⭐ Sponsored</span>{% endif %}
+      </div>
+      <div class="bd-hero-content">
+        <div class="bd-hero-namerow">
+          {% if business.logo %}
+            <img src="{{ business.logo.url }}" alt="{{ business.name }}" class="bd-logo">
+          {% else %}
+            <div class="bd-logo-fallback">{{ business.name|slice:":1"|upper }}</div>
+          {% endif %}
+          <div>
+            <div class="bd-name">{{ business.name }}</div>
+            <div class="bd-meta">{{ business.get_category_display }}{% if business.town %} · {{ business.town }}{% if business.county %}, {{ business.county }}{% endif %}{% endif %}</div>
+          </div>
+        </div>
+        <div class="bd-hero-contact">
+          {% if business.whatsapp_number %}
+            <a href="https://wa.me/{{ business.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE." target="_blank" class="bd-hero-contact-btn bd-hc-wa">WhatsApp</a>
+          {% endif %}
+          {% if business.phone_number %}<a href="tel:{{ business.phone_number }}" class="bd-hero-contact-btn bd-hc-phone">Call</a>{% endif %}
+          {% if business.website %}<a href="{{ business.website }}" target="_blank" rel="noopener noreferrer" class="bd-hero-contact-btn bd-hc-web">Visit Website ↗</a>{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="bd-inner" style="padding-bottom:0;">
+      <div class="bd-toprow">
+        <button type="button" class="bd-share-btn" onclick="shareBusinessProfile()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Share
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bd-inner">
+    {% if business.description %}
+    <div class="bd-card">
+      <div class="bd-section-title">About</div>
+      <p style="font-size:0.9rem; line-height:1.7;">{{ business.description|linebreaksbr }}</p>
+    </div>
+    {% endif %}
+
+    {% if business.products.all %}
+    <div class="bd-card">
+      <div class="bd-section-title">Products & Services</div>
+      <div class="bd-products">
+        {% for product in business.products.all|slice:":12" %}
+          <div class="bd-product">
+            {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}
+            <div class="bd-product-name">{{ product.name }}</div>
+            {% if product.price %}<div class="bd-product-price">KSh {{ product.price|floatformat:"0" }}</div>{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% if business.gallery_images.all %}
+    <div class="bd-card">
+      <div class="bd-section-title">Gallery</div>
+      <div class="bd-gallery">
+        {% for photo in business.gallery_images.all %}
+          <img src="{{ photo.image.url }}" alt="{{ business.name }} photo" onclick="openBdLightbox({{ forloop.counter0 }})">
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bd-lightbox" id="bdLightbox" onclick="if(event.target===this) closeBdLightbox()">
+    <button type="button" class="bd-lightbox-close" onclick="closeBdLightbox()" aria-label="Close">&times;</button>
+    <img id="bdLightboxImg" src="" alt="Full size photo">
+  </div>
+</div>
+<script>
+  const bdGalleryPhotos = [{% for photo in business.gallery_images.all %}"{{ photo.image.url|escapejs }}",{% endfor %}];
+  let bdLightboxIndex = 0;
+  function openBdLightbox(index) {
+    bdLightboxIndex = index;
+    document.getElementById('bdLightboxImg').src = bdGalleryPhotos[bdLightboxIndex];
+    document.getElementById('bdLightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeBdLightbox() {
+    document.getElementById('bdLightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => {
+    if (!document.getElementById('bdLightbox').classList.contains('open')) return;
+    if (e.key === 'Escape') closeBdLightbox();
+    if (e.key === 'ArrowLeft') { bdLightboxIndex = (bdLightboxIndex - 1 + bdGalleryPhotos.length) % bdGalleryPhotos.length; document.getElementById('bdLightboxImg').src = bdGalleryPhotos[bdLightboxIndex]; }
+    if (e.key === 'ArrowRight') { bdLightboxIndex = (bdLightboxIndex + 1) % bdGalleryPhotos.length; document.getElementById('bdLightboxImg').src = bdGalleryPhotos[bdLightboxIndex]; }
+  });
+  function shareBusinessProfile() {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({ title: "{{ business.name|escapejs }}", url: url });
+    } else {
+      navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
+    }
+  }
+</script>
+<div class="bd-inner" style="margin-top:24px;">
+  <div style="background:var(--bd-surface);border-radius:var(--bd-r-lg);padding:20px;box-shadow:var(--bd-shadow);margin-bottom:16px;">
+    {% if business.is_open_now is not None %}
+      <span style="font-weight:700;padding:4px 12px;border-radius:999px;font-size:0.85rem;{% if business.is_open_now %}background:#DCFCE7;color:#15803D;{% else %}background:#FEE2E2;color:#B91C1C;{% endif %}">
+        {% if business.is_open_now %}● Open now{% else %}● Closed now{% endif %}
+      </span>
+    {% endif %}
+    {% if business.average_rating %}
+      <span style="margin-left:12px;font-weight:700;color:var(--bd-primary);">★ {{ business.average_rating }} ({{ business.review_count }} review{{ business.review_count|pluralize }})</span>
+    {% endif %}
+  </div>
+
+  <h3 style="font-family:var(--bd-font-mono);color:var(--bd-fg);margin-bottom:12px;">Reviews</h3>
+  {% for r in reviews %}
+    <div style="background:var(--bd-surface);border-radius:var(--bd-r);padding:14px;margin-bottom:10px;box-shadow:var(--bd-shadow);">
+      <strong>{{ r.user.username }}</strong> — {{ r.rating }}★
+      {% if r.comment %}<p style="margin-top:6px;">{{ r.comment }}</p>{% endif %}
+      {% if r.reply %}
+        <div style="margin-top:8px;padding:10px;background:var(--bd-muted);border-radius:8px;font-size:0.85rem;">
+          <strong>{{ business.name }} replied:</strong> {{ r.reply }}
+        </div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p style="color:var(--bd-subtle);">No reviews yet.</p>
+  {% endfor %}
+
+  {% if user.is_authenticated %}
+  <form method="post" style="background:var(--bd-surface);border-radius:var(--bd-r-lg);padding:18px;margin-top:16px;box-shadow:var(--bd-shadow);">
+    {% csrf_token %}
+    <label style="font-weight:700;display:block;margin-bottom:8px;">Leave a review</label>
+    <select name="rating" required style="padding:8px;border-radius:8px;margin-bottom:10px;">
+      <option value="">Rating</option>
+      {% for i in "12345" %}<option value="{{ i }}">{{ i }} star{{ i|pluralize }}</option>{% endfor %}
+    </select>
+    <textarea name="comment" placeholder="Optional comment" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--bd-border);margin-bottom:10px;"></textarea>
+    <button type="submit" style="background:var(--bd-primary);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:700;">Submit Review</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

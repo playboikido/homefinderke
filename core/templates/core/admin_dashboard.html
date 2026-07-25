@@ -516,18 +516,6 @@
         <p class="db-hero-sub">Manage listings, resolve reports, and keep HomeFinder KE running smoothly.</p>
       </div>
       <div style="display:flex; gap:12px; flex-wrap:wrap;">
-        <a href="{% url 'add_mover' %}" class="db-btn" style="background:#0F766E; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
-          🚚 Add Mover
-        </a>
-        <a href="{% url 'add_mover_sponsor' %}" class="db-btn" style="background:#B45309; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
-          ⭐ Add Sponsored Mover
-        </a>
-        <a href="{% url 'add_furniture_vendor' %}" class="db-btn" style="background:#D97706; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
-          🛋️ Add Furniture Vendor
-        </a>
-        <a href="{% url 'add_furniture_vendor_sponsor' %}" class="db-btn" style="background:#92400E; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
-          ⭐ Add Sponsored Furniture Vendor
-        </a>
         <a href="{% url 'vendor_dashboard' %}" class="db-btn" style="background:#134E4A; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:600; font-size:0.9rem; display:inline-flex; align-items:center; gap:8px;">
           📋 Manage Movers & Vendors
         </a>
@@ -679,6 +667,75 @@
 
     <!-- Pending Approvals -->
     <div class="db-section">
+      <div class="db-section-head">
+        <h2 class="db-section-title">
+          Pending Business Approvals
+          {% if pending_businesses %}
+            <span class="db-badge">{{ pending_businesses|length }} awaiting</span>
+          {% endif %}
+        </h2>
+      </div>
+      <div class="db-divider"></div>
+
+      {% if pending_businesses %}
+      <div class="db-residences-grid">
+        {% for business in pending_businesses %}
+        <div class="db-res-card">
+          <div class="db-res-card-header">
+            <div class="db-res-name">{{ business.name }}</div>
+            <span class="db-pending-chip">Pending</span>
+          </div>
+
+          <div class="db-res-meta">
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+              <strong>Category</strong>
+              {{ business.get_category_display }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <strong>Location</strong>
+              {{ business.town }}{% if business.county %}, {{ business.county }}{% endif %}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <strong>Owner</strong>
+              {{ business.owner }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <strong>Submitted</strong>
+              {{ business.created_at|date:"d M Y" }}
+            </div>
+            <div class="db-res-meta-row">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1z"/></svg>
+              <strong>Plan</strong>
+              {{ business.get_plan_display }}
+            </div>
+          </div>
+
+          <div class="db-res-actions">
+            <a href="{% url 'approve_business' business.id %}" class="db-btn db-btn-approve">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              Approve
+            </a>
+            <a href="{% url 'reject_business' business.id %}" class="db-btn db-btn-reject">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Reject
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="db-empty">
+        <h3>No pending businesses</h3>
+        <p>New self-registered businesses will show up here for review.</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="db-section" style="margin-top: 40px;">
       <div class="db-section-head">
         <h2 class="db-section-title">
           Pending Approvals

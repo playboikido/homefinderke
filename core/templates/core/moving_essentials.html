@@ -136,11 +136,18 @@
   .hd-categories {
     max-width: 1100px;
     margin: 40px auto;
-    padding: 0 24px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    padding: 0 24px 12px;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     gap: 14px;
+    scroll-snap-type: x proximity;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
+  .hd-categories::-webkit-scrollbar { height: 6px; }
+  .hd-categories::-webkit-scrollbar-thumb { background: var(--hd-border); border-radius: 999px; }
   .hd-cat-card {
     background: var(--hd-card);
     border: 1px solid var(--hd-border);
@@ -151,12 +158,14 @@
     color: var(--hd-dark);
     box-shadow: var(--hd-shadow);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex: 0 0 130px;
+    scroll-snap-align: start;
   }
   .hd-cat-card:hover { transform: translateY(-4px); box-shadow: var(--hd-shadow-lg); }
   .hd-cat-card.active { border-color: var(--hd-primary); background: rgba(22,163,74,0.06); }
   .hd-cat-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
-  .hd-cat-name { font-weight: 700; font-size: 0.85rem; display: block; }
-  .hd-cat-count { font-size: 0.75rem; color: var(--hd-text-muted); }
+  .hd-cat-name { font-weight: 700; font-size: 0.85rem; display: block; white-space: nowrap; }
+  .hd-cat-count { font-size: 0.75rem; color: var(--hd-text-muted); white-space: nowrap; }
 
   .hd-body {
     max-width: 1100px;
@@ -371,7 +380,7 @@
             {% endwith %}
 
             <div class="hd-actions">
-              <a class="hd-btn hd-btn-primary" href="{% url 'mover_detail' mover.pk %}">View Details</a>
+              <a class="hd-btn hd-btn-primary" href="{{ mover.detail_url }}">View Details</a>
               {% if mover.whatsapp_number %}
                 <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ mover.whatsapp_number }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
               {% endif %}
@@ -411,7 +420,7 @@
             {% endwith %}
 
             <div class="hd-actions">
-              <a class="hd-btn hd-btn-primary" href="{% url 'furniture_vendor_detail' vendor.pk %}">View Details</a>
+              <a class="hd-btn hd-btn-primary" href="{{ vendor.detail_url }}">View Details</a>
               {% if vendor.whatsapp_number %}
                 <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ vendor.whatsapp_number }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
               {% endif %}

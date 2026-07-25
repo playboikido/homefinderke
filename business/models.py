@@ -17,6 +17,9 @@ CATEGORY_CHOICES = [
     ('garden', 'Garden & Landscaping'),
     ('internet', 'Internet Providers'),
     ('security', 'Security Companies'),
+    ('househelp', 'Househelp & Domestic Staff'),
+    ('carpets', 'Carpets & Rugs'),
+    ('bedding', 'Duvets & Blankets'),
     ('other', 'Other'),
 ]
 
