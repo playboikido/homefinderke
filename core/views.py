@@ -381,7 +381,9 @@ def moving_essentials(request):
 
     if user_lat and user_lng:
         for obj in movers + vendors:
-            obj.distance_km = haversine_km(user_lat, user_lng, obj.latitude, obj.longitude)
+            obj_lat = getattr(obj, 'latitude', None)
+            obj_lng = getattr(obj, 'longitude', None)
+            obj.distance_km = haversine_km(user_lat, user_lng, obj_lat, obj_lng)
         movers.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
         vendors.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
     else:

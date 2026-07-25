@@ -73,6 +73,7 @@
   }
   .hd-search-bar input {
     flex: 1;
+    min-width: 0;
     border: none;
     outline: none;
     padding: 12px 16px;
@@ -90,6 +91,8 @@
     font-weight: 700;
     font-family: var(--hd-font);
     cursor: pointer;
+    flex-shrink: 0;
+    white-space: nowrap;
     transition: background 0.2s ease;
   }
   .hd-search-bar button:hover { background: #128A3E; }
