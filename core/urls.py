@@ -191,7 +191,7 @@ urlpatterns = [
     path('add-furniture-vendor-sponsor/', views.add_furniture_vendor_sponsor, name='add_furniture_vendor_sponsor'),
     path('mover/<int:pk>/', views.mover_detail, name='mover_detail'),
     path('furniture-vendor/<int:pk>/', views.furniture_vendor_detail, name='furniture_vendor_detail'),
-    path('business/<slug:slug>/', views.business_detail, name='business_detail'),
+    path('business/', include('business.urls')),
     path('staff-tools/mover/<int:pk>/edit/', views.edit_mover, name='edit_mover'),
     path('staff-tools/mover/<int:pk>/delete/', views.delete_mover, name='delete_mover'),
     path('staff-tools/furniture-vendor/<int:pk>/edit/', views.edit_furniture_vendor, name='edit_furniture_vendor'),
