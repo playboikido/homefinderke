@@ -12,10 +12,10 @@
             <a href="{% url 'business:dashboard' %}" class="biz-nav-item {% if active_tab == 'dashboard' %}active{% endif %}"><span>📊</span> Dashboard</a>
             <a href="{% url 'business:edit' %}" class="biz-nav-item {% if active_tab == 'business' %}active{% endif %}"><span>🏢</span> My Business</a>
             <a href="{% url 'business:products' %}" class="biz-nav-item {% if active_tab == 'products' %}active{% endif %}"><span>🛍️</span> Products</a>
-            <span class="biz-nav-item biz-nav-disabled"><span>🖼️</span> Gallery <em style="opacity:.6;font-size:.7rem;">soon</em></span>
-            <span class="biz-nav-item biz-nav-disabled"><span>💬</span> Inquiries <em style="opacity:.6;font-size:.7rem;">🔒</em></span>
-            <span class="biz-nav-item biz-nav-disabled"><span>⭐</span> Reviews</span>
-            <span class="biz-nav-item biz-nav-disabled"><span>📈</span> Analytics</span>
+            <a href="{% url 'business:gallery' %}" class="biz-nav-item {% if active_tab == 'gallery' %}active{% endif %}"><span>🖼️</span> Gallery</a>
+            <a href="{% url 'business:inquiries' %}" class="biz-nav-item {% if active_tab == 'inquiries' %}active{% endif %}"><span>💬</span> Inquiries</a>
+            <a href="{% url 'business:reviews' %}" class="biz-nav-item {% if active_tab == 'reviews' %}active{% endif %}"><span>⭐</span> Reviews</a>
+            <a href="{% url 'business:analytics' %}" class="biz-nav-item {% if active_tab == 'analytics' %}active{% endif %}"><span>📈</span> Analytics</a>
             <a href="{% url 'business:plans' %}" class="biz-nav-item {% if active_tab == 'plans' %}active{% endif %}"><span>💳</span> Subscription</a>
             <span class="biz-nav-item biz-nav-disabled"><span>🧾</span> Payments <em style="opacity:.6;font-size:.7rem;">🔒</em></span>
             <span class="biz-nav-item biz-nav-disabled"><span>✅</span> Verification <em style="opacity:.6;font-size:.7rem;">soon</em></span>

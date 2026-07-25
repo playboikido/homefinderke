@@ -2100,20 +2100,53 @@ def furniture_vendor_detail(request, pk):
 
 
 def business_detail(request, slug):
-    from business.models import BusinessReview
+    from business.models import BusinessAnalyticsEvent, BusinessInquiry, BusinessReview
     business = get_object_or_404(Business, slug=slug, is_approved=True, is_active=True, is_paused_by_owner=False)
-    if request.method == 'POST' and request.user.is_authenticated:
-        rating = request.POST.get('rating')
-        comment = request.POST.get('comment', '').strip()
-        if rating:
-            BusinessReview.objects.update_or_create(
-                business=business, user=request.user,
-                defaults={'rating': int(rating), 'comment': comment}
-            )
-            messages.success(request, "Thanks for your review!")
+
+    if request.method == 'POST':
+        if request.POST.get('form_type') == 'inquiry':
+            message = request.POST.get('message', '').strip()
+            name = request.POST.get('customer_name', '').strip()
+            if message and name:
+                BusinessInquiry.objects.create(
+                    business=business,
+                    customer=request.user if request.user.is_authenticated else None,
+                    customer_name=name,
+                    customer_phone=request.POST.get('customer_phone', '').strip(),
+                    customer_email=request.POST.get('customer_email', '').strip(),
+                    message=message,
+                )
+                messages.success(request, "Message sent! The business will get back to you directly.")
             return redirect('business_detail', slug=business.slug)
+        elif request.user.is_authenticated:
+            rating = request.POST.get('rating')
+            comment = request.POST.get('comment', '').strip()
+            if rating:
+                BusinessReview.objects.update_or_create(
+                    business=business, user=request.user,
+                    defaults={'rating': int(rating), 'comment': comment}
+                )
+                messages.success(request, "Thanks for your review!")
+            return redirect('business_detail', slug=business.slug)
+
+    BusinessAnalyticsEvent.objects.create(
+        business=business, event_type='profile_view',
+        user=request.user if request.user.is_authenticated else None,
+    )
     reviews = business.reviews.select_related('user')[:20]
     return render(request, 'core/business_detail.html', {'business': business, 'reviews': reviews})
+
+
+def business_track_click(request, slug, event_type):
+    from business.models import BusinessAnalyticsEvent
+    if event_type in ('phone_click', 'whatsapp_click', 'website_click'):
+        business = Business.objects.filter(slug=slug, is_approved=True).first()
+        if business:
+            BusinessAnalyticsEvent.objects.create(
+                business=business, event_type=event_type,
+                user=request.user if request.user.is_authenticated else None,
+            )
+    return HttpResponse(status=204)
 
 def robots_txt(request):
     base_url = request.build_absolute_uri('/')[:-1]

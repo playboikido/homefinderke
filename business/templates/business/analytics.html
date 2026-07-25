@@ -1,0 +1,37 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Analytics — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Analytics</h1>
+    <p class="biz-subtitle">Last 30 days.{% if not advanced %} Upgrade to Premium for advanced breakdowns and full product rankings.{% endif %}</p>
+
+    <div class="biz-grid">
+        <div class="biz-stat"><div class="biz-value">{{ breakdown.profile_view }}</div><div class="biz-label">Profile Views</div></div>
+        <div class="biz-stat"><div class="biz-value">{{ breakdown.phone_click }}</div><div class="biz-label">Phone Clicks</div></div>
+        <div class="biz-stat"><div class="biz-value">{{ breakdown.whatsapp_click }}</div><div class="biz-label">WhatsApp Clicks</div></div>
+        <div class="biz-stat"><div class="biz-value">{{ breakdown.website_click }}</div><div class="biz-label">Website Clicks</div></div>
+        <div class="biz-stat"><div class="biz-value">{{ breakdown.product_view }}</div><div class="biz-label">Product Views</div></div>
+        <div class="biz-stat"><div class="biz-value">{{ breakdown.saved }}</div><div class="biz-label">Times Saved</div></div>
+    </div>
+
+    <h2 style="margin-top:24px;">Top Products</h2>
+    {% for p in top_products %}
+    <div class="biz-inquiry">{{ p.name }} <span class="biz-empty">— {{ p.views_count }} view{{ p.views_count|pluralize }}</span></div>
+    {% empty %}
+    <p class="biz-empty">No product views yet.</p>
+    {% endfor %}
+
+    {% if advanced %}
+    <h2 style="margin-top:24px;">Visitor Locations</h2>
+    {% for loc in location_breakdown %}
+    <div class="biz-inquiry">{{ loc.location_hint }} <span class="biz-empty">— {{ loc.count }} visit{{ loc.count|pluralize }}</span></div>
+    {% empty %}
+    <p class="biz-empty">No location data yet.</p>
+    {% endfor %}
+    {% else %}
+    <div class="biz-unlock" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <p class="biz-empty">Visitor location breakdown is a Premium feature. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

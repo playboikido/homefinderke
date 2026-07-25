@@ -82,10 +82,10 @@
         </div>
         <div class="bd-hero-contact">
           {% if business.whatsapp_number %}
-            <a href="https://wa.me/{{ business.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE." target="_blank" class="bd-hero-contact-btn bd-hc-wa">WhatsApp</a>
+            <a href="https://wa.me/{{ business.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE." target="_blank" class="bd-hero-contact-btn bd-hc-wa" onclick="bdTrack('whatsapp_click')">WhatsApp</a>
           {% endif %}
-          {% if business.phone_number %}<a href="tel:{{ business.phone_number }}" class="bd-hero-contact-btn bd-hc-phone">Call</a>{% endif %}
-          {% if business.website %}<a href="{{ business.website }}" target="_blank" rel="noopener noreferrer" class="bd-hero-contact-btn bd-hc-web">Visit Website ↗</a>{% endif %}
+          {% if business.phone_number %}<a href="tel:{{ business.phone_number }}" class="bd-hero-contact-btn bd-hc-phone" onclick="bdTrack('phone_click')">Call</a>{% endif %}
+          {% if business.website %}<a href="{{ business.website }}" target="_blank" rel="noopener noreferrer" class="bd-hero-contact-btn bd-hc-web" onclick="bdTrack('website_click')">Visit Website ↗</a>{% endif %}
         </div>
       </div>
     </div>
@@ -167,6 +167,10 @@
       navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
     }
   }
+  function bdTrack(eventType) {
+    const url = "/biz/{{ business.slug|escapejs }}/track/" + eventType + "/";
+    if (navigator.sendBeacon) { navigator.sendBeacon(url); } else { fetch(url); }
+  }
 </script>
 <div class="bd-inner" style="margin-top:24px;">
   <div style="background:var(--bd-surface);border-radius:var(--bd-r-lg);padding:20px;box-shadow:var(--bd-shadow);margin-bottom:16px;">
@@ -180,7 +184,19 @@
     {% endif %}
   </div>
 
-  <h3 style="font-family:var(--bd-font-mono);color:var(--bd-fg);margin-bottom:12px;">Reviews</h3>
+  {% if user.is_authenticated %}
+  <form method="post" style="background:var(--bd-surface);border-radius:var(--bd-r-lg);padding:18px;margin-top:16px;box-shadow:var(--bd-shadow);">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="inquiry">
+    <label style="font-weight:700;display:block;margin-bottom:8px;">Send a message to {{ business.name }}</label>
+    <input type="text" name="customer_name" placeholder="Your name" value="{{ request.user.first_name|default:request.user.username }}" required style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--bd-border);margin-bottom:8px;">
+    <input type="text" name="customer_phone" placeholder="Phone (optional)" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--bd-border);margin-bottom:8px;">
+    <textarea name="message" placeholder="What would you like to ask?" required style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--bd-border);margin-bottom:10px;"></textarea>
+    <button type="submit" style="background:var(--bd-primary);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:700;">Send Message</button>
+  </form>
+  {% endif %}
+
+  <h3 style="font-family:var(--bd-font-mono);color:var(--bd-fg);margin-bottom:12px;margin-top:24px;">Reviews</h3>
   {% for r in reviews %}
     <div style="background:var(--bd-surface);border-radius:var(--bd-r);padding:14px;margin-bottom:10px;box-shadow:var(--bd-shadow);">
       <strong>{{ r.user.username }}</strong> — {{ r.rating }}★

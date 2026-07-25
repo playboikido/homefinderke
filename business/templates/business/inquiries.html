@@ -1,0 +1,46 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Inquiries — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Inquiries</h1>
+
+    {% if locked %}
+    <div class="biz-unlock">
+        <h2>💬 Inquiries is a Standard+ feature</h2>
+        <p class="biz-empty">Customers can still reach you directly by phone or WhatsApp on your listing. Upgrade to Standard to view and reply to inquiries submitted through your HomeFinder profile.</p>
+        <a href="{% url 'business:plans' %}" class="biz-btn biz-btn-primary" style="margin-top:12px;display:inline-block;">Upgrade Plan</a>
+    </div>
+    {% else %}
+    <p class="biz-subtitle">{{ inquiries.count }} inquir{{ inquiries.count|pluralize:"y,ies" }}</p>
+
+    {% for inquiry in inquiries %}
+    <div class="biz-inquiry">
+        <strong>{{ inquiry.customer_name }}</strong>
+        <span class="biz-empty"> — {{ inquiry.created_at|date:"d M Y, H:i" }}</span>
+        {% if inquiry.status == 'new' %}<span class="biz-badge biz-badge-pending" style="margin-left:8px;">New</span>{% endif %}
+        {% if inquiry.product %}<div class="biz-empty">Re: {{ inquiry.product.name }}</div>{% endif %}
+        <p style="margin-top:6px;">{{ inquiry.message }}</p>
+        <div class="biz-empty">
+            {% if inquiry.customer_phone %}📞 {{ inquiry.customer_phone }}{% endif %}
+            {% if inquiry.customer_email %} · ✉️ {{ inquiry.customer_email }}{% endif %}
+        </div>
+
+        {% if inquiry.reply %}
+        <div style="margin-top:10px;padding:10px 14px;background:var(--muted);border-radius:10px;font-size:0.85rem;">
+            <strong>You replied:</strong> {{ inquiry.reply }}
+        </div>
+        {% else %}
+        <form method="POST" style="margin-top:10px;display:flex;gap:8px;">
+            {% csrf_token %}
+            <input type="hidden" name="inquiry_id" value="{{ inquiry.id }}">
+            <input type="text" name="reply" placeholder="Write a reply..." style="flex:1;">
+            <button type="submit" class="biz-btn biz-btn-primary">Reply</button>
+        </form>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p class="biz-empty">No inquiries yet.</p>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

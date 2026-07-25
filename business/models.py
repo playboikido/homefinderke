@@ -42,11 +42,11 @@ PLAN_LIMITS = {
 # querysets, and templates should all check business.has_feature('x')
 # rather than comparing business.plan directly.
 PLAN_FEATURES = {
-    'starter':    {'analytics', 'reviews_view'},
-    'standard':   {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking'},
-    'premium':    {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking',
+    'starter':    {'analytics', 'reviews_view', 'gallery'},
+    'standard':   {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries'},
+    'premium':    {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics'},
-    'enterprise': {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking',
+    'enterprise': {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
                    'multi_location', 'account_manager'},
 }

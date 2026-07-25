@@ -1,0 +1,36 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Reviews — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Reviews</h1>
+    <p class="biz-subtitle">{{ business.review_count }} review{{ business.review_count|pluralize }} · {{ business.average_rating|default:"—" }}★ average</p>
+
+    {% for r in reviews %}
+    <div class="biz-inquiry">
+        <strong>{{ r.user.username }}</strong> — {{ r.rating }}★ <span class="biz-empty">{{ r.created_at|date:"d M Y" }}</span>
+        {% if r.comment %}<p style="margin-top:6px;">{{ r.comment }}</p>{% endif %}
+
+        {% if r.reply %}
+        <div style="margin-top:10px;padding:10px 14px;background:var(--muted);border-radius:10px;font-size:0.85rem;">
+            <strong>You replied:</strong> {{ r.reply }}
+        </div>
+        {% elif can_reply %}
+        <form method="POST" style="margin-top:10px;display:flex;gap:8px;">
+            {% csrf_token %}
+            <input type="hidden" name="review_id" value="{{ r.id }}">
+            <input type="text" name="reply" placeholder="Write a reply..." style="flex:1;">
+            <button type="submit" class="biz-btn biz-btn-primary">Reply</button>
+        </form>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p class="biz-empty">No reviews yet.</p>
+    {% endfor %}
+
+    {% if not can_reply and reviews %}
+    <div class="biz-unlock" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <p class="biz-empty">Replying to reviews is available on Standard plan and above. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

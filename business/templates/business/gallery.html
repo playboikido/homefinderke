@@ -1,0 +1,33 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Gallery — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Gallery</h1>
+    <p class="biz-subtitle">
+        {{ photos.count }}{% if limit %} / {{ limit }}{% endif %} photo{{ photos.count|pluralize }}
+        {% if limit %}on your {{ business.get_plan_display }} plan{% else %}· unlimited on your {{ business.get_plan_display }} plan{% endif %}
+    </p>
+
+    <form method="POST" enctype="multipart/form-data" style="display:flex;gap:10px;align-items:center;margin-bottom:24px;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="file" name="image" accept="image/*" required>
+        <input type="text" name="caption" placeholder="Caption (optional)" style="flex:1;min-width:160px;">
+        <button type="submit" class="biz-btn biz-btn-primary">Upload</button>
+    </form>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px;">
+        {% for photo in photos %}
+        <div style="position:relative;">
+            <img src="{{ photo.image.url }}" alt="{{ photo.caption }}" style="width:100%;height:120px;object-fit:cover;border-radius:10px;border:1px solid var(--border);">
+            <form method="POST" style="margin-top:6px;">
+                {% csrf_token %}
+                <input type="hidden" name="delete_id" value="{{ photo.id }}">
+                <button type="submit" class="biz-btn biz-btn-ghost" style="width:100%;font-size:0.75rem;padding:6px;" onclick="return confirm('Remove this photo?')">Remove</button>
+            </form>
+        </div>
+        {% empty %}
+        <p class="biz-empty">No photos yet — upload your first one above.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

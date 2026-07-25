@@ -331,6 +331,126 @@ def business_settings(request):
 
 
 @login_required
+def business_reviews(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    can_reply = business.has_feature('reviews_reply')
+    if request.method == 'POST' and can_reply:
+        review = business.reviews.filter(pk=request.POST.get('review_id')).first()
+        reply_text = request.POST.get('reply', '').strip()
+        if review and reply_text:
+            review.reply = reply_text
+            review.replied_at = timezone.now()
+            review.save(update_fields=['reply', 'replied_at'])
+            messages.success(request, "Reply posted.")
+        return redirect('business:reviews')
+
+    reviews = business.reviews.select_related('user').all()
+    return render(request, 'business/reviews.html', {
+        'business': business, 'reviews': reviews, 'can_reply': can_reply, 'active_tab': 'reviews',
+    })
+
+
+@login_required
+def business_analytics(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    now = timezone.now()
+    events = business.analytics_events.filter(created_at__gte=now - timedelta(days=30))
+    breakdown = {
+        'profile_view':   events.filter(event_type='profile_view').count(),
+        'phone_click':    events.filter(event_type='phone_click').count(),
+        'whatsapp_click': events.filter(event_type='whatsapp_click').count(),
+        'website_click':  events.filter(event_type='website_click').count(),
+        'product_view':   events.filter(event_type='product_view').count(),
+        'saved':          events.filter(event_type='saved').count(),
+    }
+    advanced = business.has_feature('advanced_analytics')
+    top_products = business.products.order_by('-views_count')[:10 if advanced else 3]
+    location_breakdown = None
+    if advanced:
+        location_breakdown = (
+            events.exclude(location_hint='').values('location_hint')
+            .annotate(count=Count('id')).order_by('-count')[:8]
+        )
+    return render(request, 'business/analytics.html', {
+        'business': business, 'breakdown': breakdown, 'advanced': advanced,
+        'top_products': top_products, 'location_breakdown': location_breakdown, 'active_tab': 'analytics',
+    })
+
+
+@login_required
+def business_gallery(request):
+    from .models import BusinessGalleryImage
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    limit = PLAN_LIMITS[business.plan]['gallery']
+    photos = business.gallery_images.all()
+
+    if request.method == 'POST':
+        if 'delete_id' in request.POST:
+            BusinessGalleryImage.objects.filter(pk=request.POST['delete_id'], business=business).delete()
+            messages.success(request, "Photo removed.")
+            return redirect('business:gallery')
+        image = request.FILES.get('image')
+        if image:
+            if limit is not None and photos.count() >= limit:
+                messages.error(request, f"Your {business.get_plan_display()} plan allows up to {limit} gallery photos. Upgrade to add more.")
+            else:
+                BusinessGalleryImage.objects.create(
+                    business=business, image=image, caption=request.POST.get('caption', '').strip()
+                )
+                messages.success(request, "Photo uploaded.")
+        return redirect('business:gallery')
+
+    return render(request, 'business/gallery.html', {
+        'business': business, 'photos': photos, 'limit': limit, 'active_tab': 'gallery',
+    })
+
+
+@login_required
+def business_inquiries(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if not business.has_feature('inquiries'):
+        return render(request, 'business/inquiries.html', {
+            'business': business, 'locked': True, 'active_tab': 'inquiries',
+        })
+
+    if request.method == 'POST':
+        inquiry = business.inquiries.filter(pk=request.POST.get('inquiry_id')).first()
+        reply_text = request.POST.get('reply', '').strip()
+        if inquiry and reply_text:
+            inquiry.reply = reply_text
+            inquiry.status = 'responded'
+            inquiry.responded_at = timezone.now()
+            inquiry.save(update_fields=['reply', 'status', 'responded_at'])
+            messages.success(request, "Reply sent.")
+        return redirect('business:inquiries')
+
+    inquiries = business.inquiries.select_related('product', 'customer').all()
+    return render(request, 'business/inquiries.html', {
+        'business': business, 'inquiries': inquiries, 'locked': False, 'active_tab': 'inquiries',
+    })
+
+
+@login_required
 def products_manage(request):
     business = _get_business_or_redirect(request)
     if not business:
