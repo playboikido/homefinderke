@@ -259,11 +259,11 @@
   <!-- ============ 1. STICKY BREADCRUMB ============ -->
   <div class="bd-breadcrumb-wrap">
     <nav class="bd-breadcrumb" aria-label="Breadcrumb">
-      <a href="{% url 'home' %}" class="bd-reset">Home</a>
+      <a href="/" class="bd-reset">Home</a>
       <span class="bd-crumb-sep">/</span>
-      <a href="{% url 'business_list' %}" class="bd-reset">Businesses</a>
+      <a href="javascript:history.back()" class="bd-reset">Businesses</a>
       <span class="bd-crumb-sep">/</span>
-      <a href="{% url 'business_list' %}?category={{ business.category }}" class="bd-reset">{{ business.get_category_display }}</a>
+      <span>{{ business.get_category_display }}</span>
       <span class="bd-crumb-sep">/</span>
       <span class="bd-crumb-current">{{ business.name }}</span>
     </nav>
@@ -638,11 +638,11 @@
     <div class="bd-card">
       <div class="bd-section-title">
         <span class="bd-section-title-left">You May Also Like</span>
-        <a href="{% url 'business_list' %}?category={{ business.category }}" class="bd-section-link">View All Businesses</a>
+        <a href="javascript:history.back()" class="bd-section-link">View All Businesses</a>
       </div>
       <div class="bd-nearby-scroll">
         {% for nb in nearby_businesses %}
-          <a href="{% url 'business_detail' nb.slug %}" class="bd-nearby-card bd-reset">
+          <a href="/biz/{{ nb.slug }}/" class="bd-nearby-card bd-reset">
             {% if nb.cover_image %}<img src="{{ nb.cover_image.url }}" alt="{{ nb.name }}" class="bd-nearby-img" loading="lazy">
             {% elif nb.logo %}<img src="{{ nb.logo.url }}" alt="{{ nb.name }}" class="bd-nearby-img" loading="lazy">{% endif %}
             <div class="bd-nearby-body">
