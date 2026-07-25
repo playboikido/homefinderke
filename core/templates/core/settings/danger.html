@@ -88,20 +88,4 @@
     </div>
   </form>
 </div>
-
-<div class="danger-card">
-  <div class="danger-title">Delete Account</div>
-  <div class="danger-desc">
-    <strong>This cannot be undone.</strong> Your account, profile, listings, favorites, saved searches, and all
-    associated data will be permanently deleted.
-  </div>
-  <form method="post" onsubmit="return confirm('This will PERMANENTLY delete your account and all your data. This cannot be undone. Are you absolutely sure?');">
-    {% csrf_token %}
-    <input type="hidden" name="action" value="delete_account">
-    <input type="password" name="password" class="password-field" placeholder="Enter your password to confirm" required>
-    <div>
-      <button type="submit" class="btn-danger">Permanently Delete My Account</button>
-    </div>
-  </form>
-</div>
 {% endblock %}
