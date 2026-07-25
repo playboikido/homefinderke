@@ -157,7 +157,6 @@ urlpatterns = [
         name='settings_danger'
         ),
 
-    path('owner/<int:user_id>/', views.owner_profile, name='owner_profile'),    
 
     path(
         'settings/export-data/',
