@@ -85,7 +85,7 @@ MIDDLEWARE = [
     'allauth.account.middleware.AccountMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'core.middleware.StaffShortSessionMiddleware',
-    #'core.middleware.RequireStaffMFAMiddleware',
+    'core.middleware.RequireStaffMFAMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'axes.middleware.AxesMiddleware',
 ]
