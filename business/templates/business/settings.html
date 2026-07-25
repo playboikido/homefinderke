@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Settings — {{ business.name }}{% endblock %}
+
+{% block extra_head %}
+{% include "business/_styles.html" %}
+<style>
+  .biz-toggle-row { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 0; border-bottom:1px solid var(--biz-border, #E5E7EB); }
+  .biz-toggle-row:last-child { border-bottom:none; }
+  .biz-toggle-label { font-weight:600; }
+  .biz-toggle-desc { font-size:0.82rem; color:#6B7280; margin-top:2px; }
+  .biz-switch { position:relative; width:44px; height:24px; flex-shrink:0; }
+  .biz-switch input { opacity:0; width:0; height:0; }
+  .biz-switch-track { position:absolute; inset:0; background:#D1D5DB; border-radius:999px; cursor:pointer; transition:background .2s; }
+  .biz-switch-track::before { content:''; position:absolute; width:18px; height:18px; left:3px; top:3px; background:#fff; border-radius:50%; transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,0.2); }
+  .biz-switch input:checked + .biz-switch-track { background:#0F766E; }
+  .biz-switch input:checked + .biz-switch-track::before { transform:translateX(20px); }
+  .biz-warning-box { background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:14px 16px; margin-top:6px; font-size:0.85rem; color:#92400E; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="biz-wrap">
+    <div class="biz-topbar">HomeFinderKE Business Workspace</div>
+    <div class="biz-back-link"><a href="{% url 'business:dashboard' %}">&larr; Back to Dashboard</a></div>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div class="biz-card">
+            <h1>Settings</h1>
+            <p class="biz-subtitle">Manage notifications and listing visibility for {{ business.name }}.</p>
+
+            <h2>Notifications</h2>
+            <div class="biz-toggle-row">
+                <div>
+                    <div class="biz-toggle-label">New review alerts</div>
+                    <div class="biz-toggle-desc">Get notified when a customer leaves a review.</div>
+                </div>
+                <label class="biz-switch">
+                    {{ form.notify_new_review }}
+                    <span class="biz-switch-track" onclick="this.previousElementSibling.click()"></span>
+                </label>
+            </div>
+            <div class="biz-toggle-row">
+                <div>
+                    <div class="biz-toggle-label">New inquiry alerts</div>
+                    <div class="biz-toggle-desc">Get notified when a customer contacts you.</div>
+                </div>
+                <label class="biz-switch">
+                    {{ form.notify_new_inquiry }}
+                    <span class="biz-switch-track" onclick="this.previousElementSibling.click()"></span>
+                </label>
+            </div>
+
+            <h2 style="margin-top:24px;">Listing Visibility</h2>
+            <div class="biz-toggle-row">
+                <div>
+                    <div class="biz-toggle-label">Pause my listing</div>
+                    <div class="biz-toggle-desc">Temporarily hide {{ business.name }} from the public directory. Your approval status and data are kept — flip this off to go live again instantly.</div>
+                </div>
+                <label class="biz-switch">
+                    {{ form.is_paused_by_owner }}
+                    <span class="biz-switch-track" onclick="this.previousElementSibling.click()"></span>
+                </label>
+            </div>
+            {% if business.is_paused_by_owner %}
+            <div class="biz-warning-box">⏸️ Your listing is currently paused and not visible on /moving-essentials/.</div>
+            {% endif %}
+
+            <h2 style="margin-top:24px;">Account</h2>
+            <div class="biz-toggle-row">
+                <div>
+                    <div class="biz-toggle-label">Password</div>
+                    <div class="biz-toggle-desc">Change the password for {{ business.owner.email|default:business.owner.username }}.</div>
+                </div>
+                <a href="{% url 'account_change_password' %}" class="biz-btn biz-btn-ghost">Change Password</a>
+            </div>
+
+            <div class="biz-form-actions">
+                <a href="{% url 'business:dashboard' %}" class="biz-btn biz-btn-ghost">Cancel</a>
+                <button type="submit" class="biz-btn biz-btn-primary">Save Settings</button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

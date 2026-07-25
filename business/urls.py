@@ -14,6 +14,7 @@ urlpatterns = [
     path('onboarding/verification/', views.onboarding_verification, name='onboarding_verification'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('edit/', views.business_edit, name='edit'),
+    path('settings/', views.business_settings, name='settings'),
     path('products/', views.products_manage, name='products'),
     path('plans/', views.plans_view, name='plans'),
     path('plans/upgrade/<slug:plan_slug>/', views.request_upgrade, name='request_upgrade'),

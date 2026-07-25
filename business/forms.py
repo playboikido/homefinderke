@@ -13,6 +13,17 @@ def validate_doc_size(value):
         raise forms.ValidationError(f"File must be under {MAX_DOC_SIZE_MB}MB.")
 
 
+class BusinessSettingsForm(forms.ModelForm):
+    class Meta:
+        model = Business
+        fields = ['is_paused_by_owner', 'notify_new_review', 'notify_new_inquiry']
+        widgets = {
+            'is_paused_by_owner': forms.CheckboxInput(),
+            'notify_new_review': forms.CheckboxInput(),
+            'notify_new_inquiry': forms.CheckboxInput(),
+        }
+
+
 class BusinessInfoForm(forms.ModelForm):
     REQUIRED_FIELDS = ['name', 'category', 'description', 'cover_image']
 

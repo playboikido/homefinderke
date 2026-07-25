@@ -346,7 +346,7 @@ def moving_essentials(request):
     vendors_qs = FurnitureVendor.objects.filter(is_approved=True).prefetch_related(
         Prefetch('products', queryset=FurnitureProduct.objects.filter(is_active=True))
     )
-    businesses_qs = Business.objects.filter(is_approved=True, is_active=True).select_related('owner').prefetch_related(
+    businesses_qs = Business.objects.filter(is_approved=True, is_active=True, is_paused_by_owner=False).select_related('owner').prefetch_related(
         Prefetch('products', queryset=BusinessProduct.objects.filter(is_available=True))
     )
 
@@ -381,9 +381,10 @@ def moving_essentials(request):
 
     if user_lat and user_lng:
         for obj in movers + vendors:
-            obj_lat = getattr(obj, 'latitude', None)
-            obj_lng = getattr(obj, 'longitude', None)
-            obj.distance_km = haversine_km(user_lat, user_lng, obj_lat, obj_lng)
+            try:
+                obj.distance_km = haversine_km(user_lat, user_lng, getattr(obj, 'latitude', None), getattr(obj, 'longitude', None))
+            except (TypeError, ValueError):
+                obj.distance_km = None
         movers.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
         vendors.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
     else:
@@ -442,7 +443,9 @@ def haversine_km(lat1, lng1, lat2, lng2):
     dlat = math.radians(lat2 - lat1)
     dlng = math.radians(lng2 - lng1)
     a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlng/2)**2
-    return R * 2 * math.asin(math.sqrt(a))
+    # Floating-point rounding can push `a` a hair above 1 for near-identical
+    # coordinates, which makes math.asin() raise "math domain error". Clamp it.
+    return R * 2 * math.asin(min(1.0, math.sqrt(max(0.0, a))))
 
 def residence_detail(request, pk):
     # Allow owners to preview their own unapproved residences
@@ -2098,7 +2101,7 @@ def furniture_vendor_detail(request, pk):
 
 def business_detail(request, slug):
     from business.models import BusinessReview
-    business = get_object_or_404(Business, slug=slug, is_approved=True, is_active=True)
+    business = get_object_or_404(Business, slug=slug, is_approved=True, is_active=True, is_paused_by_owner=False)
     if request.method == 'POST' and request.user.is_authenticated:
         rating = request.POST.get('rating')
         comment = request.POST.get('comment', '').strip()

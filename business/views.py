@@ -310,6 +310,27 @@ def business_edit(request):
 
 
 @login_required
+def business_settings(request):
+    from .forms import BusinessSettingsForm
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if request.method == 'POST':
+        form = BusinessSettingsForm(request.POST, instance=business)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Settings saved.")
+            return redirect('business:settings')
+    else:
+        form = BusinessSettingsForm(instance=business)
+
+    return render(request, 'business/settings.html', {'form': form, 'business': business})
+
+
+@login_required
 def products_manage(request):
     business = _get_business_or_redirect(request)
     if not business:

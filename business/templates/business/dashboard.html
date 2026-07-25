@@ -4,7 +4,7 @@
 {% block dash_content %}
 <div class="biz-dash-header">
     <div>
-        <h1>Good Morning, {{ business.owner.first_name|default:business.owner.username }} 👋</h1>
+        <h1>Good {% now "G" as h %}{% if h|add:0 < 12 %}morning{% elif h|add:0 < 18 %}afternoon{% else %}evening{% endif %}, {{ business.owner.first_name|default:business.owner.username }} 👋</h1>
         <p class="biz-empty">Here's what's happening with your business today.</p>
     </div>
     <div class="biz-dash-user">
