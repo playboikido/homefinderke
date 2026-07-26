@@ -228,6 +228,49 @@ def ai_assistant(request):
             else:
                 current_approved_residences = "No approved listings exist anywhere on the platform yet."
 
+        # 2b. DYNAMIC DATA FETCH — home-service businesses (movers, furniture vendors)
+        from core.models import Mover, FurnitureVendor
+        from django.db.models import Count, Avg
+        from django.utils import timezone
+
+        today = timezone.now().date()
+
+        movers_qs = (
+            Mover.objects.filter(is_approved=True)
+            .filter(Q(contract_expires_at__isnull=True) | Q(contract_expires_at__gte=today))
+            .annotate(review_count_ann=Count('reviews'), avg_rating_ann=Avg('reviews__rating'))
+        )
+        vendors_qs = (
+            FurnitureVendor.objects.filter(is_approved=True)
+            .filter(Q(contract_end_date__isnull=True) | Q(contract_end_date__gte=today))
+            .annotate(review_count_ann=Count('reviews'), avg_rating_ann=Avg('reviews__rating'))
+        )
+
+        if matched_place:
+            movers_qs = movers_qs.filter(service_counties__icontains=matched_place)
+            vendors_qs = vendors_qs.filter(
+                Q(service_counties__icontains=matched_place) | Q(location__icontains=matched_place)
+            )
+
+        # Sort order: sponsored first, then most-reviewed, then highest-rated
+        movers_qs = movers_qs.order_by('-is_major_sponsor', '-review_count_ann', '-avg_rating_ann')
+        vendors_qs = vendors_qs.order_by('-is_major_sponsor', '-review_count_ann', '-avg_rating_ann')
+
+        top_movers = list(movers_qs[:5])
+        top_vendors = list(vendors_qs[:5])
+
+        business_lines = []
+        for m in top_movers:
+            tag = " (SPONSORED)" if m.is_major_sponsor else ""
+            rating_txt = f", {m.avg_rating_ann:.1f}\u2605 ({m.review_count_ann} reviews)" if m.review_count_ann else ", no reviews yet"
+            business_lines.append(f"- [Mover] {m.name}{tag}: serves {m.service_counties or 'multiple areas'}{rating_txt}")
+        for v in top_vendors:
+            tag = " (SPONSORED)" if v.is_major_sponsor else ""
+            rating_txt = f", {v.avg_rating_ann:.1f}\u2605 ({v.review_count_ann} reviews)" if v.review_count_ann else ", no reviews yet"
+            business_lines.append(f"- [{v.get_category_display()}] {v.name}{tag}: {v.location}{rating_txt}")
+
+        current_business_directory = "\n".join(business_lines) if business_lines else "No approved home-service businesses are listed yet."
+
         SYSTEM_INSTRUCTION = f"""
 You are the AI for HomeFinder KE, a free, community-driven Kenyan residential directory.
 
@@ -237,8 +280,8 @@ CRITICAL TOKEN & LENGTH LAWS:
 
 STRICT OPERATING RULES:
 - HARD DATA CHECK: You must FIRST check the "LIVE APPROVED DATA" section below before answering any availability question. Do NOT hallucinate or say a house exists if its location or type is not listed in that section.
-- COMMUNITY HOOK: Always keep the spirit of "Help HomeFinder KE today by listing a vacancy so you can be helped tomorrow!" 
-- WHAT WE DO: Only showcase vacant plots and apartments, location navigation, and interior images. 
+- COMMUNITY HOOK: Always keep the spirit of "Help HomeFinder KE today by listing a vacancy so you can be- WHAT WE DO: Showcase vacant plots and apartments, location navigation, interior images, and the Home Directory — our listing of home-service businesses (movers, furniture vendors, cleaning services, and similar) shown under LIVE BUSINESS DIRECTORY DATA below.
+
 - WHAT WE DON'T DO: HomeFinder KE DOES NOT sell houses or plots. There is no buying, selling, or house payments here. Everything is 100% free.
 
 SEARCH MATCH LOGIC:
@@ -251,6 +294,15 @@ SEARCH MATCH LOGIC:
 
 LIVE APPROVED DATA (ONLY REFER TO THIS):
 [{current_approved_residences}]
+
+BUSINESS DIRECTORY MATCH LOGIC:
+- If the user asks about movers, furniture, cleaning, or any home-service business, refer ONLY to LIVE BUSINESS DIRECTORY DATA below. Never invent a business that isn't listed there.
+- The list is already sorted: sponsored businesses first, then by number of reviews, then by average rating. Present them in that same order — do not re-rank based on your own judgment.
+- If asked "which is the best mover" or similar, recommend the first 1-2 entries from the list as given, and briefly mention their rating/review count if present. If a business has no reviews yet, say so plainly rather than implying quality either way.
+- If no businesses are listed for what they asked, say so directly and point them to the Home Directory page — don't suggest outside companies.
+
+LIVE BUSINESS DIRECTORY DATA (ONLY REFER TO THIS):
+[{current_business_directory}]
 """
         if not check_submission_rate_limit(request, 'ai_chat_assistant', limit=20, window_seconds=3600):
             return JsonResponse({'error': 'Too many messages. Please slow down and try again shortly.'}, status=429)
