@@ -1,11 +1,18 @@
+import json
 from datetime import timedelta
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.db.models.functions import TruncDate
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from core.mpesa import initiate_stk_push
 
 from .forms import (
     BusinessContactForm, BusinessEditForm, BusinessInfoForm, BusinessLocationForm,
@@ -532,16 +539,76 @@ def request_upgrade(request, plan_slug):
         return redirect('business:dashboard')
 
     price = PLAN_PRICING[plan_slug]['monthly']
-    BusinessPayment.objects.create(
-        business=business,
-        purpose='subscription_monthly',
-        method='mpesa',
-        amount=price or 0,
-        status='pending',
+
+    if price is None:
+        # Enterprise / custom pricing — sales-assisted, no automated payment
+        BusinessPayment.objects.create(
+            business=business, purpose='subscription_monthly', method='mpesa',
+            amount=0, status='pending', plan=plan_slug,
+        )
+        messages.success(
+            request,
+            "Upgrade request received — our team will reach out shortly to confirm custom pricing.",
+        )
+        return redirect('business:dashboard')
+
+    if not business.phone_number:
+        messages.error(request, "Please add a phone number to your business profile before upgrading.")
+        return redirect('business:edit')
+
+    payment = BusinessPayment.objects.create(
+        business=business, purpose='subscription_monthly', method='mpesa',
+        amount=price, status='pending', plan=plan_slug,
     )
-    messages.success(
-        request,
-        f"Upgrade request for {dict(PLAN_CHOICES)[plan_slug]} received — our team will reach out shortly "
-        f"by phone or WhatsApp to complete payment{' (custom pricing — we\u2019ll confirm the amount with you)' if price is None else ''}.",
+
+    result = initiate_stk_push(
+        business.phone_number,
+        price,
+        callback_url=settings.MPESA_BUSINESS_CALLBACK_URL,
+        account_reference=f"HFKE-{business.slug}"[:20],
+        transaction_desc=f"{dict(PLAN_CHOICES)[plan_slug]} plan upgrade",
     )
+
+    if result.get('ResponseCode') == '0':
+        payment.checkout_request_id = result.get('CheckoutRequestID', '')
+        payment.merchant_request_id = result.get('MerchantRequestID', '')
+        payment.save(update_fields=['checkout_request_id', 'merchant_request_id'])
+        messages.success(request, "Check your phone and enter your M-Pesa PIN to complete the upgrade.")
+    else:
+        payment.status = 'failed'
+        payment.save(update_fields=['status'])
+        messages.error(request, result.get('errorMessage', 'Could not start the payment. Please try again.'))
+
     return redirect('business:dashboard')
+
+
+@csrf_exempt
+@require_POST
+def business_mpesa_callback(request):
+    data = json.loads(request.body)
+    result = data.get('Body', {}).get('stkCallback', {})
+    checkout_id = result.get('CheckoutRequestID')
+
+    try:
+        payment = BusinessPayment.objects.get(checkout_request_id=checkout_id)
+        if result.get('ResultCode') == 0:
+            payment.status = 'completed'
+            items = result.get('CallbackMetadata', {}).get('Item', [])
+            for item in items:
+                if item.get('Name') == 'MpesaReceiptNumber':
+                    payment.mpesa_receipt = item.get('Value', '')
+            payment.save()
+
+            business = payment.business
+            business.plan = payment.plan
+            business.save(update_fields=['plan', 'is_featured'])
+            BusinessSubscription.objects.update_or_create(
+                business=business, defaults={'plan': payment.plan, 'status': 'active'},
+            )
+        else:
+            payment.status = 'failed'
+            payment.save(update_fields=['status'])
+    except BusinessPayment.DoesNotExist:
+        pass
+
+    return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})

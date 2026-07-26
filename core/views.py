@@ -502,32 +502,27 @@ def residence_detail(request, pk):
         county=residence.county
     ).exclude(pk=residence.pk).order_by('-is_premium', '-views_count')[:4]
 
+    # Only Premium (paying/sponsored) businesses are showcased on residence pages.
+    # Free/unpaid directory listings no longer appear here — that's now exclusive
+    # to the Home Directory page itself.
     sponsored_movers = list(
         Mover.objects.filter(is_approved=True, is_major_sponsor=True)
+        .filter(service_counties__icontains=residence.county)
         .prefetch_related(
             Prefetch('products', queryset=MoverProduct.objects.filter(is_active=True))
         )
-        .order_by('-created_at')[:4]
-    )
-    regular_movers = list(
-        Mover.objects.filter(is_approved=True, is_major_sponsor=False)
-        .filter(service_counties__icontains=residence.county)
-        .order_by('-created_at')[:5]
+        .order_by('-created_at')[:6]
     )
     sponsored_vendors = list(
         FurnitureVendor.objects.filter(is_approved=True, is_major_sponsor=True)
+        .filter(service_counties__icontains=residence.county)
         .prefetch_related(
             Prefetch('products', queryset=FurnitureProduct.objects.filter(is_active=True))
         )
-        .order_by('-created_at')[:4]
+        .order_by('-created_at')[:6]
     )
-    regular_vendors = list(
-        FurnitureVendor.objects.filter(is_approved=True, is_major_sponsor=False)
-        .filter(service_counties__icontains=residence.county)
-        .order_by('-created_at')[:5]
-    )
-    movers = sponsored_movers + regular_movers
-    vendors = sponsored_vendors + regular_vendors
+    movers = sponsored_movers
+    vendors = sponsored_vendors
 
     share_url = request.build_absolute_uri()
     share_text = f"Check out {residence.name} on HomeFinder Kenya: {share_url}"
@@ -538,9 +533,7 @@ def residence_detail(request, pk):
         'movers': movers,
         'vendors': vendors,
         'sponsored_movers': sponsored_movers,
-        'regular_movers': regular_movers,
         'sponsored_vendors': sponsored_vendors,
-        'regular_vendors': regular_vendors,
         'share_url': share_url,
         'share_text': share_text,
     }

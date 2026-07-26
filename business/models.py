@@ -377,6 +377,10 @@ class BusinessPayment(models.Model):
     currency = models.CharField(max_length=3, default='KES')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     reference = models.CharField(max_length=100, blank=True)
+    plan = models.CharField(max_length=20, choices=PLAN_CHOICES, blank=True, help_text="Plan to activate on successful payment")
+    checkout_request_id = models.CharField(max_length=100, blank=True)
+    merchant_request_id = models.CharField(max_length=100, blank=True)
+    mpesa_receipt = models.CharField(max_length=50, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
