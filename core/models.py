@@ -418,6 +418,7 @@ class Profile(models.Model):
     hide_email = models.BooleanField(default=True)
 
     phone_verified = models.BooleanField(default=False)
+    terms_accepted_at = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.profile_picture and hasattr(self.profile_picture, 'file'):
