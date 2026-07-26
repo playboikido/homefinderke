@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
@@ -86,6 +87,17 @@ def _ai_fraud_check(residence):
     except Exception as e:
         print("AI FRAUD CHECK ERROR:", e)
         return False, ''
+
+def get_started(request):
+    return render(request, 'core/get_started.html')
+
+
+def set_account_intent(request, account_type):
+    if account_type not in ('resident', 'business'):
+        return redirect('get_started')
+    request.session['intended_account_type'] = account_type
+    return redirect(f"{reverse('account_signup')}?type={account_type}")
+
 
 def _ai_image_check(image_field):
     """Use an NVIDIA vision model to check if the image is a real property photo."""

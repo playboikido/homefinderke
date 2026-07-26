@@ -177,16 +177,24 @@
 
         {% for field in form %}
             {% if field.name == 'account_type' %}
-                <div class="form-group" style="margin-bottom:20px;">
-                    <label style="font-weight:600; display:block; margin-bottom:8px;">{{ field.label }}</label>
-                    <div style="display:flex; gap:20px;">
-                        {% for choice in field %}
-                            <label style="display:flex; align-items:center; gap:6px; font-weight:400;">
-                                {{ choice.tag }} {{ choice.choice_label }}
-                            </label>
-                        {% endfor %}
+                {% if request.GET.type %}
+                    <input type="hidden" name="account_type" value="{{ request.GET.type }}">
+                    <p style="margin-bottom:20px; font-size:0.9rem; color: var(--fg-muted, #555);">
+                        Signing up as: <strong>{{ request.GET.type|title }}</strong>
+                        &middot; <a href="{% url 'get_started' %}">not you? change</a>
+                    </p>
+                {% else %}
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label style="font-weight:600; display:block; margin-bottom:8px;">{{ field.label }}</label>
+                        <div style="display:flex; gap:20px;">
+                            {% for choice in field %}
+                                <label style="display:flex; align-items:center; gap:6px; font-weight:400;">
+                                    {{ choice.tag }} {{ choice.choice_label }}
+                                </label>
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
+                {% endif %}
             {% elif field.name == 'terms_agreed' %}
                 <div class="form-group" style="margin-bottom:20px; display:flex; align-items:flex-start; gap:8px;">
                     {{ field }}

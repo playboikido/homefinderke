@@ -218,6 +218,8 @@ urlpatterns = [
     path('roommates/profile/', views.roommate_profile_edit, name='roommate_profile_edit'),
     path('roommates/deactivate/', views.roommate_deactivate, name='roommate_deactivate'),
     path('residence/<int:pk>/download-pdf/', views.download_residence_pdf, name='download_residence_pdf'),
+    path('get-started/', views.get_started, name='get_started'),
+    path('get-started/<str:account_type>/', views.set_account_intent, name='set_account_intent'),
     path('privacy-policy/', TemplateView.as_view(template_name='core/privacy_policy.html'), name='privacy_policy'),
     path('terms-of-service/', TemplateView.as_view(template_name='core/terms_of_service.html'), name='terms_of_service'),
     path('sw.js', TemplateView.as_view(template_name='sw.js', content_type='application/javascript'), name='sw_js'),

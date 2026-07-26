@@ -211,6 +211,29 @@
                 {{ form.username.errors }}
             </div>
 
+            <div class="form-group">
+                <label>{{ form.account_type.label }}</label>
+                <div style="display:flex; gap:20px;">
+                    {% for choice in form.account_type %}
+                        <label style="display:flex; align-items:center; gap:6px; font-weight:400;">
+                            {{ choice.tag }} {{ choice.choice_label }}
+                        </label>
+                    {% endfor %}
+                </div>
+                {{ form.account_type.errors }}
+            </div>
+
+            <div class="form-group" style="display:flex; align-items:flex-start; gap:8px;">
+                {{ form.terms_agreed }}
+                <label for="{{ form.terms_agreed.id_for_label }}" style="font-weight:400;">
+                    I agree to the
+                    <a href="{% url 'terms_of_service' %}" target="_blank">Terms of Service</a>
+                    and
+                    <a href="{% url 'privacy_policy' %}" target="_blank">Privacy Policy</a>
+                </label>
+            </div>
+            {{ form.terms_agreed.errors }}
+
             <button type="submit" class="signup-btn">
                 Complete Sign Up
             </button>
