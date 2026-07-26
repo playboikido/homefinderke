@@ -313,12 +313,18 @@
     gap: 16px;
   }
 
-  /* Proximity Cards Grid */
+  /* Proximity Cards Row — horizontal scroll */
   .location-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
     gap: 24px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
   }
+  .location-grid::-webkit-scrollbar { height: 6px; }
+  .location-grid::-webkit-scrollbar-thumb { background: #99F6E4; border-radius: 4px; }
   .location-card {
     background: #FFFFFF;
     border: 1.5px solid #99F6E4;
@@ -329,6 +335,9 @@
     transition: all 250ms cubic-bezier(0.4,0,0.2,1);
     text-decoration: none;
     display: block;
+    flex: 0 0 auto;
+    width: 280px;
+    scroll-snap-align: start;
   }
   .location-card:hover {
     transform: translateY(-6px);
@@ -411,17 +420,70 @@
   .app-links { display: flex; gap: 12px; }
   .app-btn { background: #FFFFFF; color: #111827; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 0.88rem; }
 
-  .county-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  .county-chip { background: #FFFFFF; border: 1.5px solid #99F6E4; border-radius: 10px; padding: 14px 16px; text-align: center; color: #134E4A; font-weight: 600; font-size: 0.88rem; text-decoration: none; transition: all 200ms; display: block; }
+  /* County row — single horizontal scroll strip, all counties, no expand/collapse */
+  .county-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .county-grid::-webkit-scrollbar { height: 6px; }
+  .county-grid::-webkit-scrollbar-thumb { background: #99F6E4; border-radius: 4px; }
+  .county-chip {
+    background: #FFFFFF;
+    border: 1.5px solid #99F6E4;
+    border-radius: 10px;
+    padding: 14px 18px;
+    text-align: center;
+    color: #134E4A;
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: all 200ms;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    scroll-snap-align: start;
+  }
   .county-chip:hover { background: #0F766E; color: #FFFFFF; border-color: #0F766E; transform: translateY(-2px); }
-  .housetype-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 16px; }
-  .housetype-item { display: flex; flex-direction: column; align-items: center; gap: 8px; background: #FFFFFF; border: 1.5px solid #99F6E4; border-radius: 14px; padding: 20px 12px; text-decoration: none; color: #134E4A; font-weight: 600; font-size: 0.85rem; transition: all 200ms; }
+
+  /* House type row — horizontal scroll */
+  .housetype-grid {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+  .housetype-grid::-webkit-scrollbar { height: 6px; }
+  .housetype-grid::-webkit-scrollbar-thumb { background: #99F6E4; border-radius: 4px; }
+  .housetype-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    border: 1.5px solid #99F6E4;
+    border-radius: 14px;
+    padding: 20px 12px;
+    text-decoration: none;
+    color: #134E4A;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 200ms;
+    flex: 0 0 auto;
+    width: 120px;
+    scroll-snap-align: start;
+  }
   .housetype-item:hover { border-color: #0F766E; background: #E8F8F6; transform: translateY(-3px); }
   .housetype-icon { font-size: 1.8rem; }
 
   @media (max-width: 900px) {
     .advanced-filter-drawer { grid-template-columns: repeat(2, 1fr); }
-    .location-grid { grid-template-columns: 1fr; }
   }
   @media (max-width: 640px) {
     .main-search-row { flex-direction: column; align-items: stretch; }
@@ -535,12 +597,6 @@
         const drawer = document.getElementById('advancedDrawer');
         drawer.style.display = (drawer.style.display === 'grid') ? 'none' : 'grid';
     });
-    document.getElementById('toggleCountiesBtn').addEventListener('click', function() {
-        const more = document.getElementById('countyGridMore');
-        const isHidden = more.style.display === 'none';
-        more.style.display = isHidden ? 'grid' : 'none';
-        this.textContent = isHidden ? 'Show Fewer Counties' : 'Show All 47 Counties';
-    });
 </script>
 
 <section class="stats-bar">
@@ -571,7 +627,7 @@
         <div class="section-header">
             <div>
                 <h2 class="section-title">Browse by County</h2>
-                <p class="section-subtitle">Find listings wherever you're headed in Kenya</p>
+                <p class="section-subtitle">Swipe through all 47 counties to find listings wherever you're headed</p>
             </div>
         </div>
         <div class="county-grid">
@@ -595,8 +651,6 @@
             <a href="/search/?county=Kwale" class="county-chip">Kwale</a>
             <a href="/search/?county=Garissa" class="county-chip">Garissa</a>
             <a href="/search/?county=Kitui" class="county-chip">Kitui</a>
-        </div>
-        <div class="county-grid" id="countyGridMore" style="display:none; margin-top:12px;">
             <a href="/search/?county=Baringo" class="county-chip">Baringo</a>
             <a href="/search/?county=Busia" class="county-chip">Busia</a>
             <a href="/search/?county=Elgeyo-Marakwet" class="county-chip">Elgeyo-Marakwet</a>
@@ -625,9 +679,6 @@
             <a href="/search/?county=Wajir" class="county-chip">Wajir</a>
             <a href="/search/?county=West+Pokot" class="county-chip">West Pokot</a>
         </div>
-        <div style="text-align:center; margin-top:20px;">
-            <button type="button" id="toggleCountiesBtn" style="background:#fff; color:#0F766E; border:1.5px solid #99F6E4; border-radius:10px; padding:10px 22px; font-weight:600; font-size:0.88rem; cursor:pointer;">Show All 47 Counties</button>
-        </div>
     </div>
 </section>
 
@@ -636,7 +687,7 @@
         <div class="section-header">
             <div>
                 <h2 class="section-title">Browse by House Type</h2>
-                <p class="section-subtitle">Jump straight to the layout you're looking for</p>
+                <p class="section-subtitle">Swipe to the layout you're looking for</p>
             </div>
         </div>
         <div class="housetype-grid">
@@ -655,7 +706,7 @@
     <div class="container">
         <div class="text-center mb-4">
             <h2 class="section-title">Popular Hub Locations</h2>
-            <p class="section-subtitle">Find quick structural housing options layout close to important hubs</p>
+            <p class="section-subtitle">Swipe through quick housing options close to important hubs</p>
         </div>
         
         <div class="location-grid">

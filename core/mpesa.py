@@ -78,5 +78,6 @@ def initiate_stk_push(
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        logger.error("M-Pesa STK push failed: %s", e)
+        body = getattr(e.response, 'text', '')[:500] if getattr(e, 'response', None) is not None else ''
+        logger.error("M-Pesa STK push failed: %s | response body: %s", e, body)
         return {'ResponseCode': '1', 'errorMessage': 'Could not reach M-Pesa right now. Please try again shortly.'}
