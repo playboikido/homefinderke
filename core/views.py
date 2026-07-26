@@ -2100,7 +2100,7 @@ def furniture_vendor_detail(request, pk):
 
 
 def business_detail(request, slug):
-    from business.models import BusinessAnalyticsEvent, BusinessInquiry, BusinessReview
+    from business.models import BusinessAnalyticsEvent, BusinessFavorite, BusinessInquiry, BusinessReview
     business = get_object_or_404(Business, slug=slug, is_approved=True, is_active=True, is_paused_by_owner=False)
 
     if request.method == 'POST':
@@ -2118,6 +2118,11 @@ def business_detail(request, slug):
                 )
                 messages.success(request, "Message sent! The business will get back to you directly.")
             return redirect('business_detail', slug=business.slug)
+        elif request.POST.get('form_type') == 'favorite' and request.user.is_authenticated:
+            fav, created = BusinessFavorite.objects.get_or_create(user=request.user, business=business)
+            if not created:
+                fav.delete()
+            return redirect('business_detail', slug=business.slug)
         elif request.user.is_authenticated:
             rating = request.POST.get('rating')
             comment = request.POST.get('comment', '').strip()
@@ -2134,7 +2139,23 @@ def business_detail(request, slug):
         user=request.user if request.user.is_authenticated else None,
     )
     reviews = business.reviews.select_related('user')[:20]
-    return render(request, 'core/business_detail.html', {'business': business, 'reviews': reviews})
+    total_reviews = business.review_count
+    rating_breakdown = []
+    for star in (5, 4, 3, 2, 1):
+        count = business.reviews.filter(rating=star).count()
+        pct = round((count / total_reviews) * 100) if total_reviews else 0
+        rating_breakdown.append({'star': star, 'count': count, 'pct': pct})
+    is_favorited = (
+        request.user.is_authenticated
+        and BusinessFavorite.objects.filter(user=request.user, business=business).exists()
+    )
+    related = Business.objects.filter(
+        category=business.category, is_approved=True, is_active=True, is_paused_by_owner=False
+    ).exclude(pk=business.pk)[:4]
+    return render(request, 'core/business_detail.html', {
+        'business': business, 'reviews': reviews, 'rating_breakdown': rating_breakdown,
+        'is_favorited': is_favorited, 'related': related,
+    })
 
 
 def business_track_click(request, slug, event_type):

@@ -4,805 +4,375 @@
 {% block content %}
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
-
-  :root {
-    --bd-primary: #0F766E; --bd-primary-dk: #0D5E58; --bd-primary-lt: #14B8A6;
-    --bd-wa: #22C55E; --bd-wa-dk: #16A34A;
-    --bd-bg: #F0FDFA; --bd-fg: #134E4A; --bd-surface: #FFFFFF; --bd-muted: #F3FBFA;
-    --bd-border: #DDF4F0; --bd-text: #1C4A47; --bd-subtle: #5EAFA8; --bd-faint: #8FB9B4;
-    --bd-font-body: 'Fira Sans', system-ui, sans-serif; --bd-font-mono: 'Fira Code', monospace;
-    --bd-r-sm: 8px; --bd-r: 12px; --bd-r-lg: 18px; --bd-r-xl: 24px; --bd-r-full: 999px;
-    --bd-shadow-sm: 0 2px 8px rgba(15,118,110,0.08);
-    --bd-shadow: 0 4px 16px rgba(15,118,110,0.10);
-    --bd-shadow-lg: 0 16px 40px rgba(15,118,110,0.16);
-    --bd-ease: cubic-bezier(.4,0,.2,1);
+  .bd-wrap {
+    --bd-primary: #0F766E; --bd-primary-dk: #0D5E58; --bd-secondary: #14B8A6;
+    --bd-bg: #F0FDFA; --bd-fg: #134E4A; --bd-surface: #FFFFFF; --bd-muted: #E8F0F3;
+    --bd-border: #99F6E4; --bd-text: #1C4A47; --bd-subtle: #5EAFA8;
+    font-family: 'Fira Sans', system-ui, sans-serif !important;
+    background: var(--bd-bg) !important; min-height: 100vh; color: var(--bd-text) !important;
+    padding-bottom: 90px;
   }
+  .bd-wrap * { box-sizing: border-box; }
+  .bd-inner { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  .bd-mono { font-family: 'Fira Code', monospace; }
 
-  * { box-sizing: border-box; }
-  .bd-wrap { font-family: var(--bd-font-body) !important; background: var(--bd-bg) !important; min-height: 100vh; color: var(--bd-text) !important; padding-bottom: 84px; }
-  .bd-inner { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-  a.bd-reset { text-decoration: none; color: inherit; }
-  button.bd-reset { font-family: inherit; }
+  .bd-crumbs { font-size: 0.8rem; color: var(--bd-subtle); padding: 16px 0 4px; }
+  .bd-crumbs a { color: var(--bd-subtle); text-decoration: none; }
+  .bd-crumbs a:hover { text-decoration: underline; }
+  .bd-crumbs span.sep { margin: 0 6px; }
+  .bd-crumbs span.current { color: var(--bd-fg); font-weight: 600; }
 
-  /* ---------- Breadcrumb ---------- */
-  .bd-breadcrumb-wrap { position: sticky; top: 0; z-index: 40; background: rgba(240,253,250,0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--bd-border); }
-  .bd-breadcrumb { max-width: 1080px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--bd-subtle); overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
-  .bd-breadcrumb::-webkit-scrollbar { display: none; }
-  .bd-breadcrumb a { color: var(--bd-subtle); transition: color 160ms var(--bd-ease); }
-  .bd-breadcrumb a:hover { color: var(--bd-primary); }
-  .bd-breadcrumb .bd-crumb-sep { color: var(--bd-faint); }
-  .bd-breadcrumb .bd-crumb-current { color: var(--bd-fg); font-weight: 600; }
+  /* Hero */
+  .bd-hero { position: relative; min-height: 230px; border-radius: 20px; overflow: hidden; background: linear-gradient(135deg, var(--bd-fg), var(--bd-primary)); box-shadow: 0 10px 28px rgba(15,118,110,0.16); margin: 12px 0 20px; }
+  .bd-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .bd-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4,22,20,0.25) 0%, rgba(4,22,20,0.88) 100%); }
+  .bd-hero-icons { position: absolute; z-index: 3; top: 14px; right: 14px; display: flex; gap: 8px; }
+  .bd-icon-btn { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,0.92); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.05rem; color: var(--bd-fg); }
+  .bd-icon-btn.active { background: #FEE2E2; color: #DC2626; }
+  .bd-hero-content { position: relative; z-index: 2; padding: 24px 26px 22px; display: flex; gap: 18px; align-items: flex-end; flex-wrap: wrap; }
+  .bd-logo { width: 68px; height: 68px; border-radius: 50%; background: #fff; object-fit: cover; border: 3px solid #fff; flex-shrink: 0; }
+  .bd-logo-fallback { width: 68px; height: 68px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; color: var(--bd-primary); font-family: 'Fira Code', monospace; font-size: 1.6rem; font-weight: 700; flex-shrink: 0; }
+  .bd-hero-main { flex: 1; min-width: 240px; }
+  .bd-name-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .bd-name { font-family: 'Fira Code', monospace; font-size: 1.5rem; font-weight: 700; color: #fff; }
+  .bd-verified { display: inline-flex; align-items: center; gap: 4px; background: rgba(52,211,153,0.2); color: #6EE7B7; border: 1px solid rgba(110,231,183,0.4); padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
+  .bd-meta-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 8px; font-size: 0.85rem; color: rgba(255,255,255,0.85); }
+  .bd-stars { color: #FBBF24; font-weight: 700; }
+  .bd-open { color: #6EE7B7; font-weight: 600; }
+  .bd-closed { color: #FCA5A5; font-weight: 600; }
+  .bd-hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .bd-hero-btn { display: inline-flex; align-items: center; gap: 7px; padding: 10px 18px; border-radius: 10px; font-size: 0.85rem; font-weight: 700; text-decoration: none; border: none; cursor: pointer; transition: transform .15s ease; }
+  .bd-hero-btn:hover { transform: translateY(-1px); }
+  .bd-btn-call { background: rgba(255,255,255,0.94); color: var(--bd-fg); }
+  .bd-btn-wa { background: #16A34A; color: #fff; }
+  .bd-btn-dir { background: rgba(255,255,255,0.14); color: #fff; border: 1.5px solid rgba(255,255,255,0.35); }
 
-  /* ---------- Hero ---------- */
-  .bd-hero-outer { padding: 16px 20px 0; }
-  .bd-hero { max-width: 1080px; margin: 0 auto; position: relative; min-height: 340px; border-radius: var(--bd-r-xl); overflow: hidden; background: linear-gradient(135deg, var(--bd-fg), var(--bd-primary)); box-shadow: var(--bd-shadow-lg); }
-  .bd-hero-img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; }
-  .bd-hero::after { content:''; position:absolute; inset:0; background: linear-gradient(180deg, rgba(4,22,20,0.05) 0%, rgba(4,22,20,0.20) 45%, rgba(4,22,20,0.92) 100%); }
+  /* Photo strip */
+  .bd-photo-strip { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 26px; scroll-snap-type: x proximity; }
+  .bd-photo-strip::-webkit-scrollbar { height: 6px; }
+  .bd-photo-strip::-webkit-scrollbar-thumb { background: var(--bd-border); border-radius: 999px; }
+  .bd-photo-tile { position: relative; flex: 0 0 130px; height: 96px; border-radius: 12px; overflow: hidden; cursor: pointer; scroll-snap-align: start; border: 1px solid var(--bd-border); }
+  .bd-photo-tile img { width: 100%; height: 100%; object-fit: cover; transition: transform .2s ease; }
+  .bd-photo-tile:hover img { transform: scale(1.06); }
 
-  .bd-hero-topbar { position:absolute; z-index:3; inset:16px 16px auto 16px; display:flex; justify-content:space-between; align-items:center; }
-  .bd-back-pill { display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:var(--bd-r-full); font-size:0.78rem; font-weight:600; background:rgba(255,255,255,0.16); color:#fff; border:1.5px solid rgba(255,255,255,0.3); cursor:pointer; text-decoration:none; backdrop-filter: blur(6px); transition: all 180ms var(--bd-ease); }
-  .bd-back-pill:hover { background:rgba(255,255,255,0.28); transform: translateY(-1px); }
-  .bd-hero-topbar-right { display:flex; gap:8px; align-items:center; }
-  .bd-icon-pill { display:inline-flex; align-items:center; justify-content:center; width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.16); border:1.5px solid rgba(255,255,255,0.3); color:#fff; cursor:pointer; backdrop-filter: blur(6px); transition: all 180ms var(--bd-ease); }
-  .bd-icon-pill:hover { background:rgba(255,255,255,0.28); transform: translateY(-1px); }
-  .bd-icon-pill.bd-saved { background:#fff; color:#E11D48; border-color:#fff; }
-  .bd-icon-pill svg { width:16px; height:16px; }
-  .bd-sponsored-pill { display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border-radius:var(--bd-r-full); font-size:0.75rem; font-weight:700; background:rgba(255,255,255,0.92); color:#92400E; }
+  /* Tabs */
+  .bd-tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1.5px solid var(--bd-border); margin-bottom: 24px; }
+  .bd-tab { padding: 10px 16px; font-size: 0.85rem; font-weight: 600; color: var(--bd-subtle); text-decoration: none; white-space: nowrap; border-bottom: 2.5px solid transparent; }
+  .bd-tab:hover, .bd-tab.active { color: var(--bd-primary); border-bottom-color: var(--bd-primary); }
 
-  .bd-hero-content { position:absolute; z-index:3; left:0; right:0; bottom:0; padding: 24px; }
-  .bd-hero-namerow { display:flex; align-items:center; gap:16px; margin-bottom:16px; }
-  .bd-logo { width:64px; height:64px; border-radius:16px; object-fit:cover; border:2.5px solid rgba(255,255,255,0.4); flex-shrink:0; background:#fff; }
-  .bd-logo-fallback { width:64px; height:64px; border-radius:16px; background:rgba(255,255,255,0.18); display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--bd-font-mono); font-size:1.6rem; font-weight:700; flex-shrink:0; border:2.5px solid rgba(255,255,255,0.3); }
-  .bd-name-block { min-width: 0; }
-  .bd-name-row { display:flex; align-items:center; gap:8px; flex-wrap: wrap; }
-  .bd-name { font-family: var(--bd-font-mono); font-size: 1.5rem; font-weight:700; color:#fff; letter-spacing: -0.02em; line-height: 1.15; }
-  .bd-verified-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 9px 2px 6px; border-radius:var(--bd-r-full); font-size:0.7rem; font-weight:700; background:rgba(20,184,166,0.9); color:#fff; }
-  .bd-meta-row { display:flex; align-items:center; gap:10px; flex-wrap: wrap; color: rgba(255,255,255,0.85); font-size:0.85rem; margin-top:6px; }
-  .bd-meta-row .bd-dot { opacity: 0.5; }
-  .bd-rating-inline { display:inline-flex; align-items:center; gap:4px; font-weight: 700; color: #FCD34D; }
-  .bd-status-open { color: #6EE7B7; font-weight: 700; }
-  .bd-status-closed { color: #FCA5A5; font-weight: 700; }
+  /* Layout */
+  .bd-layout { display: grid; grid-template-columns: 1fr 320px; gap: 22px; align-items: start; }
+  @media (max-width: 860px) { .bd-layout { grid-template-columns: 1fr; } }
+  .bd-card { background: var(--bd-surface); border-radius: 16px; border: 1.5px solid var(--bd-border); box-shadow: 0 3px 10px rgba(15,118,110,0.08); padding: 22px; margin-bottom: 20px; scroll-margin-top: 90px; }
+  .bd-card h2 { font-family: 'Fira Code', monospace; font-size: 1rem; font-weight: 700; color: var(--bd-fg); margin-bottom: 14px; }
+  .bd-card h2 .bd-view-all { float: right; font-size: 0.78rem; font-weight: 600; color: var(--bd-primary); text-decoration: none; }
 
-  .bd-hero-contact { display:flex; gap:10px; flex-wrap:wrap; margin-top: 18px; }
-  .bd-hero-contact-btn { display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:var(--bd-r); font-size:0.85rem; font-weight:600; border:none; cursor:pointer; text-decoration:none; transition: all 180ms var(--bd-ease); }
-  .bd-hero-contact-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
-  .bd-hero-contact-btn:active { transform: translateY(0) scale(0.98); }
-  .bd-hero-contact-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(255,255,255,0.5); }
-  .bd-hc-wa { background: var(--bd-wa); color:#fff; }
-  .bd-hc-phone { background:#fff; color: var(--bd-fg); }
-  .bd-hc-directions { background:rgba(255,255,255,0.14); color:#fff; border:1.5px solid rgba(255,255,255,0.35) !important; }
-  .bd-hc-web { background:rgba(255,255,255,0.14); color:#fff; border:1.5px solid rgba(255,255,255,0.35) !important; }
+  .bd-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .bd-badge { display: inline-flex; align-items: center; gap: 5px; background: var(--bd-muted); color: var(--bd-primary-dk); padding: 5px 12px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
 
-  /* ---------- Tabs ---------- */
-  .bd-tabs-wrap { position: sticky; top: 45px; z-index: 30; background: rgba(240,253,250,0.92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--bd-border); margin-top: 16px; }
-  .bd-tabs { max-width: 1080px; margin: 0 auto; padding: 0 20px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; }
-  .bd-tabs::-webkit-scrollbar { display: none; }
-  .bd-tab { flex-shrink: 0; padding: 14px 16px; font-size: 0.85rem; font-weight: 600; color: var(--bd-subtle); background: none; border: none; cursor: pointer; border-bottom: 2.5px solid transparent; transition: all 180ms var(--bd-ease); white-space: nowrap; }
-  .bd-tab:hover { color: var(--bd-primary); }
-  .bd-tab.active { color: var(--bd-primary); border-bottom-color: var(--bd-primary); }
+  .bd-products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+  .bd-product { border: 1.5px solid var(--bd-border); border-radius: 12px; overflow: hidden; }
+  .bd-product img { width: 100%; height: 100px; object-fit: cover; }
+  .bd-product-body { padding: 10px; }
+  .bd-product-name { font-weight: 700; font-size: 0.82rem; }
+  .bd-product-from { font-size: 0.7rem; color: var(--bd-subtle); margin-top: 2px; }
+  .bd-product-price { font-family: 'Fira Code', monospace; color: var(--bd-primary); font-weight: 700; font-size: 0.88rem; margin-top: 2px; }
 
-  /* ---------- Cards / generic ---------- */
-  .bd-card { background: var(--bd-surface) !important; border-radius: var(--bd-r-lg); border:1.5px solid var(--bd-border); box-shadow: var(--bd-shadow-sm); padding: 24px; margin-top: 20px; transition: box-shadow 220ms var(--bd-ease); scroll-margin-top: 110px; }
-  .bd-card:hover { box-shadow: var(--bd-shadow); }
-  .bd-section-title { font-family: var(--bd-font-mono); font-size: 0.95rem; font-weight:700; color: var(--bd-fg) !important; margin-bottom: 16px; display:flex; align-items:center; justify-content: space-between; gap:10px; }
-  .bd-section-title-left { display:flex; align-items:center; gap:10px; }
-  .bd-section-title-left::before { content:''; width:4px; height:16px; background: var(--bd-primary); border-radius:2px; display:block; }
-  .bd-section-link { font-size: 0.78rem; font-weight: 600; color: var(--bd-primary); text-decoration: none; flex-shrink: 0; }
-  .bd-section-link:hover { text-decoration: underline; }
+  .bd-rating-summary { display: flex; gap: 24px; align-items: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .bd-rating-big { font-family: 'Fira Code', monospace; font-size: 2.4rem; font-weight: 700; color: var(--bd-fg); line-height: 1; }
+  .bd-rating-count { font-size: 0.78rem; color: var(--bd-subtle); margin-top: 4px; }
+  .bd-hist { flex: 1; min-width: 160px; }
+  .bd-hist-row { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; margin-bottom: 4px; }
+  .bd-hist-bar-bg { flex: 1; height: 6px; background: var(--bd-muted); border-radius: 999px; overflow: hidden; }
+  .bd-hist-bar { height: 100%; background: #FBBF24; }
+  .bd-review { padding: 14px 0; border-top: 1px solid var(--bd-border); }
+  .bd-review:first-child { border-top: none; }
+  .bd-review-name { font-weight: 700; font-size: 0.86rem; }
+  .bd-review-date { color: var(--bd-subtle); font-size: 0.72rem; margin-left: 8px; }
+  .bd-review-reply { margin-top: 8px; padding: 10px 12px; background: var(--bd-muted); border-radius: 10px; font-size: 0.82rem; }
 
-  .bd-two-col { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; align-items: start; }
-  .bd-two-col > .bd-card { margin-top: 20px; }
+  .bd-info-row { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--bd-border); font-size: 0.85rem; }
+  .bd-info-row:first-of-type { border-top: none; padding-top: 0; }
+  .bd-info-icon { color: var(--bd-primary); flex-shrink: 0; margin-top: 2px; }
+  .bd-info-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--bd-subtle); font-weight: 700; }
+  .bd-report-btn { display: block; text-align: center; margin-top: 16px; padding: 10px; border-radius: 10px; border: 1.5px solid var(--bd-border); color: var(--bd-primary-dk); font-weight: 700; font-size: 0.82rem; text-decoration: none; }
+  .bd-report-btn:hover { background: var(--bd-muted); }
 
-  /* ---------- Gallery ---------- */
-  .bd-gallery-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-  .bd-gallery-scroll::-webkit-scrollbar { height: 6px; }
-  .bd-gallery-scroll::-webkit-scrollbar-thumb { background: var(--bd-border); border-radius: 4px; }
-  .bd-gallery-item { position: relative; flex: 0 0 auto; width: 150px; height: 112px; border-radius: var(--bd-r); overflow: hidden; cursor: pointer; scroll-snap-align: start; border: 1.5px solid var(--bd-border); transition: transform 200ms var(--bd-ease); }
-  .bd-gallery-item:hover { transform: translateY(-3px); }
-  .bd-gallery-item img { width:100%; height:100%; object-fit:cover; display:block; }
-  .bd-gallery-item .bd-gallery-tag { position:absolute; left:8px; bottom:8px; padding: 2px 9px; border-radius: var(--bd-r-full); background: rgba(4,22,20,0.55); color:#fff; font-size:0.68rem; font-weight:600; backdrop-filter: blur(3px); }
+  #bd-map { height: 220px; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--bd-border); }
 
-  /* ---------- About ---------- */
-  .bd-desc { font-size:0.92rem; line-height:1.75; color: var(--bd-text); }
-  .bd-badges { display:flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
-  .bd-badge { display:inline-flex; align-items:center; gap:5px; padding: 5px 12px; border-radius: var(--bd-r-full); font-size: 0.75rem; font-weight: 600; background: var(--bd-muted); color: var(--bd-primary-dk); border: 1px solid var(--bd-border); }
-  .bd-badge svg { width: 12px; height: 12px; }
-  .bd-years-chip { display:inline-flex; align-items:baseline; gap:5px; margin-top: 14px; font-size: 0.8rem; color: var(--bd-subtle); }
-  .bd-years-chip strong { font-family: var(--bd-font-mono); color: var(--bd-fg); font-size: 1rem; }
+  .bd-related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; }
+  .bd-related-card { background: var(--bd-surface); border-radius: 14px; border: 1.5px solid var(--bd-border); overflow: hidden; text-decoration: none; color: inherit; transition: transform .15s ease; }
+  .bd-related-card:hover { transform: translateY(-3px); }
+  .bd-related-card img { width: 100%; height: 100px; object-fit: cover; }
+  .bd-related-body { padding: 10px 12px; }
+  .bd-related-name { font-weight: 700; font-size: 0.85rem; }
+  .bd-related-meta { font-size: 0.72rem; color: var(--bd-subtle); margin-top: 3px; }
 
-  /* ---------- Info list ---------- */
-  .bd-info-list { display: flex; flex-direction: column; gap: 4px; }
-  .bd-info-row { display:flex; align-items:flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--bd-border); }
-  .bd-info-row:last-child { border-bottom: none; }
-  .bd-info-icon { width: 32px; height: 32px; border-radius: var(--bd-r-sm); background: var(--bd-muted); color: var(--bd-primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .bd-info-icon svg { width: 15px; height: 15px; }
-  .bd-info-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--bd-faint); font-weight: 600; }
-  .bd-info-value { font-size: 0.87rem; color: var(--bd-text); font-weight: 500; word-break: break-word; }
-  .bd-info-value a { color: var(--bd-primary-dk); text-decoration: none; }
-  .bd-info-value a:hover { text-decoration: underline; }
-  .bd-social-row { display:flex; gap: 8px; margin-top: 4px; }
-  .bd-social-icon { width: 34px; height: 34px; border-radius: 50%; background: var(--bd-muted); color: var(--bd-primary); display:flex; align-items:center; justify-content:center; transition: all 180ms var(--bd-ease); }
-  .bd-social-icon:hover { background: var(--bd-primary); color: #fff; transform: translateY(-2px); }
-  .bd-social-icon svg { width: 15px; height: 15px; }
-  .bd-map-btn { width: 100%; margin-top: 14px; display:flex; align-items:center; justify-content:center; gap:8px; padding: 11px; border-radius: var(--bd-r); background: var(--bd-muted); color: var(--bd-primary-dk); font-weight: 700; font-size: 0.85rem; border: 1.5px solid var(--bd-border); cursor: pointer; text-decoration:none; transition: all 180ms var(--bd-ease); }
-  .bd-map-btn:hover { background: var(--bd-primary); color: #fff; border-color: var(--bd-primary); }
-
-  /* ---------- Products ---------- */
-  .bd-products { display:grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 16px; }
-  .bd-product { border:1.5px solid var(--bd-border); border-radius: var(--bd-r-lg); overflow: hidden; background: var(--bd-surface); transition: all 220ms var(--bd-ease); display:flex; flex-direction: column; }
-  .bd-product:hover { box-shadow: var(--bd-shadow); transform: translateY(-3px); border-color: var(--bd-primary-lt); }
-  .bd-product-img-wrap { position: relative; width: 100%; aspect-ratio: 4/3; background: var(--bd-muted); overflow: hidden; }
-  .bd-product-img-wrap img { width:100%; height:100%; object-fit:cover; }
-  .bd-product-avail { position:absolute; top:8px; left:8px; padding: 3px 10px; border-radius: var(--bd-r-full); font-size: 0.68rem; font-weight: 700; background: rgba(255,255,255,0.94); color: #15803D; }
-  .bd-product-avail.bd-unavailable { color: #B91C1C; }
-  .bd-product-body { padding: 14px; display:flex; flex-direction: column; gap: 6px; flex: 1; }
-  .bd-product-name { font-weight:700; font-size:0.9rem; color: var(--bd-fg); line-height: 1.3; }
-  .bd-product-desc { font-size: 0.78rem; color: var(--bd-subtle); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .bd-product-price { font-family: var(--bd-font-mono); color: var(--bd-primary); font-weight:700; font-size:0.88rem; margin-top:2px; }
-  .bd-product-price span { font-size: 0.7rem; color: var(--bd-faint); font-weight: 500; font-family: var(--bd-font-body); }
-  .bd-product-actions { display:flex; gap: 6px; margin-top: 8px; }
-  .bd-product-view-btn { flex: 1; padding: 8px 10px; border-radius: var(--bd-r-sm); background: var(--bd-fg); color:#fff; border:none; font-size: 0.78rem; font-weight: 600; cursor:pointer; transition: all 180ms var(--bd-ease); }
-  .bd-product-view-btn:hover { background: var(--bd-primary-dk); }
-  .bd-product-view-btn:active { transform: scale(0.97); }
-  .bd-product-icon-btn { width: 34px; height: 34px; flex-shrink:0; border-radius: var(--bd-r-sm); border: 1.5px solid var(--bd-border); background: var(--bd-surface); color: var(--bd-primary); display:flex; align-items:center; justify-content:center; cursor:pointer; transition: all 180ms var(--bd-ease); }
-  .bd-product-icon-btn:hover { background: var(--bd-muted); border-color: var(--bd-primary); }
-  .bd-product-icon-btn svg { width: 14px; height: 14px; }
-
-  /* ---------- Product modal ---------- */
-  .bd-modal-overlay { display:none; position:fixed; inset:0; background:rgba(4,22,20,0.6); backdrop-filter: blur(3px); z-index:1000; align-items:flex-end; justify-content:center; }
-  .bd-modal-overlay.open { display:flex; animation: bdFadeIn 200ms var(--bd-ease); }
-  @keyframes bdFadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .bd-modal { width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; background: var(--bd-surface); border-radius: var(--bd-r-xl) var(--bd-r-xl) 0 0; padding: 0; box-shadow: var(--bd-shadow-lg); animation: bdSlideUp 260ms var(--bd-ease); }
-  @media (min-width: 640px) { .bd-modal-overlay.open { align-items: center; } .bd-modal { border-radius: var(--bd-r-xl); margin: 20px; } }
-  @keyframes bdSlideUp { from { transform: translateY(24px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  .bd-modal-img { width: 100%; aspect-ratio: 16/10; object-fit: cover; background: var(--bd-muted); }
-  .bd-modal-close { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 50%; background: rgba(4,22,20,0.55); color:#fff; border: none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size: 1.2rem; }
-  .bd-modal-body { padding: 22px; }
-  .bd-modal-title { font-family: var(--bd-font-mono); font-size: 1.15rem; font-weight: 700; color: var(--bd-fg); }
-  .bd-modal-price { font-family: var(--bd-font-mono); color: var(--bd-primary); font-weight: 700; font-size: 1rem; margin-top: 4px; }
-  .bd-modal-desc { font-size: 0.87rem; line-height: 1.7; color: var(--bd-text); margin-top: 14px; }
-  .bd-modal-attr { margin-top: 16px; }
-  .bd-modal-attr-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--bd-faint); font-weight: 700; margin-bottom: 8px; }
-  .bd-modal-attr-chips { display:flex; flex-wrap: wrap; gap: 6px; }
-  .bd-modal-chip { padding: 5px 12px; border-radius: var(--bd-r-full); background: var(--bd-muted); border: 1px solid var(--bd-border); font-size: 0.78rem; font-weight: 600; color: var(--bd-fg); }
-  .bd-modal-actions { display:flex; gap: 10px; margin-top: 22px; }
-  .bd-modal-actions a { flex: 1; text-align:center; padding: 12px; border-radius: var(--bd-r); font-weight: 700; font-size: 0.85rem; text-decoration:none; transition: all 180ms var(--bd-ease); }
-  .bd-modal-actions .bd-hc-wa { background: var(--bd-wa); color:#fff; }
-  .bd-modal-actions .bd-hc-phone { background: var(--bd-muted); color: var(--bd-fg); border: 1.5px solid var(--bd-border); }
-  .bd-modal-actions a:hover { transform: translateY(-2px); }
-
-  /* ---------- Reviews ---------- */
-  .bd-review-summary { display:flex; align-items:center; gap: 18px; padding-bottom: 16px; margin-bottom: 4px; border-bottom: 1px solid var(--bd-border); }
-  .bd-review-avg { font-family: var(--bd-font-mono); font-size: 2.4rem; font-weight: 700; color: var(--bd-fg); line-height: 1; }
-  .bd-review-stars { color: #F59E0B; font-size: 0.9rem; margin-top: 4px; }
-  .bd-review-count-text { font-size: 0.78rem; color: var(--bd-subtle); margin-top: 2px; }
-  .bd-review-card { padding: 16px 0; border-bottom: 1px solid var(--bd-border); }
-  .bd-review-card:last-child { border-bottom: none; }
-  .bd-review-head { display:flex; align-items:center; gap: 10px; }
-  .bd-review-avatar { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; background: var(--bd-muted); flex-shrink: 0; }
-  .bd-review-avatar-fallback { width: 38px; height: 38px; border-radius: 50%; background: var(--bd-primary); color: #fff; display:flex; align-items:center; justify-content:center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
-  .bd-review-name-row { display:flex; align-items:center; gap: 8px; flex-wrap: wrap; }
-  .bd-review-name { font-weight: 700; font-size: 0.87rem; color: var(--bd-fg); }
-  .bd-review-verified { display:inline-flex; align-items:center; gap:3px; font-size: 0.68rem; font-weight: 600; color: var(--bd-primary); }
-  .bd-review-date { font-size: 0.72rem; color: var(--bd-faint); margin-top: 1px; }
-  .bd-review-stars-sm { color: #F59E0B; font-size: 0.78rem; margin-top: 4px; }
-  .bd-review-text { font-size: 0.85rem; line-height: 1.65; color: var(--bd-text); margin-top: 8px; }
-  .bd-review-reply { margin-top: 10px; padding: 10px 12px; background: var(--bd-muted); border-radius: var(--bd-r); font-size: 0.82rem; border-left: 3px solid var(--bd-primary); }
-  .bd-review-helpful { display:inline-flex; align-items:center; gap: 6px; margin-top: 10px; padding: 5px 12px; border-radius: var(--bd-r-full); border: 1.5px solid var(--bd-border); background: var(--bd-surface); font-size: 0.72rem; font-weight: 600; color: var(--bd-subtle); cursor: pointer; transition: all 180ms var(--bd-ease); }
-  .bd-review-helpful:hover { border-color: var(--bd-primary); color: var(--bd-primary); }
-  .bd-review-helpful svg { width: 12px; height: 12px; }
-  .bd-empty-state { text-align:center; padding: 28px 16px; color: var(--bd-subtle); font-size: 0.85rem; }
-
-  /* ---------- Forms ---------- */
-  .bd-form-label { font-weight:700; display:block; margin-bottom: 10px; font-size: 0.85rem; color: var(--bd-fg); }
-  .bd-input, .bd-textarea, .bd-select { width:100%; padding: 11px 14px; border-radius: var(--bd-r-sm); border: 1.5px solid var(--bd-border); margin-bottom: 10px; font-family: inherit; font-size: 0.85rem; background: var(--bd-muted); transition: all 180ms var(--bd-ease); color: var(--bd-text); }
-  .bd-input:focus, .bd-textarea:focus, .bd-select:focus { outline: none; border-color: var(--bd-primary); background: var(--bd-surface); box-shadow: 0 0 0 3px rgba(15,118,110,0.12); }
-  .bd-textarea { resize: vertical; min-height: 90px; }
-  .bd-btn-primary { background: var(--bd-primary); color: #fff; border: none; padding: 11px 22px; border-radius: var(--bd-r-sm); font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 180ms var(--bd-ease); }
-  .bd-btn-primary:hover { background: var(--bd-primary-dk); transform: translateY(-1px); }
-  .bd-btn-primary:active { transform: scale(0.98); }
-  .bd-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(15,118,110,0.3); }
-
-  /* ---------- Map ---------- */
-  .bd-map-frame { width: 100%; aspect-ratio: 4/3; border-radius: var(--bd-r); border: 1.5px solid var(--bd-border); overflow: hidden; background: var(--bd-muted); }
-  .bd-map-frame iframe { width: 100%; height: 100%; border: 0; }
-  .bd-map-landmarks { margin-top: 12px; font-size: 0.8rem; color: var(--bd-subtle); line-height: 1.6; }
-
-  /* ---------- Nearby carousel ---------- */
-  .bd-nearby-scroll { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 6px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
-  .bd-nearby-scroll::-webkit-scrollbar { height: 6px; }
-  .bd-nearby-scroll::-webkit-scrollbar-thumb { background: var(--bd-border); border-radius: 4px; }
-  .bd-nearby-card { flex: 0 0 auto; width: 190px; border-radius: var(--bd-r-lg); border: 1.5px solid var(--bd-border); overflow: hidden; background: var(--bd-surface); scroll-snap-align: start; text-decoration: none; color: inherit; display:block; transition: all 220ms var(--bd-ease); }
-  .bd-nearby-card:hover { transform: translateY(-4px); box-shadow: var(--bd-shadow); border-color: var(--bd-primary-lt); }
-  .bd-nearby-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; background: var(--bd-muted); }
-  .bd-nearby-body { padding: 12px; }
-  .bd-nearby-name { font-weight: 700; font-size: 0.85rem; color: var(--bd-fg); line-height: 1.3; }
-  .bd-nearby-meta { display:flex; align-items:center; gap: 6px; margin-top: 6px; font-size: 0.75rem; color: var(--bd-subtle); }
-  .bd-nearby-rating { color: #F59E0B; font-weight: 700; }
-
-  /* ---------- Sticky mobile contact bar ---------- */
-  .bd-mobile-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: linear-gradient(135deg, var(--bd-fg), var(--bd-primary)); box-shadow: 0 -6px 24px rgba(4,22,20,0.25); padding: 12px 16px; display: flex; align-items: center; gap: 12px; }
-  .bd-mobile-bar-text { color: #fff; flex: 1; min-width: 0; }
-  .bd-mobile-bar-title { font-size: 0.8rem; font-weight: 700; }
-  .bd-mobile-bar-sub { font-size: 0.72rem; color: rgba(255,255,255,0.75); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .bd-mobile-bar-btn { flex-shrink: 0; display:inline-flex; align-items:center; gap: 7px; background: #fff; color: var(--bd-fg); padding: 11px 18px; border-radius: var(--bd-r-full); font-weight: 700; font-size: 0.82rem; text-decoration: none; transition: transform 180ms var(--bd-ease); }
-  .bd-mobile-bar-btn:hover { transform: translateY(-1px); }
-  .bd-mobile-bar-btn.bd-wa-fill { background: var(--bd-wa); color: #fff; }
-
-  /* ---------- Lightbox ---------- */
-  .bd-lightbox { display:none; position:fixed; inset:0; background:rgba(4,22,20,0.94); z-index:1100; align-items:center; justify-content:center; padding:30px; }
-  .bd-lightbox.open { display:flex; animation: bdFadeIn 200ms var(--bd-ease); }
-  .bd-lightbox img { max-width:100%; max-height:100%; border-radius:var(--bd-r-lg); object-fit:contain; }
-  .bd-lightbox-close { position:absolute; top:20px; right:24px; background:rgba(255,255,255,0.14); border:1.5px solid rgba(255,255,255,0.3); color:#fff; width:42px; height:42px; border-radius:50%; font-size:1.5rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .bd-lightbox-nav { position:absolute; top:50%; transform: translateY(-50%); background:rgba(255,255,255,0.14); border:1.5px solid rgba(255,255,255,0.3); color:#fff; width:44px; height:44px; border-radius:50%; font-size:1.3rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  .bd-lightbox-prev { left: 20px; } .bd-lightbox-next { right: 20px; }
-
-  /* ---------- Responsive ---------- */
-  @media (max-width: 860px) {
-    .bd-two-col { grid-template-columns: 1fr; }
+  .bd-inquiry-form input, .bd-inquiry-form textarea, .bd-review-form select, .bd-review-form textarea {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1.5px solid var(--bd-border); font-family: inherit; margin-bottom: 10px; font-size: 0.85rem;
   }
-  @media (max-width: 640px) {
-    .bd-hero { min-height: 300px; }
-    .bd-name { font-size: 1.2rem; }
-    .bd-logo, .bd-logo-fallback { width: 52px; height: 52px; border-radius: 13px; }
-    .bd-hero-contact-btn { padding: 10px 16px; font-size: 0.8rem; }
-    .bd-card { padding: 18px; }
-    .bd-review-avg { font-size: 2rem; }
-  }
-  @media (min-width: 641px) {
-    .bd-mobile-bar { display: none; }
-  }
+  .bd-submit-btn { background: var(--bd-primary); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+  .bd-sticky-cta { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: linear-gradient(90deg, var(--bd-fg), var(--bd-primary)); padding: 14px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: 0 -4px 16px rgba(0,0,0,0.12); }
+  .bd-sticky-text { color: #fff; }
+  .bd-sticky-text strong { display: block; font-size: 0.92rem; }
+  .bd-sticky-text span { font-size: 0.78rem; color: rgba(255,255,255,0.8); }
+  .bd-sticky-btn { background: #fff; color: var(--bd-fg); padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; text-decoration: none; white-space: nowrap; }
+
+  .bd-lightbox { display: none; position: fixed; inset: 0; background: rgba(4,22,20,0.94); z-index: 1000; align-items: center; justify-content: center; padding: 30px; }
+  .bd-lightbox.open { display: flex; }
+  .bd-lightbox img { max-width: 100%; max-height: 100%; border-radius: 14px; object-fit: contain; }
+  .bd-lightbox-close { position: absolute; top: 20px; right: 24px; background: rgba(255,255,255,0.14); border: 1.5px solid rgba(255,255,255,0.3); color: #fff; width: 42px; height: 42px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; }
 </style>
 
 <div class="bd-wrap">
+  <div class="bd-inner">
+    <div class="bd-crumbs">
+      <a href="{% url 'home' %}">Home</a><span class="sep">›</span>
+      <a href="{% url 'moving_essentials' %}">Businesses</a><span class="sep">›</span>
+      <a href="{% url 'moving_essentials' %}?category={{ business.category }}">{{ business.get_category_display }}</a><span class="sep">›</span>
+      <span class="current">{{ business.name }}</span>
+    </div>
 
-  <!-- ============ 1. STICKY BREADCRUMB ============ -->
-  <div class="bd-breadcrumb-wrap">
-    <nav class="bd-breadcrumb" aria-label="Breadcrumb">
-      <a href="/" class="bd-reset">Home</a>
-      <span class="bd-crumb-sep">/</span>
-      <a href="javascript:history.back()" class="bd-reset">Businesses</a>
-      <span class="bd-crumb-sep">/</span>
-      <span>{{ business.get_category_display }}</span>
-      <span class="bd-crumb-sep">/</span>
-      <span class="bd-crumb-current">{{ business.name }}</span>
-    </nav>
-  </div>
-
-  <!-- ============ 2. HERO ============ -->
-  <div class="bd-hero-outer">
     <div class="bd-hero">
-      {% if business.gallery_images.all %}
-        <img class="bd-hero-img" src="{{ business.gallery_images.first.image.url }}" alt="{{ business.name }}" loading="lazy">
-      {% elif business.cover_image %}
-        <img class="bd-hero-img" src="{{ business.cover_image.url }}" alt="{{ business.name }}" loading="lazy">
-      {% elif business.logo %}
-        <img class="bd-hero-img" src="{{ business.logo.url }}" alt="{{ business.name }}" loading="lazy">
-      {% endif %}
+      {% if business.cover_image %}<img class="bd-hero-img" src="{{ business.cover_image.url }}" alt="{{ business.name }}">
+      {% elif business.gallery_images.all %}<img class="bd-hero-img" src="{{ business.gallery_images.first.image.url }}" alt="{{ business.name }}">{% endif %}
 
-      <div class="bd-hero-topbar">
-        <a href="javascript:history.back()" class="bd-back-pill" aria-label="Go back">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back
-        </a>
-        <div class="bd-hero-topbar-right">
-          {% if business.is_featured %}<span class="bd-sponsored-pill">⭐ Sponsored</span>{% endif %}
-          <button type="button" class="bd-icon-pill" id="bdSaveBtn" onclick="bdToggleSave(this)" aria-label="Save business" aria-pressed="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.8 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
-          </button>
-          <button type="button" class="bd-icon-pill" onclick="shareBusinessProfile()" aria-label="Share business">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          </button>
-        </div>
+      <div class="bd-hero-icons">
+        {% if user.is_authenticated %}
+        <form method="post">{% csrf_token %}<input type="hidden" name="form_type" value="favorite">
+          <button type="submit" class="bd-icon-btn {% if is_favorited %}active{% endif %}">{% if is_favorited %}❤️{% else %}🤍{% endif %}</button>
+        </form>
+        {% endif %}
+        <button type="button" class="bd-icon-btn" onclick="bdShare()">⤴️</button>
       </div>
 
       <div class="bd-hero-content">
-        <div class="bd-hero-namerow">
-          {% if business.logo %}
-            <img src="{{ business.logo.url }}" alt="{{ business.name }}" class="bd-logo">
-          {% else %}
-            <div class="bd-logo-fallback">{{ business.name|slice:":1"|upper }}</div>
-          {% endif %}
-          <div class="bd-name-block">
-            <div class="bd-name-row">
-              <span class="bd-name">{{ business.name }}</span>
-              {% if business.is_verified %}
-                <span class="bd-verified-badge">
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5.3 3.4 9.9 8 11 4.6-1.1 8-5.7 8-11V5l-8-3zm-1.2 14.2L6.5 12l1.4-1.4 2.9 2.9 6.3-6.3 1.4 1.4-7.7 7.6z"/></svg>
-                  Verified
-                </span>
-              {% endif %}
-            </div>
-            <div class="bd-meta-row">
-              <span>{{ business.get_category_display }}</span>
-              {% if business.average_rating %}
-                <span class="bd-dot">·</span>
-                <span class="bd-rating-inline">★ {{ business.average_rating }}</span>
-                <span>({{ business.review_count }} review{{ business.review_count|pluralize }})</span>
-              {% endif %}
-              {% if business.is_open_now is not None %}
-                <span class="bd-dot">·</span>
-                {% if business.is_open_now %}<span class="bd-status-open">Open now</span>{% else %}<span class="bd-status-closed">Closed</span>{% endif %}
-              {% endif %}
-              {% if business.town %}
-                <span class="bd-dot">·</span>
-                <span>{{ business.town }}{% if business.county %}, {{ business.county }}{% endif %}</span>
-              {% endif %}
-            </div>
+        {% if business.logo %}<img class="bd-logo" src="{{ business.logo.url }}" alt="{{ business.name }}">
+        {% else %}<div class="bd-logo-fallback">{{ business.name|slice:":1"|upper }}</div>{% endif %}
+
+        <div class="bd-hero-main">
+          <div class="bd-name-row">
+            <span class="bd-name">{{ business.name }}</span>
+            {% if business.verification_status == 'verified' %}<span class="bd-verified">✓ Verified Business</span>{% endif %}
+          </div>
+          <div class="bd-meta-row">
+            {% if business.average_rating %}<span class="bd-stars">★ {{ business.average_rating }}</span> ({{ business.review_count }} Review{{ business.review_count|pluralize }}){% endif %}
+            <span>📍 {{ business.town }}{% if business.county %}, {{ business.county }}{% endif %}</span>
+            {% if business.is_open_now is not None %}
+              {% if business.is_open_now %}<span class="bd-open">● Open Now</span>{% if business.closes_at %}· Closes {{ business.closes_at|time:"g:i A" }}{% endif %}
+              {% else %}<span class="bd-closed">● Closed</span>{% endif %}
+            {% endif %}
           </div>
         </div>
 
-        <div class="bd-hero-contact">
-          {% if business.whatsapp_number %}
-            <a href="https://wa.me/{{ business.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE." target="_blank" rel="noopener noreferrer" class="bd-hero-contact-btn bd-hc-wa" onclick="bdTrack('whatsapp_click')">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.1 8.1 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8 1-.2.2-.3.2-.5.1-1.4-.7-2.3-1.3-3.2-2.9-.2-.4.2-.4.6-1.2.1-.2 0-.4 0-.5L9.5 8.1c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-1 1-1 2.4s1 2.8 1.1 3c.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>
-              WhatsApp
-            </a>
-          {% endif %}
-          {% if business.phone_number %}
-            <a href="tel:{{ business.phone_number }}" class="bd-hero-contact-btn bd-hc-phone" onclick="bdTrack('phone_click')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.1-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2.1z"/></svg>
-              Call
-            </a>
-          {% endif %}
-          {% if business.latitude and business.longitude %}
-            <a href="https://www.google.com/maps/dir/?api=1&destination={{ business.latitude }},{{ business.longitude }}" target="_blank" rel="noopener noreferrer" class="bd-hero-contact-btn bd-hc-directions" onclick="bdTrack('directions_click')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-              Directions
-            </a>
-          {% endif %}
-          {% if business.website %}
-            <a href="{{ business.website }}" target="_blank" rel="noopener noreferrer" class="bd-hero-contact-btn bd-hc-web" onclick="bdTrack('website_click')">Visit Website ↗</a>
-          {% endif %}
+        <div class="bd-hero-actions">
+          {% if business.phone_number %}<a href="tel:{{ business.phone_number }}" class="bd-hero-btn bd-btn-call" onclick="bdTrack('phone_click')">📞 Call</a>{% endif %}
+          {% if business.whatsapp_number %}<a href="https://wa.me/{{ business.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE." target="_blank" class="bd-hero-btn bd-btn-wa" onclick="bdTrack('whatsapp_click')">💬 WhatsApp</a>{% endif %}
+          {% if business.latitude and business.longitude %}<a href="https://www.google.com/maps?q={{ business.latitude }},{{ business.longitude }}" target="_blank" class="bd-hero-btn bd-btn-dir">🧭 Directions</a>{% endif %}
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- ============ 3. NAVIGATION TABS ============ -->
-  <div class="bd-tabs-wrap">
-    <div class="bd-tabs" id="bdTabs" role="tablist">
-      <button type="button" class="bd-tab active" data-target="bdOverview">Overview</button>
-      {% if business.products.all %}<button type="button" class="bd-tab" data-target="bdProducts">Products & Services</button>{% endif %}
-      <button type="button" class="bd-tab" data-target="bdReviews">Reviews{% if business.review_count %} ({{ business.review_count }}){% endif %}</button>
-      {% if business.gallery_images.all %}<button type="button" class="bd-tab" data-target="bdPhotos">Photos</button>{% endif %}
-      <button type="button" class="bd-tab" data-target="bdAbout">About</button>
-      <button type="button" class="bd-tab" data-target="bdLocation">Location</button>
-    </div>
-  </div>
-
-  <div class="bd-inner" id="bdOverview">
-
-    <!-- ============ 4. IMAGE GALLERY ============ -->
     {% if business.gallery_images.all %}
-    <div class="bd-card" id="bdPhotos">
-      <div class="bd-section-title">
-        <span class="bd-section-title-left">Photos</span>
-        <span class="bd-section-link">{{ business.gallery_images.all|length }} photo{{ business.gallery_images.all|length|pluralize }}</span>
-      </div>
-      <div class="bd-gallery-scroll">
-        {% for photo in business.gallery_images.all %}
-          <div class="bd-gallery-item" onclick="openBdLightbox({{ forloop.counter0 }})">
-            <img src="{{ photo.image.url }}" alt="{{ business.name }} photo" loading="lazy">
-            {% if photo.category %}<span class="bd-gallery-tag">{{ photo.category }}</span>{% endif %}
-          </div>
-        {% endfor %}
-      </div>
+    <div class="bd-photo-strip">
+      {% for photo in business.gallery_images.all|slice:":10" %}
+        <div class="bd-photo-tile" onclick="openBdLightbox({{ forloop.counter0 }})"><img src="{{ photo.image.url }}" alt="{{ photo.caption|default:business.name }}"></div>
+      {% endfor %}
     </div>
     {% endif %}
 
-    <!-- ============ 5 & 6. ABOUT + BUSINESS INFO ============ -->
-    <div class="bd-two-col" id="bdAbout">
-      <div class="bd-card" style="margin-top:0;">
-        <div class="bd-section-title"><span class="bd-section-title-left">About {{ business.name }}</span></div>
-        {% if business.description %}
-          <p class="bd-desc">{{ business.description|linebreaksbr }}</p>
-        {% else %}
-          <p class="bd-desc" style="color:var(--bd-faint);">This business hasn't added a description yet.</p>
-        {% endif %}
-
-        {% if business.years_in_operation %}
-          <div class="bd-years-chip"><strong>{{ business.years_in_operation }}+</strong> years in operation</div>
-        {% endif %}
-
-        <div class="bd-badges">
-          {% if business.is_verified %}
-          <span class="bd-badge"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5.3 3.4 9.9 8 11 4.6-1.1 8-5.7 8-11V5l-8-3z"/></svg>Verified Business</span>
-          {% endif %}
-          {% if business.offers_installation %}
-          <span class="bd-badge">Professional Installation</span>
-          {% endif %}
-          <span class="bd-badge">Quality Guaranteed</span>
-          <span class="bd-badge">Trusted Service</span>
-          {% if business.avg_response_time %}
-          <span class="bd-badge">Fast Response</span>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="bd-card" style="margin-top:0;">
-        <div class="bd-section-title"><span class="bd-section-title-left">Business Information</span></div>
-        <div class="bd-info-list">
-          <div class="bd-info-row">
-            <div class="bd-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg></div>
-            <div><div class="bd-info-label">Category</div><div class="bd-info-value">{{ business.get_category_display }}</div></div>
-          </div>
-          <div class="bd-info-row">
-            <div class="bd-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 6-9 12-9 12S3 16 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-            <div><div class="bd-info-label">Location</div><div class="bd-info-value">{{ business.town }}{% if business.county %}, {{ business.county }}{% endif %}</div></div>
-          </div>
-          {% if business.service_areas %}
-          <div class="bd-info-row">
-            <div class="bd-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg></div>
-            <div><div class="bd-info-label">Service Areas</div><div class="bd-info-value">{{ business.service_areas }}</div></div>
-          </div>
-          {% endif %}
-          {% if business.working_hours %}
-          <div class="bd-info-row">
-            <div class="bd-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-            <div><div class="bd-info-label">Working Hours</div><div class="bd-info-value">{{ business.working_hours|linebreaksbr }}</div></div>
-          </div>
-          {% endif %}
-          {% if business.phone_number %}
-          <div class="bd-info-row">
-            <div class="bd-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.1-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2.1z"/></svg></div>
-            <div><div class="bd-info-label">Phone</div><div class="bd-info-value"><a href="tel:{{ business.phone_number }}">{{ business.phone_number }}</a></div></div>
-          </div>
-          {% endif %}
-          {% if business.email %}
-          <div class="bd-info-row">
-            <div class="bd-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg></div>
-            <div><div class="bd-info-label">Email</div><div class="bd-info-value"><a href="mailto:{{ business.email }}">{{ business.email }}</a></div></div>
-          </div>
-          {% endif %}
-          {% if business.website %}
-          <div class="bd-info-row">
-            <div class="bd-info-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20z"/></svg></div>
-            <div><div class="bd-info-label">Website</div><div class="bd-info-value"><a href="{{ business.website }}" target="_blank" rel="noopener noreferrer">{{ business.website }}</a></div></div>
-          </div>
-          {% endif %}
-        </div>
-
-        {% if business.facebook_url or business.instagram_url or business.tiktok_url %}
-        <div class="bd-social-row">
-          {% if business.facebook_url %}<a href="{{ business.facebook_url }}" target="_blank" rel="noopener noreferrer" class="bd-social-icon" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.2c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg></a>{% endif %}
-          {% if business.instagram_url %}<a href="{{ business.instagram_url }}" target="_blank" rel="noopener noreferrer" class="bd-social-icon" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></a>{% endif %}
-          {% if business.tiktok_url %}<a href="{{ business.tiktok_url }}" target="_blank" rel="noopener noreferrer" class="bd-social-icon" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 2h-3v13.6a2.9 2.9 0 1 1-2.4-2.9v-3a5.9 5.9 0 1 0 5.4 5.9V8.6a7 7 0 0 0 4 1.3v-3a4 4 0 0 1-4-3.4z"/></svg></a>{% endif %}
-        </div>
-        {% endif %}
-
-        {% if business.latitude and business.longitude %}
-        <a href="https://www.google.com/maps/dir/?api=1&destination={{ business.latitude }},{{ business.longitude }}" target="_blank" rel="noopener noreferrer" class="bd-map-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-          Open in Google Maps
-        </a>
-        {% endif %}
-      </div>
+    <div class="bd-tabs">
+      <a href="#bd-about" class="bd-tab active">Overview</a>
+      <a href="#bd-products" class="bd-tab">Products & Services</a>
+      <a href="#bd-reviews" class="bd-tab">Reviews ({{ business.review_count }})</a>
+      <a href="#bd-photos" class="bd-tab">Photos</a>
+      <a href="#bd-about" class="bd-tab">About</a>
+      <a href="#bd-location" class="bd-tab">Location</a>
     </div>
 
-    <!-- ============ 7. PRODUCTS & SERVICES ============ -->
-    {% if business.products.all %}
-    <div class="bd-card" id="bdProducts">
-      <div class="bd-section-title">
-        <span class="bd-section-title-left">Products & Services</span>
-        {% if business.products.all|length > 12 %}<a href="#" class="bd-section-link">View All</a>{% endif %}
-      </div>
-      <div class="bd-products">
-        {% for product in business.products.all|slice:":12" %}
-          <div class="bd-product">
-            <div class="bd-product-img-wrap">
-              {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" loading="lazy">{% endif %}
-              {% if product.is_available is not None %}
-                {% if product.is_available %}<span class="bd-product-avail">Available</span>{% else %}<span class="bd-product-avail bd-unavailable">Unavailable</span>{% endif %}
-              {% endif %}
-            </div>
-            <div class="bd-product-body">
-              <div class="bd-product-name">{{ product.name }}</div>
-              {% if product.short_description %}<div class="bd-product-desc">{{ product.short_description }}</div>{% endif %}
-              {% if product.price %}<div class="bd-product-price"><span>From</span> KSh {{ product.price|floatformat:"0" }}</div>{% endif %}
-              <div class="bd-product-actions">
-                <button type="button" class="bd-product-view-btn" onclick="bdOpenProductModal('bdProductModal{{ forloop.counter0 }}')">View Details</button>
-                {% if business.whatsapp_number %}
-                <a href="https://wa.me/{{ business.whatsapp_number }}?text=Hi,%20I'm%20interested%20in%20{{ product.name|urlencode }}%20from%20{{ business.name|urlencode }}" target="_blank" rel="noopener noreferrer" class="bd-product-icon-btn" aria-label="WhatsApp about {{ product.name }}">
-                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm4.5 12.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8 1-.2.2-.3.2-.5.1-1.4-.7-2.3-1.3-3.2-2.9-.2-.4.2-.4.6-1.2.1-.2 0-.4 0-.5L9.5 8.1c-.2-.4-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-1 1-1 2.4s1 2.8 1.1 3c.1.2 2 3 4.8 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg>
-                </a>
-                {% endif %}
-              </div>
-            </div>
-          </div>
+    <div class="bd-layout">
+      <div class="bd-main">
 
-          <!-- ============ 8. PRODUCT DETAIL MODAL ============ -->
-          <div class="bd-modal-overlay" id="bdProductModal{{ forloop.counter0 }}" onclick="if(event.target===this) bdCloseProductModal('bdProductModal{{ forloop.counter0 }}')">
-            <div class="bd-modal">
-              <div style="position:relative;">
-                {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}" class="bd-modal-img">{% endif %}
-                <button type="button" class="bd-modal-close" onclick="bdCloseProductModal('bdProductModal{{ forloop.counter0 }}')" aria-label="Close">&times;</button>
-              </div>
-              <div class="bd-modal-body">
-                <div class="bd-modal-title">{{ product.name }}</div>
-                {% if product.price %}<div class="bd-modal-price">From KSh {{ product.price|floatformat:"0" }}</div>{% endif %}
-                {% if product.description %}<p class="bd-modal-desc">{{ product.description|linebreaksbr }}</p>{% endif %}
-
-                {% if product.colors %}
-                <div class="bd-modal-attr">
-                  <div class="bd-modal-attr-label">Available Colours</div>
-                  <div class="bd-modal-attr-chips">{% for c in product.colors|slice:":8" %}<span class="bd-modal-chip">{{ c }}</span>{% endfor %}</div>
-                </div>
-                {% endif %}
-                {% if product.sizes %}
-                <div class="bd-modal-attr">
-                  <div class="bd-modal-attr-label">Sizes</div>
-                  <div class="bd-modal-attr-chips">{% for s in product.sizes|slice:":8" %}<span class="bd-modal-chip">{{ s }}</span>{% endfor %}</div>
-                </div>
-                {% endif %}
-                {% if product.materials %}
-                <div class="bd-modal-attr">
-                  <div class="bd-modal-attr-label">Materials</div>
-                  <div class="bd-modal-attr-chips">{% for m in product.materials|slice:":8" %}<span class="bd-modal-chip">{{ m }}</span>{% endfor %}</div>
-                </div>
-                {% endif %}
-
-                <div class="bd-modal-actions">
-                  {% if business.whatsapp_number %}<a href="https://wa.me/{{ business.whatsapp_number }}?text=Hi,%20I'm%20interested%20in%20{{ product.name|urlencode }}" target="_blank" rel="noopener noreferrer" class="bd-hc-wa">WhatsApp</a>{% endif %}
-                  {% if business.phone_number %}<a href="tel:{{ business.phone_number }}" class="bd-hc-phone">Contact Business</a>{% endif %}
-                </div>
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
-
-    <!-- ============ 9 & 10. REVIEWS + LOCATION ============ -->
-    <div class="bd-two-col">
-      <div class="bd-card" id="bdReviews" style="margin-top:20px;">
-        <div class="bd-section-title">
-          <span class="bd-section-title-left">Customer Reviews</span>
-          {% if business.review_count %}<a href="#" class="bd-section-link">View All Reviews</a>{% endif %}
-        </div>
-
-        {% if business.average_rating %}
-        <div class="bd-review-summary">
-          <div>
-            <div class="bd-review-avg">{{ business.average_rating }}</div>
-            <div class="bd-review-stars">★★★★★</div>
-            <div class="bd-review-count-text">{{ business.review_count }} rating{{ business.review_count|pluralize }}</div>
+        <div class="bd-card" id="bd-about">
+          <h2>About {{ business.name }}</h2>
+          {% if business.description %}<p style="font-size:0.88rem;line-height:1.7;">{{ business.description|linebreaksbr }}</p>{% endif %}
+          <div class="bd-badges">
+            {% if business.verification_status == 'verified' %}<span class="bd-badge">✓ Verified Business</span>{% endif %}
+            <span class="bd-badge">🛠️ {{ business.get_category_display }}</span>
+            {% if business.product_count %}<span class="bd-badge">🛍️ {{ business.product_count }} Product{{ business.product_count|pluralize }}</span>{% endif %}
           </div>
         </div>
-        {% endif %}
 
-        {% for r in reviews %}
-          <div class="bd-review-card">
-            <div class="bd-review-head">
-              {% if r.user.profile_photo %}<img src="{{ r.user.profile_photo.url }}" alt="{{ r.user.username }}" class="bd-review-avatar">
-              {% else %}<div class="bd-review-avatar-fallback">{{ r.user.username|slice:":1"|upper }}</div>{% endif %}
-              <div>
-                <div class="bd-review-name-row">
-                  <span class="bd-review-name">{{ r.user.username }}</span>
-                  {% if r.is_verified_customer %}<span class="bd-review-verified">✓ Verified Customer</span>{% endif %}
-                </div>
-                <div class="bd-review-date">{{ r.created_at|date:"M d, Y" }}</div>
+        <div class="bd-card" id="bd-products">
+          <h2>Products & Services</h2>
+          {% if business.products.all %}
+          <div class="bd-products-grid">
+            {% for product in business.products.all|slice:":12" %}
+            <div class="bd-product">
+              {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">{% endif %}
+              <div class="bd-product-body">
+                <div class="bd-product-name">{{ product.name }}</div>
+                {% if product.price %}<div class="bd-product-from">From</div><div class="bd-product-price">KSh {{ product.price|floatformat:"0" }}</div>{% endif %}
               </div>
             </div>
-            <div class="bd-review-stars-sm">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
-            {% if r.comment %}<p class="bd-review-text">{{ r.comment }}</p>{% endif %}
+            {% endfor %}
+          </div>
+          {% else %}<p style="color:var(--bd-subtle);font-size:0.85rem;">No products listed yet.</p>{% endif %}
+        </div>
+
+        <div class="bd-card" id="bd-photos">
+          <h2>Photos</h2>
+          {% if business.gallery_images.all %}
+          <div class="bd-products-grid">
+            {% for photo in business.gallery_images.all %}
+              <div class="bd-product" style="cursor:pointer;" onclick="openBdLightbox({{ forloop.counter0 }})"><img src="{{ photo.image.url }}" alt="{{ business.name }}" style="height:110px;"></div>
+            {% endfor %}
+          </div>
+          {% else %}<p style="color:var(--bd-subtle);font-size:0.85rem;">No photos yet.</p>{% endif %}
+        </div>
+
+        <div class="bd-card" id="bd-reviews">
+          <h2>Customer Reviews</h2>
+          <div class="bd-rating-summary">
+            <div>
+              <div class="bd-rating-big">{{ business.average_rating|default:"—" }}</div>
+              <div class="bd-rating-count">{{ business.review_count }} Review{{ business.review_count|pluralize }}</div>
+            </div>
+            <div class="bd-hist">
+              {% for row in rating_breakdown %}
+              <div class="bd-hist-row"><span>{{ row.star }}★</span><div class="bd-hist-bar-bg"><div class="bd-hist-bar" style="width:{{ row.pct }}%;"></div></div><span>{{ row.count }}</span></div>
+              {% endfor %}
+            </div>
+          </div>
+
+          {% for r in reviews %}
+          <div class="bd-review">
+            <span class="bd-review-name">{{ r.user.username }}</span><span class="bd-review-date">{{ r.created_at|timesince }} ago</span>
+            <div class="bd-stars" style="font-size:0.8rem;">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+            {% if r.comment %}<p style="font-size:0.85rem;margin-top:4px;">{{ r.comment }}</p>{% endif %}
             {% if r.reply %}<div class="bd-review-reply"><strong>{{ business.name }} replied:</strong> {{ r.reply }}</div>{% endif %}
-            <button type="button" class="bd-review-helpful">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.3a2 2 0 0 0 2-1.7l1.4-9a2 2 0 0 0-2-2.3H14z"/></svg>
-              Helpful{% if r.helpful_count %} ({{ r.helpful_count }}){% endif %}
-            </button>
           </div>
-        {% empty %}
-          <div class="bd-empty-state">No reviews yet — be the first to share your experience.</div>
-        {% endfor %}
+          {% empty %}
+          <p style="color:var(--bd-subtle);font-size:0.85rem;">No reviews yet — be the first to leave one.</p>
+          {% endfor %}
+
+          {% if user.is_authenticated %}
+          <form method="post" class="bd-review-form" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--bd-border);">
+            {% csrf_token %}
+            <label style="font-weight:700;font-size:0.85rem;display:block;margin-bottom:8px;">Leave a review</label>
+            <select name="rating" required>
+              <option value="">Rating</option>
+              {% for i in "12345" %}<option value="{{ i }}">{{ i }} star{{ i|pluralize }}</option>{% endfor %}
+            </select>
+            <textarea name="comment" placeholder="Optional comment"></textarea>
+            <button type="submit" class="bd-submit-btn">Submit Review</button>
+          </form>
+          {% endif %}
+        </div>
 
         {% if user.is_authenticated %}
-        <form method="post" style="margin-top:16px; padding-top:16px; border-top:1px solid var(--bd-border);">
-          {% csrf_token %}
-          <label class="bd-form-label">Leave a review</label>
-          <select name="rating" required class="bd-select">
-            <option value="">Rating</option>
-            {% for i in "12345" %}<option value="{{ i }}">{{ i }} star{{ i|pluralize }}</option>{% endfor %}
-          </select>
-          <textarea name="comment" placeholder="Optional comment" class="bd-textarea"></textarea>
-          <button type="submit" class="bd-btn-primary">Submit Review</button>
-        </form>
+        <div class="bd-card">
+          <h2>Have a Question or Need a Custom Order?</h2>
+          <form method="post" class="bd-inquiry-form">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="inquiry">
+            <input type="text" name="customer_name" placeholder="Your name" value="{{ request.user.first_name|default:request.user.username }}" required>
+            <input type="text" name="customer_phone" placeholder="Phone (optional)">
+            <textarea name="message" placeholder="What would you like to ask?" required></textarea>
+            <button type="submit" class="bd-submit-btn">Send Message</button>
+          </form>
+        </div>
         {% endif %}
       </div>
 
-      <div class="bd-card" id="bdLocation" style="margin-top:20px;">
-        <div class="bd-section-title"><span class="bd-section-title-left">Business Location</span>
-          {% if business.latitude and business.longitude %}<a href="https://www.google.com/maps/search/?api=1&query={{ business.latitude }},{{ business.longitude }}" target="_blank" rel="noopener noreferrer" class="bd-section-link">View Larger Map</a>{% endif %}
+      <div class="bd-sidebar">
+        <div class="bd-card" id="bd-info">
+          <h2>Business Information</h2>
+          <div class="bd-info-row"><span class="bd-info-icon">🏷️</span><div><div class="bd-info-label">Business Type</div>{{ business.get_category_display }}</div></div>
+          <div class="bd-info-row"><span class="bd-info-icon">📍</span><div><div class="bd-info-label">Location</div>{{ business.estate }}{% if business.estate %}, {% endif %}{{ business.town }}, {{ business.county }}</div></div>
+          {% if business.service_counties %}<div class="bd-info-row"><span class="bd-info-icon">🗺️</span><div><div class="bd-info-label">Service Area</div>{{ business.service_counties }}</div></div>{% endif %}
+          {% if business.opens_at and business.closes_at %}<div class="bd-info-row"><span class="bd-info-icon">🕒</span><div><div class="bd-info-label">Working Hours</div>{{ business.opens_at|time:"g:i A" }} – {{ business.closes_at|time:"g:i A" }}</div></div>{% endif %}
+          {% if business.phone_number %}<div class="bd-info-row"><span class="bd-info-icon">📞</span><div><div class="bd-info-label">Phone</div>{{ business.phone_number }}</div></div>{% endif %}
+          {% if business.email %}<div class="bd-info-row"><span class="bd-info-icon">✉️</span><div><div class="bd-info-label">Email</div>{{ business.email }}</div></div>{% endif %}
+          {% if business.website %}<div class="bd-info-row"><span class="bd-info-icon">🌐</span><div><div class="bd-info-label">Website</div><a href="{{ business.website }}" target="_blank" onclick="bdTrack('website_click')">{{ business.website }}</a></div></div>{% endif %}
+          <a href="mailto:support@homefinderke.com?subject=Report%20Business:%20{{ business.name|urlencode }}" class="bd-report-btn">🚩 Report Business</a>
         </div>
-        <div class="bd-map-frame">
-          {% if business.latitude and business.longitude %}
-            <iframe loading="lazy" src="https://maps.google.com/maps?q={{ business.latitude }},{{ business.longitude }}&z=15&output=embed" allowfullscreen></iframe>
-          {% endif %}
-        </div>
-        <div class="bd-map-landmarks">
-          {% if business.town %}{{ business.town }}{% if business.county %}, {{ business.county }}{% endif %}{% endif %}
-          {% if business.nearby_landmark %}<br>Near {{ business.nearby_landmark }}{% endif %}
-        </div>
+
         {% if business.latitude and business.longitude %}
-        <a href="https://www.google.com/maps/dir/?api=1&destination={{ business.latitude }},{{ business.longitude }}" target="_blank" rel="noopener noreferrer" class="bd-map-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-          Get Directions
-        </a>
+        <div class="bd-card" id="bd-location">
+          <h2>Business Location <a href="https://www.google.com/maps?q={{ business.latitude }},{{ business.longitude }}" target="_blank" class="bd-view-all">View Larger Map</a></h2>
+          <div id="bd-map"></div>
+        </div>
         {% endif %}
       </div>
     </div>
 
-    <!-- ============ 11. NEARBY BUSINESSES ============ -->
-    {% if nearby_businesses %}
+    {% if related %}
     <div class="bd-card">
-      <div class="bd-section-title">
-        <span class="bd-section-title-left">You May Also Like</span>
-        <a href="javascript:history.back()" class="bd-section-link">View All Businesses</a>
-      </div>
-      <div class="bd-nearby-scroll">
-        {% for nb in nearby_businesses %}
-          <a href="/biz/{{ nb.slug }}/" class="bd-nearby-card bd-reset">
-            {% if nb.cover_image %}<img src="{{ nb.cover_image.url }}" alt="{{ nb.name }}" class="bd-nearby-img" loading="lazy">
-            {% elif nb.logo %}<img src="{{ nb.logo.url }}" alt="{{ nb.name }}" class="bd-nearby-img" loading="lazy">{% endif %}
-            <div class="bd-nearby-body">
-              <div class="bd-nearby-name">{{ nb.name }}</div>
-              <div class="bd-nearby-meta">
-                {% if nb.average_rating %}<span class="bd-nearby-rating">★ {{ nb.average_rating }}</span>{% endif %}
-                {% if nb.town %}<span>· {{ nb.town }}</span>{% endif %}
-              </div>
-            </div>
-          </a>
+      <h2>You May Also Like <a href="{% url 'moving_essentials' %}?category={{ business.category }}" class="bd-view-all">View All Businesses</a></h2>
+      <div class="bd-related-grid">
+        {% for b in related %}
+        <a href="{% url 'business_detail' b.slug %}" class="bd-related-card">
+          {% if b.logo %}<img src="{{ b.logo.url }}" alt="{{ b.name }}">{% elif b.cover_image %}<img src="{{ b.cover_image.url }}" alt="{{ b.name }}">{% endif %}
+          <div class="bd-related-body">
+            <div class="bd-related-name">{{ b.name }}</div>
+            <div class="bd-related-meta">{{ b.town }} {% if b.average_rating %}· ★ {{ b.average_rating }} ({{ b.review_count }}){% endif %}</div>
+          </div>
+        </a>
         {% endfor %}
       </div>
     </div>
     {% endif %}
-
-    <!-- ============ 12. CONTACT BANNER (desktop) ============ -->
-    <div class="bd-card" style="margin-top:24px; background:linear-gradient(135deg, var(--bd-fg), var(--bd-primary)) !important; border:none; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;">
-      <div>
-        <div style="color:#fff; font-weight:700; font-family:var(--bd-font-mono); font-size:1rem;">Need more information?</div>
-        <div style="color:rgba(255,255,255,0.8); font-size:0.85rem; margin-top:4px;">Contact {{ business.name }} directly — they usually reply fast.</div>
-      </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        {% if business.phone_number %}<a href="tel:{{ business.phone_number }}" class="bd-hero-contact-btn bd-hc-phone" onclick="bdTrack('phone_click')">Call</a>{% endif %}
-        {% if business.whatsapp_number %}<a href="https://wa.me/{{ business.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE." target="_blank" rel="noopener noreferrer" class="bd-hero-contact-btn bd-hc-wa" onclick="bdTrack('whatsapp_click')">WhatsApp</a>{% endif %}
-        {% if business.website %}<a href="{{ business.website }}" target="_blank" rel="noopener noreferrer" class="bd-hero-contact-btn bd-hc-web" onclick="bdTrack('website_click')">Website</a>{% endif %}
-      </div>
-    </div>
-
-    {% if user.is_authenticated %}
-    <div class="bd-card">
-      <div class="bd-section-title"><span class="bd-section-title-left">Send a Message to {{ business.name }}</span></div>
-      <form method="post">
-        {% csrf_token %}
-        <input type="hidden" name="form_type" value="inquiry">
-        <label class="bd-form-label" for="bd_customer_name" style="display:none;">Your name</label>
-        <input id="bd_customer_name" type="text" name="customer_name" placeholder="Your name" value="{{ request.user.first_name|default:request.user.username }}" required class="bd-input">
-        <input type="text" name="customer_phone" placeholder="Phone (optional)" class="bd-input">
-        <textarea name="message" placeholder="What would you like to ask?" required class="bd-textarea"></textarea>
-        <button type="submit" class="bd-btn-primary">Send Message</button>
-      </form>
-    </div>
-    {% endif %}
-
   </div>
 
-  <!-- ============ LIGHTBOX ============ -->
+  {% if business.whatsapp_number %}
+  <div class="bd-sticky-cta">
+    <div class="bd-sticky-text"><strong>Have a question or need a custom order?</strong><span>Chat with {{ business.name }} directly on WhatsApp</span></div>
+    <a href="https://wa.me/{{ business.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE." target="_blank" class="bd-sticky-btn" onclick="bdTrack('whatsapp_click')">Chat on WhatsApp</a>
+  </div>
+  {% endif %}
+
   <div class="bd-lightbox" id="bdLightbox" onclick="if(event.target===this) closeBdLightbox()">
-    <button type="button" class="bd-lightbox-close" onclick="closeBdLightbox()" aria-label="Close">&times;</button>
-    <button type="button" class="bd-lightbox-nav bd-lightbox-prev" onclick="bdLightboxStep(-1)" aria-label="Previous photo">‹</button>
+    <button type="button" class="bd-lightbox-close" onclick="closeBdLightbox()">&times;</button>
     <img id="bdLightboxImg" src="" alt="Full size photo">
-    <button type="button" class="bd-lightbox-nav bd-lightbox-next" onclick="bdLightboxStep(1)" aria-label="Next photo">›</button>
   </div>
-
-  <!-- ============ MOBILE STICKY CONTACT BAR ============ -->
-  <div class="bd-mobile-bar">
-    <div class="bd-mobile-bar-text">
-      <div class="bd-mobile-bar-title">Have a question?</div>
-      <div class="bd-mobile-bar-sub">Chat with {{ business.name }} directly</div>
-    </div>
-    {% if business.whatsapp_number %}
-      <a href="https://wa.me/{{ business.whatsapp_number }}?text=Hello,%20I%20found%20you%20on%20HomeFinder%20KE." target="_blank" rel="noopener noreferrer" class="bd-mobile-bar-btn bd-wa-fill" onclick="bdTrack('whatsapp_click')">Chat on WhatsApp</a>
-    {% elif business.phone_number %}
-      <a href="tel:{{ business.phone_number }}" class="bd-mobile-bar-btn" onclick="bdTrack('phone_click')">Call Now</a>
-    {% endif %}
-  </div>
-
 </div>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 <script>
-  // ---------- Tabs: smooth scroll ----------
-  (function () {
-    const tabs = document.querySelectorAll('.bd-tab');
-    const stickyOffset = 100;
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        const targetId = tab.getAttribute('data-target');
-        const el = document.getElementById(targetId);
-        if (!el) return;
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        const top = el.getBoundingClientRect().top + window.pageYOffset - stickyOffset;
-        window.scrollTo({ top, behavior: 'smooth' });
-      });
-    });
-  })();
-
-  // ---------- Gallery lightbox ----------
   const bdGalleryPhotos = [{% for photo in business.gallery_images.all %}"{{ photo.image.url|escapejs }}",{% endfor %}];
   let bdLightboxIndex = 0;
-  function openBdLightbox(index) {
-    bdLightboxIndex = index;
-    document.getElementById('bdLightboxImg').src = bdGalleryPhotos[bdLightboxIndex];
+  function openBdLightbox(i) {
+    bdLightboxIndex = i;
+    document.getElementById('bdLightboxImg').src = bdGalleryPhotos[i];
     document.getElementById('bdLightbox').classList.add('open');
-    document.body.style.overflow = 'hidden';
   }
-  function closeBdLightbox() {
-    document.getElementById('bdLightbox').classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  function bdLightboxStep(dir) {
-    bdLightboxIndex = (bdLightboxIndex + dir + bdGalleryPhotos.length) % bdGalleryPhotos.length;
-    document.getElementById('bdLightboxImg').src = bdGalleryPhotos[bdLightboxIndex];
-  }
-  document.addEventListener('keydown', e => {
-    if (!document.getElementById('bdLightbox').classList.contains('open')) return;
-    if (e.key === 'Escape') closeBdLightbox();
-    if (e.key === 'ArrowLeft') bdLightboxStep(-1);
-    if (e.key === 'ArrowRight') bdLightboxStep(1);
-  });
+  function closeBdLightbox() { document.getElementById('bdLightbox').classList.remove('open'); }
 
-  // ---------- Product modal ----------
-  function bdOpenProductModal(id) {
-    document.getElementById(id).classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-  function bdCloseProductModal(id) {
-    document.getElementById(id).classList.remove('open');
-    document.body.style.overflow = '';
-  }
-  document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape') return;
-    document.querySelectorAll('.bd-modal-overlay.open').forEach(m => m.classList.remove('open'));
-    document.body.style.overflow = '';
-  });
-
-  // ---------- Save business (visual toggle; wire to your saved-businesses endpoint) ----------
-  function bdToggleSave(btn) {
-    const saved = btn.classList.toggle('bd-saved');
-    btn.setAttribute('aria-pressed', saved ? 'true' : 'false');
-    bdTrack(saved ? 'save_click' : 'unsave_click');
-  }
-
-  // ---------- Share ----------
-  function shareBusinessProfile() {
+  function bdShare() {
     const url = window.location.href;
-    if (navigator.share) {
-      navigator.share({ title: "{{ business.name|escapejs }}", url: url });
-    } else {
-      navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!'));
-    }
+    if (navigator.share) { navigator.share({ title: "{{ business.name|escapejs }}", url }); }
+    else { navigator.clipboard.writeText(url).then(() => alert('Link copied to clipboard!')); }
   }
-
-  // ---------- Analytics beacon ----------
   function bdTrack(eventType) {
     const url = "/biz/{{ business.slug|escapejs }}/track/" + eventType + "/";
     if (navigator.sendBeacon) { navigator.sendBeacon(url); } else { fetch(url); }
   }
 
-  // ---------- Highlight active tab on scroll ----------
-  (function () {
-    const sections = ['bdOverview','bdProducts','bdReviews','bdPhotos','bdAbout','bdLocation']
-      .map(id => document.getElementById(id)).filter(Boolean);
-    const tabs = Array.from(document.querySelectorAll('.bd-tab'));
-    if (!sections.length || !tabs.length) return;
-    window.addEventListener('scroll', () => {
-      const scrollPos = window.pageYOffset + 130;
-      let current = sections[0];
-      sections.forEach(sec => { if (sec.offsetTop <= scrollPos) current = sec; });
-      tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-target') === current.id));
-    }, { passive: true });
-  })();
+  {% if business.latitude and business.longitude %}
+  const bdMap = L.map('bd-map', { scrollWheelZoom: false }).setView([{{ business.latitude }}, {{ business.longitude }}], 15);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(bdMap);
+  L.marker([{{ business.latitude }}, {{ business.longitude }}]).addTo(bdMap);
+  {% endif %}
+
+  // Simple active-tab highlight on scroll
+  document.querySelectorAll('.bd-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.bd-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
 </script>
 {% endblock %}
