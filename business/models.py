@@ -386,6 +386,24 @@ class BusinessPayment(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+    def activate(self):
+        """
+        Marks this payment completed and activates the associated plan on
+        the business. Called by the M-Pesa callback on a real payment, and
+        by the admin action below for manual approval (e.g. while waiting
+        on live Safaricom credentials, or for bank/cash payments).
+        """
+        self.status = 'completed'
+        self.save(update_fields=['status'])
+
+        business = self.business
+        if self.plan:
+            business.plan = self.plan
+            business.save(update_fields=['plan', 'is_featured'])
+            BusinessSubscription.objects.update_or_create(
+                business=business, defaults={'plan': self.plan, 'status': 'active'},
+            )
+
 
 class BusinessAnalyticsEvent(models.Model):
     EVENT_CHOICES = [

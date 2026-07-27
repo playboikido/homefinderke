@@ -62,8 +62,17 @@ class BusinessSubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(BusinessPayment)
 class BusinessPaymentAdmin(admin.ModelAdmin):
-    list_display = ('business', 'purpose', 'amount', 'status', 'created_at')
-    list_filter = ('purpose', 'status', 'method')
+    list_display = ('business', 'purpose', 'amount', 'status', 'plan', 'created_at')
+    list_filter = ('purpose', 'status', 'method', 'plan')
+    actions = ['mark_completed_and_activate']
+
+    @admin.action(description="Mark as completed & activate the business's plan")
+    def mark_completed_and_activate(self, request, queryset):
+        activated = 0
+        for payment in queryset.exclude(status='completed'):
+            payment.activate()
+            activated += 1
+        self.message_user(request, f"Activated {activated} payment(s).")
 
 
 admin.site.register(BusinessStaffMember)

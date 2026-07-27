@@ -592,19 +592,12 @@ def business_mpesa_callback(request):
     try:
         payment = BusinessPayment.objects.get(checkout_request_id=checkout_id)
         if result.get('ResultCode') == 0:
-            payment.status = 'completed'
             items = result.get('CallbackMetadata', {}).get('Item', [])
             for item in items:
                 if item.get('Name') == 'MpesaReceiptNumber':
                     payment.mpesa_receipt = item.get('Value', '')
-            payment.save()
-
-            business = payment.business
-            business.plan = payment.plan
-            business.save(update_fields=['plan', 'is_featured'])
-            BusinessSubscription.objects.update_or_create(
-                business=business, defaults={'plan': payment.plan, 'status': 'active'},
-            )
+            payment.save(update_fields=['mpesa_receipt'])
+            payment.activate()
         else:
             payment.status = 'failed'
             payment.save(update_fields=['status'])
