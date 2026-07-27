@@ -1,0 +1,45 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Team Members — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Team Members</h1>
+    <p class="biz-subtitle">{{ seats_used }} of {{ seat_limit|default:"unlimited" }} seat{{ seat_limit|pluralize }} used</p>
+
+    <div class="biz-inquiry">
+        <strong>{{ business.owner.email }}</strong> <span class="biz-empty">Owner</span>
+    </div>
+
+    {% for member in staff_members %}
+    <div class="biz-inquiry" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <strong>{{ member.user.email }}</strong>
+            <span class="biz-empty">{{ member.get_role_display }} · added {{ member.created_at|date:"d M Y" }}</span>
+        </div>
+        <form method="POST" onsubmit="return confirm('Remove {{ member.user.email }} from your team?');">
+            {% csrf_token %}
+            <input type="hidden" name="remove_id" value="{{ member.id }}">
+            <button type="submit" class="biz-btn">Remove</button>
+        </form>
+    </div>
+    {% empty %}
+    <p class="biz-empty">No additional team members yet.</p>
+    {% endfor %}
+
+    {% if seat_limit is None or seats_used < seat_limit %}
+    <form method="POST" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="email" name="email" placeholder="Team member's HomeFinder KE email" required style="flex:2;min-width:200px;">
+        <select name="role" style="flex:1;">
+            <option value="staff">Staff</option>
+            <option value="manager">Manager</option>
+        </select>
+        <button type="submit" class="biz-btn biz-btn-primary">Add to team</button>
+    </form>
+    <p class="biz-empty" style="margin-top:8px;">They must already have a HomeFinder KE account under this email.</p>
+    {% else %}
+    <div class="biz-unlock" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <p class="biz-empty">You've used all {{ seat_limit }} seats on your {{ business.get_plan_display }} plan. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

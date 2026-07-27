@@ -17,7 +17,8 @@
             <a href="{% url 'business:reviews' %}" class="biz-nav-item {% if active_tab == 'reviews' %}active{% endif %}"><span>⭐</span> Reviews</a>
             <a href="{% url 'business:analytics' %}" class="biz-nav-item {% if active_tab == 'analytics' %}active{% endif %}"><span>📈</span> Analytics</a>
             <a href="{% url 'business:plans' %}" class="biz-nav-item {% if active_tab == 'plans' %}active{% endif %}"><span>💳</span> Subscription</a>
-            <span class="biz-nav-item biz-nav-disabled"><span>🧾</span> Payments <em style="opacity:.6;font-size:.7rem;">🔒</em></span>
+            <a href="{% url 'business:payments' %}" class="biz-nav-item {% if active_tab == 'payments' %}active{% endif %}"><span>🧾</span> Payments</a>
+            <a href="{% url 'business:team' %}" class="biz-nav-item {% if active_tab == 'team' %}active{% endif %}"><span>👥</span> Team</a>
             <span class="biz-nav-item biz-nav-disabled"><span>✅</span> Verification <em style="opacity:.6;font-size:.7rem;">soon</em></span>
             <a href="{% url 'business:settings' %}" class="biz-nav-item {% if active_tab == 'settings' %}active{% endif %}"><span>⚙️</span> Settings</a>
         </nav>

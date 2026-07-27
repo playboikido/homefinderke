@@ -1,0 +1,30 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Payments — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Payments</h1>
+    {% if subscription %}
+    <p class="biz-subtitle">
+        Current plan: {{ business.get_plan_display }}
+        {% if subscription.renewal_date %} · renews {{ subscription.renewal_date|date:"d M Y" }}{% endif %}
+    </p>
+    {% endif %}
+
+    {% for payment in payments %}
+    <div class="biz-inquiry" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <strong>{{ payment.get_purpose_display }}</strong>
+            <span class="biz-empty">{{ payment.get_method_display }} · {{ payment.created_at|date:"d M Y, H:i" }}</span>
+        </div>
+        <div style="text-align:right;">
+            <strong>{{ payment.currency }} {{ payment.amount|floatformat:0 }}</strong><br>
+            <span class="biz-empty" style="color: {% if payment.status == 'completed' %}var(--success, #16a34a){% elif payment.status == 'failed' %}var(--danger, #dc2626){% else %}inherit{% endif %};">
+                {{ payment.get_status_display }}
+            </span>
+        </div>
+    </div>
+    {% empty %}
+    <p class="biz-empty">No payments yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

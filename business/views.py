@@ -18,9 +18,12 @@ from .forms import (
     BusinessContactForm, BusinessEditForm, BusinessInfoForm, BusinessLocationForm,
     BusinessProductFormSet, BusinessVerificationForm,
 )
+from django.contrib.auth import get_user_model
+
 from .models import (
     PLAN_CHOICES, PLAN_FEATURE_COPY, PLAN_HEADLINE_COUNT, PLAN_LIMITS, PLAN_PRICING,
-    Business, BusinessPayment, BusinessProduct, BusinessSubscription, BusinessVerificationDocument,
+    Business, BusinessPayment, BusinessProduct, BusinessStaffMember, BusinessSubscription,
+    BusinessVerificationDocument,
 )
 
 STEP_URLS = {
@@ -539,6 +542,81 @@ def request_upgrade(request, plan_slug):
         return redirect('business:dashboard')
 
     price = PLAN_PRICING[plan_slug]['monthly']
+    BusinessPayment.objects.create(
+        business=business,
+        purpose='subscription_monthly',
+        method='mpesa',
+        amount=price or 0,
+        status='pending',
+    )
+    messages.success(
+        request,
+        f"Upgrade request for {dict(PLAN_CHOICES)[plan_slug]} received — our team will reach out shortly "
+        f"by phone or WhatsApp to complete payment{' (custom pricing — we\u2019ll confirm the amount with you)' if price is None else ''}.",
+    )
+    return redirect('business:dashboard')
+
+
+@login_required
+def team_members(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    User = get_user_model()
+    seat_limit = business.plan_limits['staff']  # None = unlimited (Enterprise)
+    staff_qs = business.staff_members.select_related('user').all()
+    seats_used = 1 + staff_qs.count()  # 1 = the owner's own seat
+
+    if request.method == 'POST':
+        if 'remove_id' in request.POST:
+            BusinessStaffMember.objects.filter(pk=request.POST['remove_id'], business=business).delete()
+            messages.success(request, "Staff member removed.")
+            return redirect('business:team')
+
+        email = request.POST.get('email', '').strip().lower()
+        role = request.POST.get('role', 'staff')
+        if role not in ('manager', 'staff'):
+            role = 'staff'
+
+        if seat_limit is not None and seats_used >= seat_limit:
+            messages.error(request, f"Your current plan allows up to {seat_limit} staff account(s). Upgrade to add more.")
+            return redirect('business:team')
+
+        target_user = User.objects.filter(email__iexact=email).first()
+        if not target_user:
+            messages.error(request, "No HomeFinder KE account found with that email. They need to sign up first.")
+        elif target_user == business.owner:
+            messages.error(request, "That's the business owner — no need to add them as staff.")
+        elif BusinessStaffMember.objects.filter(business=business, user=target_user).exists():
+            messages.error(request, "That person is already on your team.")
+        else:
+            BusinessStaffMember.objects.create(business=business, user=target_user, role=role)
+            messages.success(request, f"{target_user.email} added to your team.")
+        return redirect('business:team')
+
+    return render(request, 'business/team.html', {
+        'business': business, 'staff_members': staff_qs, 'seats_used': seats_used,
+        'seat_limit': seat_limit, 'active_tab': 'team',
+    })
+
+
+@login_required
+def business_payments(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    payments = business.payments.all()
+    subscription = getattr(business, 'subscription', None)
+    return render(request, 'business/payments.html', {
+        'business': business, 'payments': payments, 'subscription': subscription,
+        'active_tab': 'payments',
+    })
 
     if price is None:
         # Enterprise / custom pricing — sales-assisted, no automated payment
