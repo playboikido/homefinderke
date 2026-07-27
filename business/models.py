@@ -204,10 +204,18 @@ PLAN_CHOICES = [
 ]
 
 PLAN_LIMITS = {
-    'starter':    {'products': 5,   'gallery': 10,   'staff': 1},
-    'standard':   {'products': 100, 'gallery': None, 'staff': 1},
-    'premium':    {'products': None,'gallery': None, 'staff': 5},
-    'enterprise': {'products': None,'gallery': None, 'staff': None},
+    # 'branches', 'enquiries_per_month', 'ai_generations_per_month' are new —
+    # not yet enforced anywhere (no counter models exist for them yet).
+    # They're defined here now so Phase 3+ patches have a single source of
+    # truth to read from, per the brief's "no unlimited plans" rule.
+    'starter':    {'products': 5,   'gallery': 10,  'staff': 1,    'branches': 1,
+                   'enquiries_per_month': 10,   'ai_generations_per_month': 0},
+    'standard':   {'products': 100, 'gallery': 100, 'staff': 1,    'branches': 3,
+                   'enquiries_per_month': 100,  'ai_generations_per_month': 30},
+    'premium':    {'products': 250, 'gallery': 500, 'staff': 5,    'branches': 10,
+                   'enquiries_per_month': 1000, 'ai_generations_per_month': 200},
+    'enterprise': {'products': None,'gallery': None,'staff': None, 'branches': None,
+                   'enquiries_per_month': None, 'ai_generations_per_month': None},  # custom, sales-assisted
 }
 
 # Boolean/behavioral features layered on top of the numeric limits above.
@@ -216,12 +224,14 @@ PLAN_LIMITS = {
 # rather than comparing business.plan directly.
 PLAN_FEATURES = {
     'starter':    {'analytics', 'reviews_view', 'gallery'},
-    'standard':   {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries'},
+    'standard':   {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
+                   'ai_assistant'},
     'premium':    {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
-                   'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics'},
+                   'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
+                   'ai_assistant', 'ai_marketing'},
     'enterprise': {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'multi_location', 'account_manager'},
+                   'multi_location', 'account_manager', 'ai_assistant', 'ai_marketing'},
 }
 # Human-readable feature bullets shown on the plans page.
 # HEADLINE_COUNT items show by default; the rest appear behind "See more".
@@ -229,34 +239,43 @@ PLAN_FEATURE_COPY = {
     'starter': [
         'Up to 5 product listings',
         'Up to 10 gallery photos',
+        '1 business branch',
+        'Up to 10 enquiries/month',
         'Basic dashboard (views & inquiries)',
         '1 staff account',
         'Standard directory listing',
     ],
     'standard': [
         'Up to 100 product listings',
-        'Unlimited gallery photos',
+        'Up to 100 gallery photos',
+        'Up to 3 business branches',
+        'Up to 100 enquiries/month',
+        'Featured in category pages + verified badge',
         'Full analytics dashboard',
         'Phone & WhatsApp click tracking',
         'Reply to customer reviews',
+        'AI Assistant — 30 generations/month',
         '1 staff account',
-        'Standard directory listing',
     ],
     'premium': [
-        'Unlimited product listings',
-        'Unlimited gallery photos',
+        'Up to 250 product listings',
+        'Up to 500 gallery photos',
+        'Up to 10 business branches',
+        'Up to 1,000 enquiries/month',
         'Full analytics + advanced reports',
         'Phone & WhatsApp click tracking',
         'Reply to customer reviews',
         'Priority placement in search & category results',
         'Sponsor badge on directory pages',
         'Eligible for homepage promotion',
+        'AI Marketing Assistant — 200 generations/month',
         'Up to 5 staff accounts',
     ],
     'enterprise': [
         'Everything in Premium',
-        'Unlimited staff accounts',
-        'Multiple business locations',
+        'Custom product & storage limits',
+        'Unlimited branches',
+        'API / ERP / CRM integrations',
         'Dedicated account manager',
         'Custom contract & billing terms',
     ],
@@ -265,8 +284,10 @@ PLAN_HEADLINE_COUNT = 3  # bullets visible before "See more"
 
 PLAN_PRICING = {
     'starter': {'monthly': 0, 'yearly': 0},
-    'standard': {'monthly': 1500, 'yearly': 15000},
-    'premium': {'monthly': 4000, 'yearly': 40000},
+    # Yearly = ~2 months free vs. paying monthly. Change if you want a
+    # different yearly discount — this is a placeholder assumption.
+    'standard': {'monthly': 999, 'yearly': 9990},
+    'premium': {'monthly': 2999, 'yearly': 29990},
     'enterprise': {'monthly': None, 'yearly': None},  # custom / sales-assisted
 }
 
