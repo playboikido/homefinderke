@@ -44,6 +44,7 @@ from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, Furnit
 import json
 import base64
 from openai import OpenAI
+from django.views.decorators.http import require_POST
 from .watermark import watermark_image
 # ─── AI NVIDIA helpers ──────────────────────────────────────────────────────
 def _get_nvidia_client():
@@ -289,8 +290,6 @@ def _ai_image_check(image_field):
     except Exception as e:
         print("AI IMAGE CHECK ERROR:", e)
         return 'unchecked', ''
-
-from django.views.decorators.http import require_POST
 
 @require_POST
 def ai_fix_description(request):
