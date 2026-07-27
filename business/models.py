@@ -4,6 +4,7 @@ from django.utils.text import slugify
 
 
 CATEGORY_CHOICES = [
+    # --- Original 17 (unchanged, do not remove or rename) ---
     ('movers', 'Movers'),
     ('furniture', 'Furniture Store'),
     ('curtains', 'Curtains & Blinds'),
@@ -20,8 +21,180 @@ CATEGORY_CHOICES = [
     ('househelp', 'Househelp & Domestic Staff'),
     ('carpets', 'Carpets & Rugs'),
     ('bedding', 'Duvets & Blankets'),
-    ('other', 'Other'),
+
+    # --- New: Furniture & Interior ---
+    ('sofas', 'Sofa Shops'),
+    ('beds', 'Bed Stores'),
+    ('wardrobes', 'Wardrobes'),
+    ('dining_furniture', 'Dining Tables'),
+    ('tv_stands', 'TV Stands'),
+    ('office_furniture', 'Office Furniture'),
+    ('interior_design', 'Interior Designers'),
+    ('home_decor', 'Home Decorators'),
+
+    # --- New: Curtains & Flooring ---
+    ('blinds', 'Blinds'),
+    ('rugs', 'Rugs'),
+    ('wood_flooring', 'Wooden Flooring'),
+    ('tiles', 'Tiles'),
+    ('vinyl_flooring', 'Vinyl Flooring'),
+
+    # --- New: Electronics & Appliances ---
+    ('tv_sound', 'TVs & Sound Systems'),
+    ('fridges', 'Refrigerators'),
+    ('washing_machines', 'Washing Machines'),
+    ('cookers', 'Cookers'),
+    ('microwaves', 'Microwaves'),
+    ('water_dispensers', 'Water Dispensers'),
+    ('air_conditioning', 'Air Conditioners'),
+    ('fans', 'Fans'),
+    ('smart_devices', 'Smart Home Devices'),
+
+    # --- New: Kitchen ---
+    ('kitchen_utensils', 'Kitchen Utensils'),
+    ('cookware', 'Cookware'),
+    ('tableware', 'Plates & Cutlery'),
+    ('kitchen_cabinets', 'Kitchen Cabinets'),
+    ('kitchen_design', 'Modular Kitchens'),
+
+    # --- New: Bathroom ---
+    ('shower_installation', 'Shower Installation'),
+    ('water_heaters', 'Water Heaters'),
+    ('bathroom_fittings', 'Bathroom Fittings'),
+    ('sanitaryware', 'Toilets & Basins'),
+    ('mirrors', 'Mirrors'),
+
+    # --- New: Lighting & Electrical ---
+    ('electricians', 'Electricians'),
+    ('led_lighting', 'LED Lighting'),
+    ('chandeliers', 'Chandeliers'),
+    ('ceiling_lights', 'Ceiling Lights'),
+    ('outdoor_lighting', 'Outdoor Lights'),
+    ('smart_lighting', 'Smart Lighting'),
+    ('switches_sockets', 'Switches & Sockets'),
+    ('solar_systems', 'Solar Systems'),
+    ('backup_power', 'Backup Power'),
+
+    # --- New: Plumbing & Water ---
+    ('plumbers', 'Plumbers'),
+    ('boreholes', 'Borehole Companies'),
+    ('water_delivery', 'Water Delivery'),
+    ('water_tanks', 'Water Tanks'),
+    ('water_filters', 'Water Filters'),
+    ('pumps', 'Pumps'),
+    ('drainage', 'Drainage'),
+
+    # --- New: Security ---
+    ('cctv_installers', 'CCTV Installers'),
+    ('alarm_systems', 'Alarm Systems'),
+    ('electric_fencing', 'Electric Fences'),
+    ('smart_locks', 'Smart Locks'),
+    ('door_access', 'Door Access Systems'),
+
+    # --- New: Internet & Technology ---
+    ('wifi_installation', 'Wi-Fi Installation'),
+    ('starlink', 'Starlink Installation'),
+    ('networking', 'Networking Companies'),
+    ('smart_automation', 'Smart Home Automation'),
+
+    # --- New: Moving Services ---
+    ('packers', 'Packers'),
+    ('storage_companies', 'Storage Companies'),
+    ('warehouses', 'Warehouses'),
+    ('move_cleaning', 'Cleaning After Moving'),
+    ('truck_hire', 'Truck Hire'),
+
+    # --- New: Home Maintenance ---
+    ('painters', 'Painters'),
+    ('welders', 'Welders'),
+    ('carpenters', 'Carpenters'),
+    ('contractors', 'Contractors'),
+    ('masonry', 'Masonry'),
+    ('roofing', 'Roofing'),
+    ('ceiling_installers', 'Ceiling Installers'),
+    ('aluminium_windows', 'Aluminium Windows'),
+    ('glass_installers', 'Glass Installers'),
+    ('gate_fabricators', 'Gate Fabricators'),
+
+    # --- New: Outdoor ---
+    ('landscaping', 'Landscaping'),
+    ('tree_cutting', 'Tree Cutting'),
+    ('lawn_maintenance', 'Lawn Maintenance'),
+    ('pool_maintenance', 'Pool Maintenance'),
+
+    # --- New: Cleaning ---
+    ('laundry', 'Laundry'),
+    ('pest_control', 'Pest Control'),
+    ('garbage_collection', 'Garbage Collection'),
+
+    # --- New: Home Services ---
+    ('nannies', 'Nannies'),
+    ('caregivers', 'Caregivers'),
+    ('babysitters', 'Babysitters'),
+    ('private_chefs', 'Private Chefs'),
+    ('laundry_pickup', 'Laundry Pickup'),
+
+    # --- New: Financial Services ---
+    ('saccos', 'SACCOs'),
+    ('mortgage_providers', 'Mortgage Providers'),
+    ('home_insurance', 'Home Insurance'),
+    ('banks', 'Banks'),
+    ('valuers', 'Valuers'),
+
+    # --- New: Pets ---
+    ('pet_grooming', 'Pet Grooming'),
+    ('vet_clinics', 'Veterinary Clinics'),
+    ('pet_stores', 'Pet Stores'),
+    ('dog_walkers', 'Dog Walkers'),
+
+    # --- New: Smart Home ---
+    ('smart_cameras', 'Smart Cameras'),
+    ('smart_sensors', 'Smart Sensors'),
+    ('smart_thermostats', 'Smart Thermostats'),
+    ('home_automation', 'Home Automation'),
+
+    ('other', 'Other'),  # kept last, as before
 ]
+
+# Groups the flat CATEGORY_CHOICES above into sections for UI use
+# (grouped dropdowns, category landing pages). Not wired into any
+# view yet — this is scaffolding for the next phase.
+CATEGORY_GROUPS = {
+    'Furniture & Interior': ['furniture', 'sofas', 'beds', 'wardrobes', 'dining_furniture',
+                             'tv_stands', 'office_furniture', 'interior_design', 'home_decor'],
+    'Curtains & Flooring': ['curtains', 'carpets', 'blinds', 'rugs', 'wood_flooring',
+                            'tiles', 'vinyl_flooring'],
+    'Electronics & Appliances': ['electronics', 'tv_sound', 'fridges', 'washing_machines',
+                                 'cookers', 'microwaves', 'water_dispensers',
+                                 'air_conditioning', 'fans', 'smart_devices'],
+    'Kitchen': ['kitchen', 'kitchen_utensils', 'cookware', 'tableware',
+                'kitchen_cabinets', 'kitchen_design'],
+    'Bathroom': ['bathroom', 'shower_installation', 'water_heaters',
+                 'bathroom_fittings', 'sanitaryware', 'mirrors'],
+    'Lighting & Electrical': ['lighting', 'electricians', 'led_lighting', 'chandeliers',
+                              'ceiling_lights', 'outdoor_lighting', 'smart_lighting',
+                              'switches_sockets', 'solar_systems', 'backup_power'],
+    'Plumbing & Water': ['plumbers', 'boreholes', 'water_delivery', 'water_tanks',
+                         'water_filters', 'pumps', 'drainage'],
+    'Security': ['security', 'cctv_installers', 'alarm_systems', 'electric_fencing',
+                 'smart_locks', 'door_access'],
+    'Internet & Technology': ['internet', 'wifi_installation', 'starlink',
+                              'networking', 'smart_automation'],
+    'Moving Services': ['movers', 'packers', 'storage_companies', 'warehouses',
+                        'move_cleaning', 'truck_hire'],
+    'Home Maintenance': ['repairs', 'painters', 'welders', 'carpenters', 'contractors',
+                         'masonry', 'roofing', 'ceiling_installers', 'aluminium_windows',
+                         'glass_installers', 'gate_fabricators'],
+    'Outdoor': ['garden', 'landscaping', 'tree_cutting', 'lawn_maintenance', 'pool_maintenance'],
+    'Cleaning': ['cleaning', 'laundry', 'pest_control', 'garbage_collection'],
+    'Home Services': ['househelp', 'nannies', 'caregivers', 'babysitters',
+                      'private_chefs', 'laundry_pickup'],
+    'Financial Services': ['saccos', 'mortgage_providers', 'home_insurance', 'banks', 'valuers'],
+    'Pets': ['pet_grooming', 'vet_clinics', 'pet_stores', 'dog_walkers'],
+    'Smart Home': ['smart_cameras', 'smart_sensors', 'smart_thermostats', 'home_automation'],
+    'Bedding': ['mattresses', 'bedding'],
+    'Other': ['other'],
+}
 
 PLAN_CHOICES = [
     ('starter', 'Starter (Free)'),
