@@ -153,16 +153,50 @@
 <div class="settings-card">
   <div class="settings-section-title">Upload National ID</div>
   <div class="settings-section-desc">Upload a clear photo or scan of your National ID for manual review.</div>
-  <form method="post" enctype="multipart/form-data">
+  <form method="post" enctype="multipart/form-data" id="idVerifyForm">
     {% csrf_token %}
     <div class="file-input-wrap">
       {{ form.document }}
     </div>
+    <div id="idDocStatus" style="font-size:0.8rem; margin-top:6px;"></div>
     {% if form.document.errors %}<div style="color:var(--danger); font-size:0.78rem; margin-top:6px;">{{ form.document.errors|join:" " }}</div>{% endif %}
     <div style="margin-top:14px;">
-      <button type="submit" class="btn-primary">Submit for Review</button>
+      <button type="submit" class="btn-primary" id="idVerifySubmitBtn">Submit for Review</button>
     </div>
   </form>
+  <script>
+  (function() {
+    const input = document.getElementById('{{ form.document.id_for_label }}');
+    const statusEl = document.getElementById('idDocStatus');
+    const submitBtn = document.getElementById('idVerifySubmitBtn');
+    const csrf = document.querySelector('#idVerifyForm [name=csrfmiddlewaretoken]').value;
+    if (!input) return;
+    input.addEventListener('change', async function() {
+      if (!input.files || !input.files[0]) return;
+      statusEl.textContent = 'Checking document...';
+      statusEl.style.color = '#6B7280';
+      submitBtn.disabled = true;
+      const fd = new FormData();
+      fd.append('image', input.files[0]);
+      fd.append('mode', 'id_document');
+      try {
+        const res = await fetch('/ai-check-image/', { method: 'POST', headers: {'X-CSRFToken': csrf}, body: fd });
+        const data = await res.json();
+        if (data.status === 'failed') {
+          statusEl.textContent = '⚠ ' + (data.feedback || 'Please upload a clear image of your ID.');
+          statusEl.style.color = '#DC2626';
+          submitBtn.disabled = true;
+        } else {
+          statusEl.textContent = data.status === 'passed' ? '✓ Looks good' : '';
+          statusEl.style.color = '#16A34A';
+          submitBtn.disabled = false;
+        }
+      } catch (e) {
+        submitBtn.disabled = false; // fail open
+      }
+    });
+  })();
+  </script>
 </div>
 {% endif %}
 {% endblock %}

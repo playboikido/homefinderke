@@ -49,6 +49,161 @@ from .watermark import watermark_image
 def _get_nvidia_client():
     return OpenAI(base_url="https://integrate.api.nvidia.com/v1", api_key=settings.NVIDIA_API_KEY)
 
+def _get_groq_client():
+    return OpenAI(base_url="https://api.groq.com/openai/v1", api_key=settings.GROQ_API_KEY)
+
+# Prompts per upload context — keeps one endpoint reusable everywhere
+_IMAGE_CHECK_PROMPTS = {
+    'property': (
+        "You check property/vacancy photos for a Kenyan rental listing site. Look at this image and judge ALL of: "
+        "1) SUBJECT: is it a real photo of a building exterior, compound, room interior, or apartment — "
+        "NOT food, furniture close-ups with no room visible, people, vehicles, unrelated objects, memes, or logos? "
+        "2) CLARITY: is it sharp enough to show real detail (not blurry, not too dark, not a screenshot)? "
+        "3) WATERMARKS: does it carry a visible watermark, logo, or website name from ANOTHER property site or "
+        "real-estate agency (e.g. text overlays like a company name, website URL, or logo stamped in a corner)? "
+        "If a foreign watermark is present, this is very likely a photo scraped from another listing and must fail. "
+        "Respond with JSON only, no markdown, no explanation outside the JSON: "
+        "{\"status\": \"passed\" or \"failed\", \"feedback\": \"short reason, max 15 words, name the exact problem\"}"
+    ),
+    'id_document': (
+        "You check identity document uploads for a Kenyan verification system. Look at this image and judge: "
+        "1) Does it show an actual ID document (e.g. National ID card, passport) with visible text/photo, "
+        "not a blank page, random object, or unrelated photo? "
+        "2) Is it clear and legible enough to read (not blurry, not cropped/cut off, not too dark, not a "
+        "screenshot of a screenshot)? "
+        "Respond with JSON only, no markdown: "
+        "{\"status\": \"passed\" or \"failed\", \"feedback\": \"short reason, max 15 words\"}"
+    ),
+    'business_document': (
+        "You check business verification document uploads (registration certificate, KRA PIN certificate, "
+        "business permit) for a Kenyan business directory. Look at this image and judge: "
+        "1) Does it look like an official document/certificate with visible printed text, stamps, or letterhead "
+        "(not a blank page, random photo, or unrelated image)? "
+        "2) Is it clear and legible (not blurry, not cut off, not too dark)? "
+        "Respond with JSON only, no markdown: "
+        "{\"status\": \"passed\" or \"failed\", \"feedback\": \"short reason, max 15 words\"}"
+    ),
+}
+
+@require_POST
+def check_image_ai(request):
+    """Pre-submit AJAX image check used by residence photos, ID upload, and business docs."""
+    if not check_submission_rate_limit(request, 'ai_check_image', limit=30, window_seconds=3600):
+        return JsonResponse({'ok': False, 'status': 'unchecked', 'feedback': 'Too many checks, slow down.'}, status=429)
+
+    image = request.FILES.get('image')
+    mode = request.POST.get('mode', 'property')
+    if not image:
+        return JsonResponse({'ok': False, 'status': 'unchecked', 'feedback': 'No image received.'}, status=400)
+    if mode not in _IMAGE_CHECK_PROMPTS:
+        mode = 'property'
+
+    status, feedback = _groq_image_check(image, mode=mode)
+    return JsonResponse({'ok': status != 'failed', 'status': status, 'feedback': feedback})
+
+
+@require_POST
+def check_location_ai(request):
+    """
+    Pre-submit location sanity check. Geocodes the claimed town/county and
+    compares it against the pinned GPS coordinates (same Nominatim approach
+    already used in verify_location for staff review). Hard-fails only on a
+    large mismatch (wrong town/county entirely); a claimed landmark that OSM
+    can't confirm is returned as a soft warning, since OSM coverage in Kenya
+    is patchy and shouldn't block a genuine listing.
+    """
+    if not check_submission_rate_limit(request, 'ai_check_location', limit=20, window_seconds=3600):
+        return JsonResponse({'ok': True, 'status': 'unchecked', 'feedback': 'Too many checks, slow down.'}, status=429)
+
+    import requests
+    from math import radians, sin, cos, sqrt, atan2
+    from .amenity_check import check_nearby_amenities
+
+    town = request.POST.get('town', '').strip()
+    county = request.POST.get('county', '').strip()
+    nearest_stage = request.POST.get('nearest_stage', '').strip()
+    lat = request.POST.get('latitude')
+    lng = request.POST.get('longitude')
+
+    if not (town and county and lat and lng):
+        return JsonResponse({'ok': True, 'status': 'unchecked', 'feedback': ''})
+
+    try:
+        lat, lng = float(lat), float(lng)
+    except ValueError:
+        return JsonResponse({'ok': True, 'status': 'unchecked', 'feedback': ''})
+
+    def haversine_km(lat1, lon1, lat2, lon2):
+        lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
+        dlat, dlon = lat2 - lat1, lon2 - lon1
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        return 6371 * 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    try:
+        resp = requests.get(
+            'https://nominatim.openstreetmap.org/search',
+            params={'q': f"{town}, {county}, Kenya", 'format': 'json', 'limit': 1},
+            headers={'User-Agent': 'HomeFinderKE/1.0 (homefinder.ke.help@gmail.com)'},
+            timeout=8,
+        )
+        data = resp.json()
+    except Exception as e:
+        print("LOCATION CHECK GEOCODE ERROR:", e)
+        return JsonResponse({'ok': True, 'status': 'unchecked', 'feedback': ''})
+
+    if not data:
+        # OSM has no record of that town/county spelling — can't verify, don't block
+        return JsonResponse({'ok': True, 'status': 'unchecked', 'feedback': ''})
+
+    expected_lat, expected_lng = float(data[0]['lat']), float(data[0]['lon'])
+    distance_km = round(haversine_km(lat, lng, expected_lat, expected_lng), 1)
+
+    if distance_km > 40:
+        return JsonResponse({
+            'ok': False,
+            'status': 'failed',
+            'feedback': f"Your pin is ~{distance_km}km from {town}, {county}. Please re-check the map pin or the town/county fields.",
+        })
+
+    # Soft check: does the claimed nearest stage actually exist near this pin?
+    warning = ''
+    if nearest_stage:
+        amenity_result = check_nearby_amenities(lat, lng, claimed_stage=nearest_stage)
+        if amenity_result.get('checked') and amenity_result.get('stage_match') is False:
+            warning = f"Note: we couldn't confirm a stage called '{nearest_stage}' near this pin — double-check it's correct."
+
+    return JsonResponse({'ok': True, 'status': 'passed' if not warning else 'warning', 'feedback': warning})
+
+def _groq_image_check(image_field, mode='property'):
+    """Vision check via Groq (free tier). Returns (status, feedback) where status is 'passed'/'failed'/'unchecked'."""
+    try:
+        client = _get_groq_client()
+        image_bytes = image_field.read()
+        image_field.seek(0)
+        b64 = base64.b64encode(image_bytes).decode('utf-8')
+        prompt = _IMAGE_CHECK_PROMPTS.get(mode, _IMAGE_CHECK_PROMPTS['property'])
+
+        response = client.chat.completions.create(
+            model="meta-llama/llama-4-maverick-17b-128e-instruct",
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": prompt},
+                        {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}"}}
+                    ]
+                }
+            ],
+            temperature=0.1,
+            max_tokens=80,
+        )
+        text = response.choices[0].message.content.strip().strip('`').replace('json', '').strip()
+        data = json.loads(text)
+        return data.get('status', 'unchecked'), data.get('feedback', '')
+    except Exception as e:
+        print("GROQ IMAGE CHECK ERROR:", e)
+        return 'unchecked', ''
+
 def _ai_fraud_check(residence):
     """Use NVIDIA to flag suspicious listings. Returns (is_fraud, reason)."""
     try:

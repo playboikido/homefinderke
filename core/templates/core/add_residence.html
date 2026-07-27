@@ -671,11 +671,12 @@
               </div>
             </div>
             <div class="ar-hint">These are usually pre-filled automatically once you allow location access — you can still edit them if needed.</div>
+            <div id="locationCheckStatus" style="font-size:0.8rem; margin-top:8px;"></div>
           </div>
           <div class="ar-step-nav">
             <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
             <span class="ar-step-count">Step 5 of 8</span>
-            <button type="button" class="ar-btn ar-next-btn">Next →</button>
+            <button type="button" class="ar-btn ar-next-btn" id="arLocationNextBtn" data-requires-check="location">Next →</button>
           </div>
         </div>
 
@@ -743,10 +744,12 @@
             <div class="ar-field">
               {{ form.front_image.label_tag }}
               {{ form.front_image }}
+              <div class="ai-img-status" id="status_front_image" style="font-size:0.8rem; margin-top:4px;"></div>
             </div>
             <div class="ar-field">
               {{ form.vacancy_poster.label_tag }}
               {{ form.vacancy_poster }}
+              <div class="ai-img-status" id="status_vacancy_poster" style="font-size:0.8rem; margin-top:4px;"></div>
             </div>
             <div class="ar-field">
               <label>Additional Gallery Photos</label>
@@ -770,7 +773,7 @@
           <div class="ar-step-nav">
             <button type="button" class="ar-btn ar-btn-back ar-back-btn">← Back</button>
             <span class="ar-step-count">Step 8 of 8</span>
-            <button type="submit" class="ar-btn">
+            <button type="submit" class="ar-btn" id="arSubmitBtn">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14M5 12h14"/></svg>
               Submit Residence
             </button>
@@ -834,6 +837,51 @@ document.getElementById('aiFixDescBtn')?.addEventListener('click', async functio
 });
 </script>
 
+<script>
+(function() {
+  const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+  const failedFields = new Set();
+  const submitBtn = document.getElementById('arSubmitBtn');
+
+  function setStatus(fieldName, statusEl, msg, kind) {
+    statusEl.textContent = msg;
+    statusEl.style.color = kind === 'fail' ? '#DC2626' : kind === 'ok' ? '#16A34A' : '#6B7280';
+    if (kind === 'fail') failedFields.add(fieldName); else failedFields.delete(fieldName);
+    submitBtn.disabled = failedFields.size > 0;
+    submitBtn.style.opacity = failedFields.size > 0 ? '0.5' : '1';
+  }
+
+  function wireImageCheck(inputId, statusId, fieldName) {
+    const input = document.getElementById(inputId);
+    const statusEl = document.getElementById(statusId);
+    if (!input || !statusEl) return;
+    input.addEventListener('change', async function() {
+      if (!input.files || !input.files[0]) return;
+      setStatus(fieldName, statusEl, 'Checking image...', 'checking');
+      const fd = new FormData();
+      fd.append('image', input.files[0]);
+      fd.append('mode', 'property');
+      try {
+        const res = await fetch('/ai-check-image/', { method: 'POST', headers: {'X-CSRFToken': csrf}, body: fd });
+        const data = await res.json();
+        if (data.status === 'failed') {
+          setStatus(fieldName, statusEl, '⚠ ' + (data.feedback || 'Please upload a clear, correct image.'), 'fail');
+        } else if (data.status === 'passed') {
+          setStatus(fieldName, statusEl, '✓ Looks good', 'ok');
+        } else {
+          setStatus(fieldName, statusEl, '', 'neutral'); // unchecked — fail open, don't block
+        }
+      } catch (e) {
+        setStatus(fieldName, statusEl, '', 'neutral'); // network error — fail open
+      }
+    });
+  }
+
+  wireImageCheck('id_front_image', 'status_front_image', 'front_image');
+  wireImageCheck('id_vacancy_poster', 'status_vacancy_poster', 'vacancy_poster');
+})();
+</script>
+
 <!-- ── Step wizard navigation ─────────────────────────────────── -->
 <script>
 (function() {
@@ -865,10 +913,58 @@ document.getElementById('aiFixDescBtn')?.addEventListener('click', async functio
     return true;
   }
 
+  async function runLocationCheck() {
+    const statusEl = document.getElementById('locationCheckStatus');
+    const county = document.getElementById('id_county')?.value || '';
+    const town = document.getElementById('id_town')?.value || '';
+    const nearestStage = document.getElementById('id_nearest_stage')?.value || '';
+    const lat = document.getElementById('id_latitude')?.value || '';
+    const lng = document.getElementById('id_longitude')?.value || '';
+    if (!county || !town || !lat || !lng) return true; // nothing to check yet, let normal field validation handle it
+
+    statusEl.textContent = 'Checking location matches ' + town + ', ' + county + '...';
+    statusEl.style.color = '#6B7280';
+    try {
+      const fd = new FormData();
+      fd.append('county', county);
+      fd.append('town', town);
+      fd.append('nearest_stage', nearestStage);
+      fd.append('latitude', lat);
+      fd.append('longitude', lng);
+      const res = await fetch('/ai-check-location/', {
+        method: 'POST',
+        headers: {'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value},
+        body: fd
+      });
+      const data = await res.json();
+      if (data.status === 'failed') {
+        statusEl.textContent = '⚠ ' + data.feedback;
+        statusEl.style.color = '#DC2626';
+        return false;
+      }
+      if (data.status === 'warning') {
+        statusEl.textContent = '⚠ ' + data.feedback + ' (you can still continue)';
+        statusEl.style.color = '#D97706';
+        return true; // soft warning — don't block
+      }
+      statusEl.textContent = data.status === 'passed' ? '✓ Location looks consistent' : '';
+      statusEl.style.color = '#16A34A';
+      return true;
+    } catch (e) {
+      return true; // fail open on network errors
+    }
+  }
+
   document.querySelectorAll('.ar-next-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', async function() {
       const activeStep = document.querySelector('.ar-step.is-active');
       if (!validateStep(activeStep)) return;
+      if (btn.dataset.requiresCheck === 'location') {
+        btn.disabled = true;
+        const ok = await runLocationCheck();
+        btn.disabled = false;
+        if (!ok) return;
+      }
       const stepNum = parseInt(activeStep.dataset.step);
       if (stepNum < steps.length) showStep(stepNum + 1);
     });

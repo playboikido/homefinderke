@@ -77,6 +77,8 @@ urlpatterns = [
         name='save_favorite'
      ),
     path('ai-fix-description/', views.ai_fix_description, name='ai_fix_description'),
+    path('ai-check-image/', views.check_image_ai, name='check_image_ai'),
+    path('ai-check-location/', views.check_location_ai, name='check_location_ai'),
     path(
         'my-favorites/',
         views.my_favorites,

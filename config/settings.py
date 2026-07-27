@@ -14,6 +14,7 @@ from pathlib import Path
 from decouple import config
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 NVIDIA_API_KEY = config('NVIDIA_API_KEY', default='')
+GROQ_API_KEY = config('GROQ_API_KEY', default='')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
