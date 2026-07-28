@@ -26,5 +26,7 @@ urlpatterns = [
     path('payments/', views.business_payments, name='payments'),
     path('coupons/', views.coupons_view, name='coupons'),
     path('promotions/', views.promotions_view, name='promotions'),
+    path('services/', views.services_manage, name='services'),
+    path('bookings/', views.bookings_view, name='bookings'),
     path('mpesa-callback/', views.business_mpesa_callback, name='mpesa_callback'),
 ]

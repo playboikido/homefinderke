@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import FileExtensionValidator
 from django.forms import modelformset_factory
 
-from .models import Business, BusinessProduct
+from .models import Business, BusinessProduct, BusinessService
 
 ALLOWED_DOC_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png']
 MAX_DOC_SIZE_MB = 5
@@ -75,6 +75,13 @@ class BusinessLocationForm(forms.ModelForm):
 BusinessProductFormSet = modelformset_factory(
     BusinessProduct,
     fields=['name', 'category', 'price', 'description', 'image', 'is_available'],
+    extra=1,
+    can_delete=True,
+)
+
+BusinessServiceFormSet = modelformset_factory(
+    BusinessService,
+    fields=['name', 'category', 'price', 'duration_minutes', 'description', 'image', 'is_available'],
     extra=1,
     can_delete=True,
 )

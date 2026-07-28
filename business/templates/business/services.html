@@ -1,0 +1,58 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Services — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    {{ formset.non_form_errors }}
+
+    <div class="biz-card">
+        <h1>Services</h1>
+        <p class="biz-subtitle">
+            List what you do, not just what you sell.
+            {% if service_limit %}Your {{ business.get_plan_display }} plan allows up to {{ service_limit }} services.{% endif %}
+        </p>
+
+        {% for form in formset %}
+            <div class="biz-product-box">
+                {{ form.id }}
+                {{ form.non_field_errors }}
+
+                <label>Service Name</label>
+                {{ form.name.errors }}
+                {{ form.name }}
+
+                <label>Category</label>
+                {{ form.category }}
+
+                <label>Starting Price (KES, optional)</label>
+                {{ form.price }}
+
+                <label>Typical Duration (minutes, optional)</label>
+                {{ form.duration_minutes }}
+
+                <label>Description</label>
+                {{ form.description }}
+
+                <label>Image</label>
+                {{ form.image }}
+
+                <div class="biz-checkbox-row">
+                    {{ form.is_available }} <label style="margin:0;">Available</label>
+                </div>
+
+                {% if form.instance.pk %}
+                    <div class="biz-checkbox-row biz-delete-row">
+                        {{ form.DELETE }} <label style="margin:0;">Remove this service</label>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <div class="biz-form-actions">
+            <a href="{% url 'business:dashboard' %}" class="biz-btn biz-btn-ghost">Cancel</a>
+            <button type="submit" class="biz-btn biz-btn-primary">Save Services</button>
+        </div>
+    </div>
+</form>
+{% endblock %}

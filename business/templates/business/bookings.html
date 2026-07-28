@@ -1,0 +1,38 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Bookings — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Bookings</h1>
+
+    {% if locked %}
+    <div class="biz-unlock">
+        <p class="biz-empty">The booking system is available on the Premium plan. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% else %}
+    {% for b in bookings %}
+    <div class="biz-inquiry">
+        <strong>{{ b.customer_name }}</strong>
+        {% if b.service %} — {{ b.service.name }}{% endif %}
+        <span class="biz-empty">
+            {{ b.requested_date|date:"d M Y" }}{% if b.requested_time %} at {{ b.requested_time|time:"H:i" }}{% endif %}
+            · {{ b.customer_phone }}
+        </span>
+        {% if b.notes %}<p style="margin-top:4px;font-size:.85rem;">{{ b.notes }}</p>{% endif %}
+
+        <form method="POST" style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+            {% csrf_token %}
+            <input type="hidden" name="booking_id" value="{{ b.id }}">
+            <select name="status">
+                {% for value, label in b.STATUS_CHOICES %}
+                <option value="{{ value }}" {% if b.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="biz-btn">Update</button>
+        </form>
+    </div>
+    {% empty %}
+    <p class="biz-empty">No bookings yet.</p>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

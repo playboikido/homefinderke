@@ -11,19 +11,18 @@ from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-
+from django.contrib.auth import get_user_model
 from core.mpesa import initiate_stk_push
 
 from .forms import (
     BusinessContactForm, BusinessEditForm, BusinessInfoForm, BusinessLocationForm,
-    BusinessProductFormSet, BusinessVerificationForm,
+    BusinessProductFormSet, BusinessServiceFormSet, BusinessVerificationForm,
 )
-from django.contrib.auth import get_user_model
-
 from .models import (
     PLAN_CHOICES, PLAN_FEATURE_COPY, PLAN_HEADLINE_COUNT, PLAN_LIMITS, PLAN_PRICING,
-    Business, BusinessCoupon, BusinessPayment, BusinessPromotion, BusinessProduct,
-    BusinessStaffMember, BusinessSubscription, BusinessVerificationDocument,
+    Business, BusinessBooking, BusinessCoupon, BusinessPayment, BusinessPromotion,
+    BusinessProduct, BusinessService, BusinessStaffMember, BusinessSubscription,
+    BusinessVerificationDocument,
 )
 
 STEP_URLS = {
@@ -795,4 +794,71 @@ def promotions_view(request):
     return render(request, 'business/promotions.html', {
         'business': business, 'promotions': promotions, 'locked': False, 'active_tab': 'promotions',
         'can_request_homepage': business.has_feature('homepage_promotion'),
+    })
+
+@login_required
+def services_manage(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    queryset = BusinessService.objects.filter(business=business)
+    limit = business.plan_limits['services']
+
+    if request.method == 'POST':
+        formset = BusinessServiceFormSet(request.POST, request.FILES, queryset=queryset)
+        if formset.is_valid():
+            existing_active = business.services.filter(is_available=True).count()
+            new_count = sum(
+                1 for f in formset.forms
+                if f.cleaned_data and not f.cleaned_data.get('DELETE')
+                and f.cleaned_data.get('name') and not f.cleaned_data.get('id')
+            )
+            if limit is not None and (existing_active + new_count) > limit:
+                messages.error(request, f"Your current plan allows up to {limit} services. Upgrade to add more.")
+            else:
+                services = formset.save(commit=False)
+                for service in services:
+                    service.business = business
+                    service.save()
+                for obj in formset.deleted_objects:
+                    obj.delete()
+                messages.success(request, "Services updated.")
+                return redirect('business:services')
+    else:
+        formset = BusinessServiceFormSet(queryset=queryset)
+
+    return render(request, 'business/services.html', {
+        'formset': formset, 'business': business, 'service_limit': limit, 'active_tab': 'services',
+    })
+
+
+@login_required
+def bookings_view(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if not business.has_feature('bookings'):
+        return render(request, 'business/bookings.html', {
+            'business': business, 'locked': True, 'active_tab': 'bookings',
+        })
+
+    if request.method == 'POST':
+        booking = business.bookings.filter(pk=request.POST.get('booking_id')).first()
+        new_status = request.POST.get('status', '')
+        valid_statuses = {c for c, _ in BusinessBooking.STATUS_CHOICES}
+        if booking and new_status in valid_statuses:
+            booking.status = new_status
+            booking.save(update_fields=['status'])
+            messages.success(request, "Booking updated.")
+        return redirect('business:bookings')
+
+    bookings = business.bookings.select_related('service', 'customer').all()
+    return render(request, 'business/bookings.html', {
+        'business': business, 'bookings': bookings, 'locked': False, 'active_tab': 'bookings',
     })

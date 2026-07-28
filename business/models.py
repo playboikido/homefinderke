@@ -204,18 +204,10 @@ PLAN_CHOICES = [
 ]
 
 PLAN_LIMITS = {
-    # 'branches', 'enquiries_per_month', 'ai_generations_per_month' are new —
-    # not yet enforced anywhere (no counter models exist for them yet).
-    # They're defined here now so Phase 3+ patches have a single source of
-    # truth to read from, per the brief's "no unlimited plans" rule.
-    'starter':    {'products': 5,   'gallery': 10,  'staff': 1,    'branches': 1,
-                   'enquiries_per_month': 10,   'ai_generations_per_month': 0},
-    'standard':   {'products': 100, 'gallery': 100, 'staff': 1,    'branches': 3,
-                   'enquiries_per_month': 100,  'ai_generations_per_month': 30},
-    'premium':    {'products': 250, 'gallery': 500, 'staff': 5,    'branches': 10,
-                   'enquiries_per_month': 1000, 'ai_generations_per_month': 200},
-    'enterprise': {'products': None,'gallery': None,'staff': None, 'branches': None,
-                   'enquiries_per_month': None, 'ai_generations_per_month': None},  # custom, sales-assisted
+    'starter':    {'products': 5,   'services': 5,   'gallery': 10,  'staff': 1, 'branches': 1,  'enquiries': 10,   'ai_generations': 0},
+    'standard':   {'products': 100, 'services': 100, 'gallery': 100, 'staff': 1, 'branches': 3,  'enquiries': 100,  'ai_generations': 30},
+    'premium':    {'products': 250, 'services': 250, 'gallery': 500, 'staff': 5, 'branches': 10, 'enquiries': 1000, 'ai_generations': 200},
+    'enterprise': {'products': None,'services': None,'gallery': None,'staff': None, 'branches': None, 'enquiries': None, 'ai_generations': None},
 }
 
 # Boolean/behavioral features layered on top of the numeric limits above.
@@ -228,10 +220,10 @@ PLAN_FEATURES = {
                    'promotions'},
     'premium':    {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'promotions', 'coupons'},
+                   'promotions', 'coupons', 'bookings'},
     'enterprise': {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'multi_location', 'account_manager', 'promotions', 'coupons'},
+                   'multi_location', 'account_manager', 'promotions', 'coupons', 'bookings'},
 }
 # Human-readable feature bullets shown on the plans page.
 # HEADLINE_COUNT items show by default; the rest appear behind "See more".
@@ -271,6 +263,7 @@ PLAN_FEATURE_COPY = {
         'Sponsor badge on directory pages',
         'Eligible for homepage promotion',
         'Coupons',
+        'Booking system',
         'AI Marketing Assistant — 200 generations/month',
         'Up to 5 staff accounts',
     ],
@@ -693,3 +686,52 @@ class BusinessPromotion(models.Model):
 
     def __str__(self):
         return f'{self.title} ({self.business.name})'
+
+
+class BusinessService(models.Model):
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='services')
+    name = models.CharField(max_length=200)
+    category = models.CharField(max_length=100, blank=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, help_text="Starting price, if applicable")
+    duration_minutes = models.PositiveIntegerField(blank=True, null=True, help_text="Typical time to complete, if relevant")
+    description = models.TextField(blank=True)
+    image = models.ImageField(upload_to='business/services/', blank=True, null=True)
+    is_available = models.BooleanField(default=True)
+    views_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['business', 'is_available'])]
+
+    def __str__(self):
+        return f'{self.name} ({self.business.name})'
+
+
+class BusinessBooking(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending Confirmation'),
+        ('confirmed', 'Confirmed'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='bookings')
+    service = models.ForeignKey(
+        BusinessService, on_delete=models.SET_NULL, null=True, blank=True, related_name='bookings'
+    )
+    customer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    customer_name = models.CharField(max_length=150)
+    customer_phone = models.CharField(max_length=20, blank=True)
+    customer_email = models.EmailField(blank=True)
+    requested_date = models.DateField()
+    requested_time = models.TimeField(blank=True, null=True)
+    notes = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
