@@ -2284,7 +2284,10 @@ def furniture_vendor_detail(request, pk):
 
 
 def business_detail(request, slug):
-    from business.models import BusinessAnalyticsEvent, BusinessFavorite, BusinessInquiry, BusinessReview
+    from business.models import (
+        BusinessAnalyticsEvent, BusinessBooking, BusinessFavorite, BusinessInquiry,
+        BusinessOrder, BusinessOrderItem, BusinessReview,
+    )
     business = get_object_or_404(Business, slug=slug, is_approved=True, is_active=True, is_paused_by_owner=False)
 
     if request.method == 'POST':
@@ -2301,6 +2304,65 @@ def business_detail(request, slug):
                     message=message,
                 )
                 messages.success(request, "Message sent! The business will get back to you directly.")
+            return redirect('business_detail', slug=business.slug)
+        elif request.POST.get('form_type') == 'order' and request.user.is_authenticated:
+            if not business.has_feature('order_management'):
+                messages.error(request, "This business isn't set up to take online orders yet — try WhatsApp or phone instead.")
+                return redirect('business_detail', slug=business.slug)
+
+            product = business.products.filter(pk=request.POST.get('product_id'), is_available=True).first()
+            name = request.POST.get('customer_name', '').strip()
+            quantity = request.POST.get('quantity', '1')
+            try:
+                quantity = max(1, int(quantity))
+            except (TypeError, ValueError):
+                quantity = 1
+
+            if not product or not name:
+                messages.error(request, "Choose a product and enter your name to place an order.")
+            else:
+                order = BusinessOrder.objects.create(
+                    business=business, customer=request.user, customer_name=name,
+                    customer_phone=request.POST.get('customer_phone', '').strip(),
+                    delivery_address=request.POST.get('delivery_address', '').strip(),
+                )
+                BusinessOrderItem.objects.create(
+                    order=order, product=product, product_name=product.name,
+                    quantity=quantity, unit_price=product.price or 0,
+                )
+                order.total_amount = quantity * (product.price or 0)
+                order.save(update_fields=['total_amount'])
+                Notification.objects.create(
+                    user=business.owner,
+                    message=f'📦 New order from {name}: {quantity}× {product.name} — check your Orders dashboard to respond.'
+                )
+                messages.success(request, "Order request sent! The business will contact you directly to confirm and arrange payment.")
+            return redirect('business_detail', slug=business.slug)
+        elif request.POST.get('form_type') == 'booking' and request.user.is_authenticated:
+            if not business.has_feature('bookings'):
+                messages.error(request, "This business isn't set up to take online bookings yet — try WhatsApp or phone instead.")
+                return redirect('business_detail', slug=business.slug)
+
+            service = business.services.filter(pk=request.POST.get('service_id'), is_available=True).first()
+            name = request.POST.get('customer_name', '').strip()
+            requested_date = request.POST.get('requested_date', '')
+
+            if not service or not name or not requested_date:
+                messages.error(request, "Choose a service, a date, and enter your name to request a booking.")
+            else:
+                BusinessBooking.objects.create(
+                    business=business, service=service, customer=request.user, customer_name=name,
+                    customer_phone=request.POST.get('customer_phone', '').strip(),
+                    customer_email=request.POST.get('customer_email', '').strip(),
+                    requested_date=requested_date,
+                    requested_time=request.POST.get('requested_time') or None,
+                    notes=request.POST.get('notes', '').strip(),
+                )
+                Notification.objects.create(
+                    user=business.owner,
+                    message=f'📅 New booking request from {name} for {service.name} — check your Bookings dashboard to confirm.'
+                )
+                messages.success(request, "Booking request sent! The business will confirm with you directly.")
             return redirect('business_detail', slug=business.slug)
         elif request.POST.get('form_type') == 'favorite' and request.user.is_authenticated:
             fav, created = BusinessFavorite.objects.get_or_create(user=request.user, business=business)
@@ -2339,6 +2401,8 @@ def business_detail(request, slug):
     return render(request, 'core/business_detail.html', {
         'business': business, 'reviews': reviews, 'rating_breakdown': rating_breakdown,
         'is_favorited': is_favorited, 'related': related,
+        'can_order': business.has_feature('order_management'),
+        'can_book': business.has_feature('bookings'),
     })
 
 

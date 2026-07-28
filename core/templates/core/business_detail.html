@@ -187,6 +187,7 @@
       <a href="#bd-products" class="bd-tab">Products & Services</a>
       <a href="#bd-reviews" class="bd-tab">Reviews ({{ business.review_count }})</a>
       <a href="#bd-photos" class="bd-tab">Photos</a>
+      <a href="#bd-services" class="bd-tab">Services</a>
       <a href="#bd-about" class="bd-tab">About</a>
       <a href="#bd-location" class="bd-tab">Location</a>
     </div>
@@ -205,7 +206,7 @@
         </div>
 
         <div class="bd-card" id="bd-products">
-          <h2>Products & Services</h2>
+          <h2>Products</h2>
           {% if business.products.all %}
           <div class="bd-products-grid">
             {% for product in business.products.all|slice:":12" %}
@@ -214,11 +215,68 @@
               <div class="bd-product-body">
                 <div class="bd-product-name">{{ product.name }}</div>
                 {% if product.price %}<div class="bd-product-from">From</div><div class="bd-product-price">KSh {{ product.price|floatformat:"0" }}</div>{% endif %}
+                {% if can_order and user.is_authenticated %}
+                <button type="button" class="bd-submit-btn" style="margin-top:8px;padding:6px 10px;font-size:0.72rem;" onclick="bdSelectOrder('{{ product.id }}','{{ product.name|escapejs }}')">Order</button>
+                {% endif %}
               </div>
             </div>
             {% endfor %}
           </div>
           {% else %}<p style="color:var(--bd-subtle);font-size:0.85rem;">No products listed yet.</p>{% endif %}
+
+          {% if can_order and user.is_authenticated and business.products.all %}
+          <form method="post" class="bd-inquiry-form" id="bd-order-form" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--bd-border);">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="order">
+            <label style="font-weight:700;font-size:0.85rem;">Ordering: <span id="bd-order-product-label"></span></label>
+            <select name="product_id" id="bd-order-product-select" required>
+              {% for product in business.products.all %}<option value="{{ product.id }}">{{ product.name }}</option>{% endfor %}
+            </select>
+            <input type="number" name="quantity" placeholder="Quantity" value="1" min="1" required>
+            <input type="text" name="customer_name" placeholder="Your name" value="{{ request.user.first_name|default:request.user.username }}" required>
+            <input type="text" name="customer_phone" placeholder="Phone" required>
+            <input type="text" name="delivery_address" placeholder="Delivery address (optional)">
+            <button type="submit" class="bd-submit-btn">Send Order Request</button>
+            <p style="font-size:0.72rem;color:var(--bd-subtle);margin-top:6px;">Payment is arranged directly with the business — HomeFinder KE doesn't process payments.</p>
+          </form>
+          {% endif %}
+        </div>
+
+        <div class="bd-card" id="bd-services">
+          <h2>Services</h2>
+          {% if business.services.all %}
+          <div class="bd-products-grid">
+            {% for service in business.services.all|slice:":12" %}
+            <div class="bd-product">
+              {% if service.image %}<img src="{{ service.image.url }}" alt="{{ service.name }}">{% endif %}
+              <div class="bd-product-body">
+                <div class="bd-product-name">{{ service.name }}</div>
+                {% if service.price %}<div class="bd-product-from">From</div><div class="bd-product-price">KSh {{ service.price|floatformat:"0" }}</div>{% endif %}
+                {% if can_book and user.is_authenticated %}
+                <button type="button" class="bd-submit-btn" style="margin-top:8px;padding:6px 10px;font-size:0.72rem;" onclick="bdSelectBooking('{{ service.id }}','{{ service.name|escapejs }}')">Book</button>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}<p style="color:var(--bd-subtle);font-size:0.85rem;">No services listed yet.</p>{% endif %}
+
+          {% if can_book and user.is_authenticated and business.services.all %}
+          <form method="post" class="bd-inquiry-form" id="bd-booking-form" style="display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--bd-border);">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="booking">
+            <label style="font-weight:700;font-size:0.85rem;">Booking: <span id="bd-booking-service-label"></span></label>
+            <select name="service_id" id="bd-booking-service-select" required>
+              {% for service in business.services.all %}<option value="{{ service.id }}">{{ service.name }}</option>{% endfor %}
+            </select>
+            <input type="date" name="requested_date" min="{% now 'Y-m-d' %}" required>
+            <input type="time" name="requested_time">
+            <input type="text" name="customer_name" placeholder="Your name" value="{{ request.user.first_name|default:request.user.username }}" required>
+            <input type="text" name="customer_phone" placeholder="Phone" required>
+            <textarea name="notes" placeholder="Anything the business should know (optional)"></textarea>
+            <button type="submit" class="bd-submit-btn">Send Booking Request</button>
+          </form>
+          {% endif %}
         </div>
 
         <div class="bd-card" id="bd-photos">
@@ -359,6 +417,22 @@
   function bdTrack(eventType) {
     const url = "/biz/{{ business.slug|escapejs }}/track/" + eventType + "/";
     if (navigator.sendBeacon) { navigator.sendBeacon(url); } else { fetch(url); }
+  }
+
+  function bdSelectOrder(productId, productName) {
+    const form = document.getElementById('bd-order-form');
+    document.getElementById('bd-order-product-select').value = productId;
+    document.getElementById('bd-order-product-label').textContent = productName;
+    form.style.display = 'block';
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function bdSelectBooking(serviceId, serviceName) {
+    const form = document.getElementById('bd-booking-form');
+    document.getElementById('bd-booking-service-select').value = serviceId;
+    document.getElementById('bd-booking-service-label').textContent = serviceName;
+    form.style.display = 'block';
+    form.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
   {% if business.latitude and business.longitude %}
