@@ -20,7 +20,7 @@ from .forms import (
 )
 from .models import (
     PLAN_CHOICES, PLAN_FEATURE_COPY, PLAN_HEADLINE_COUNT, PLAN_LIMITS, PLAN_PRICING,
-    Business, BusinessBooking, BusinessCoupon, BusinessOrder, BusinessOrderItem,
+    Business, BusinessAIUsage, BusinessBooking, BusinessCoupon, BusinessOrder, BusinessOrderItem,
     BusinessPayment, BusinessPromotion, BusinessProduct, BusinessQuotation,
     BusinessService, BusinessStaffMember, BusinessSubscription, BusinessVerificationDocument,
 )
@@ -986,4 +986,104 @@ def orders_view(request):
     return render(request, 'business/orders.html', {
         'business': business, 'orders': orders, 'products': business.products.filter(is_available=True),
         'locked': False, 'active_tab': 'orders',
+    })
+
+AI_TASK_PROMPTS = {
+    'product_description': (
+        "You write concise, honest product/service listing descriptions for small businesses on a "
+        "Kenyan home-services marketplace. Keep it under 80 words, factual (don't invent details not "
+        "given), and appealing to Kenyan customers. Return plain text only, no markdown."
+    ),
+    'seo': (
+        "You generate SEO metadata for a Kenyan business's directory profile. Given the business info, "
+        "return exactly two lines: 'Title: ...' (under 60 characters) and 'Keywords: ...' (5-8 comma-"
+        "separated keywords relevant to Kenyan search intent). No other text."
+    ),
+    'social_caption': (
+        "You write short, engaging social media captions for a Kenyan small business. Match the tone to "
+        "the requested platform (Facebook posts can be slightly longer and conversational, Instagram "
+        "captions are punchy with 2-4 relevant hashtags, WhatsApp adverts are short and direct with a "
+        "clear call-to-action). Return plain text only, no markdown, no quotation marks around it."
+    ),
+}
+
+
+def _business_ai_quota_check(business):
+    """Returns (allowed: bool, usage: BusinessAIUsage, limit: int|None)."""
+    from django.utils import timezone
+    limit = business.plan_limits.get('ai_generations', 0)
+    current_month = timezone.now().strftime('%Y-%m')
+    usage, _ = BusinessAIUsage.objects.get_or_create(business=business, defaults={'month': current_month})
+    if usage.month != current_month:
+        usage.month = current_month
+        usage.generations_used = 0
+        usage.save(update_fields=['month', 'generations_used'])
+    if limit is not None and usage.generations_used >= limit:
+        return False, usage, limit
+    return True, usage, limit
+
+
+@login_required
+def ai_assistant_view(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if not business.has_feature('ai_assistant'):
+        return render(request, 'business/ai_assistant.html', {
+            'business': business, 'locked': True, 'active_tab': 'ai_assistant',
+        })
+
+    from core.views import _get_nvidia_client, check_submission_rate_limit
+
+    result = None
+    if request.method == 'POST':
+        if not check_submission_rate_limit(request, 'business_ai_assistant', limit=20, window_seconds=3600):
+            messages.error(request, "Too many AI requests. Please slow down and try again shortly.")
+            return redirect('business:ai_assistant')
+
+        task = request.POST.get('task', '')
+        user_input = request.POST.get('user_input', '').strip()
+        platform = request.POST.get('platform', 'facebook')
+
+        if task not in AI_TASK_PROMPTS:
+            messages.error(request, "Unknown AI task.")
+            return redirect('business:ai_assistant')
+        if not user_input:
+            messages.error(request, "Tell the assistant what to work with first.")
+            return redirect('business:ai_assistant')
+
+        allowed, usage, limit = _business_ai_quota_check(business)
+        if not allowed:
+            messages.error(request, f"You've used all {limit} AI generations for this month on your {business.get_plan_display()} plan. Upgrade for more.")
+            return redirect('business:ai_assistant')
+
+        try:
+            client = _get_nvidia_client()
+            user_prompt = user_input
+            if task == 'social_caption':
+                user_prompt = f"Platform: {platform}\n\nBusiness/context: {user_input}"
+
+            response = client.chat.completions.create(
+                model="z-ai/glm-5.2",
+                messages=[
+                    {"role": "system", "content": AI_TASK_PROMPTS[task]},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.5,
+                max_tokens=250,
+            )
+            result = response.choices[0].message.content.strip()
+            usage.generations_used += 1
+            usage.save(update_fields=['generations_used'])
+        except Exception as e:
+            print("BUSINESS AI ASSISTANT ERROR:", e)
+            messages.error(request, "The AI assistant is unavailable right now. Please try again shortly.")
+
+    _, usage, limit = _business_ai_quota_check(business)
+    return render(request, 'business/ai_assistant.html', {
+        'business': business, 'locked': False, 'active_tab': 'ai_assistant',
+        'result': result, 'generations_used': usage.generations_used, 'generation_limit': limit,
     })

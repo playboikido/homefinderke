@@ -1,0 +1,43 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}AI Assistant — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>AI Assistant</h1>
+
+    {% if locked %}
+    <div class="biz-unlock">
+        <p class="biz-empty">The AI Assistant is available on the Standard plan and above. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% else %}
+    <p class="biz-subtitle">{{ generations_used }} of {{ generation_limit|default:"unlimited" }} generations used this month</p>
+
+    <form method="POST" style="display:flex;flex-direction:column;gap:10px;max-width:640px;">
+        {% csrf_token %}
+        <label>What do you need?</label>
+        <select name="task" id="ai-task" onchange="document.getElementById('platform-row').style.display = this.value === 'social_caption' ? 'block' : 'none';">
+            <option value="product_description">Write a product/service description</option>
+            <option value="seo">Generate SEO title & keywords</option>
+            <option value="social_caption">Write a social media caption</option>
+        </select>
+
+        <div id="platform-row" style="display:none;">
+            <label>Platform</label>
+            <select name="platform">
+                <option value="facebook">Facebook post</option>
+                <option value="instagram">Instagram caption</option>
+                <option value="whatsapp">WhatsApp advert</option>
+            </select>
+        </div>
+
+        <label>Give it the details to work with</label>
+        <textarea name="user_input" rows="4" placeholder="e.g. 3-seater grey fabric sofa, KSh 35,000, delivered free within Nairobi..." required>{{ request.POST.user_input }}</textarea>
+
+        <button type="submit" class="biz-btn biz-btn-primary" style="align-self:flex-start;">Generate</button>
+    </form>
+
+    {% if result %}
+    <div style="margin-top:20px;padding:14px 18px;background:var(--muted);border-radius:10px;white-space:pre-wrap;">{{ result }}</div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

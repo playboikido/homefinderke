@@ -30,5 +30,6 @@ urlpatterns = [
     path('bookings/', views.bookings_view, name='bookings'),
     path('quotations/', views.quotations_view, name='quotations'),
     path('orders/', views.orders_view, name='orders'),
+    path('ai-assistant/', views.ai_assistant_view, name='ai_assistant'),
     path('mpesa-callback/', views.business_mpesa_callback, name='mpesa_callback'),
 ]

@@ -217,13 +217,14 @@ PLAN_LIMITS = {
 PLAN_FEATURES = {
     'starter':    {'analytics', 'reviews_view', 'gallery'},
     'standard':   {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
-                   'promotions'},
+                   'promotions', 'ai_assistant'},
     'premium':    {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'promotions', 'coupons', 'bookings', 'order_management'},
+                   'promotions', 'coupons', 'bookings', 'order_management', 'ai_assistant'},
     'enterprise': {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'multi_location', 'account_manager', 'promotions', 'coupons', 'bookings', 'order_management'},
+                   'multi_location', 'account_manager', 'promotions', 'coupons', 'bookings',
+                   'order_management', 'ai_assistant'},
 }
 # Human-readable feature bullets shown on the plans page.
 # HEADLINE_COUNT items show by default; the rest appear behind "See more".
@@ -797,3 +798,14 @@ class BusinessOrderItem(models.Model):
     @property
     def line_total(self):
         return self.quantity * self.unit_price
+
+
+class BusinessAIUsage(models.Model):
+    """Tracks monthly AI-generation quota usage per business, reset by month string ('YYYY-MM')."""
+    business = models.OneToOneField(Business, on_delete=models.CASCADE, related_name='ai_usage')
+    month = models.CharField(max_length=7)
+    generations_used = models.PositiveIntegerField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.business.name} — {self.month}: {self.generations_used}'
