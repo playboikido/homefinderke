@@ -2,7 +2,7 @@ from django import forms
 from django.core.validators import FileExtensionValidator
 from django.forms import modelformset_factory
 
-from .models import Business, BusinessProduct, BusinessService
+from .models import Business, BusinessBranch, BusinessProduct, BusinessService
 
 ALLOWED_DOC_EXTENSIONS = ['pdf', 'jpg', 'jpeg', 'png']
 MAX_DOC_SIZE_MB = 5
@@ -85,6 +85,27 @@ BusinessServiceFormSet = modelformset_factory(
     extra=1,
     can_delete=True,
 )
+
+
+class BusinessBranchForm(forms.ModelForm):
+    REQUIRED_FIELDS = ['name', 'county', 'town']
+
+    class Meta:
+        model = BusinessBranch
+        fields = [
+            'name', 'phone_number', 'whatsapp_number',
+            'county', 'town', 'estate', 'street',
+            'latitude', 'longitude', 'opens_at', 'closes_at', 'closed_weekdays', 'is_active',
+        ]
+        widgets = {
+            'opens_at': forms.TimeInput(attrs={'type': 'time'}),
+            'closes_at': forms.TimeInput(attrs={'type': 'time'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name in self.REQUIRED_FIELDS:
+            self.fields[field_name].required = True
 
 
 class BusinessVerificationForm(forms.Form):

@@ -809,3 +809,38 @@ class BusinessAIUsage(models.Model):
 
     def __str__(self):
         return f'{self.business.name} — {self.month}: {self.generations_used}'
+
+
+class BusinessBranch(models.Model):
+    """
+    An ADDITIONAL location beyond the business's main profile. The main
+    Business record (its own county/town/phone_number/etc.) always counts
+    as branch #1 and is never duplicated here — this table only holds
+    branches 2+, consistent with how BusinessStaffMember only holds staff
+    beyond the owner.
+    """
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='branches')
+    name = models.CharField(max_length=150, help_text="e.g. 'Westlands Branch'")
+    phone_number = models.CharField(max_length=20, blank=True)
+    whatsapp_number = models.CharField(max_length=20, blank=True)
+
+    county = models.CharField(max_length=100, blank=True)
+    town = models.CharField(max_length=100, blank=True)
+    estate = models.CharField(max_length=100, blank=True)
+    street = models.CharField(max_length=200, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+
+    opens_at = models.TimeField(null=True, blank=True)
+    closes_at = models.TimeField(null=True, blank=True)
+    closed_weekdays = models.CharField(max_length=20, blank=True, help_text="Comma-separated, 0=Mon..6=Sun")
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return f'{self.name} — {self.business.name}'

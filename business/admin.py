@@ -19,6 +19,7 @@ from .models import (
     BusinessQuotation,
     BusinessOrder,
     BusinessOrderItem,
+    BusinessBranch,
 )
 
 
@@ -88,6 +89,7 @@ admin.site.register(BusinessFavorite)
 admin.site.register(BusinessAnalyticsEvent)
 admin.site.register(BusinessCoupon)
 admin.site.register(BusinessService)
+admin.site.register(BusinessBranch)
 
 
 @admin.register(BusinessBooking)

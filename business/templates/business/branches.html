@@ -1,0 +1,64 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Branches — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Branches</h1>
+    <p class="biz-subtitle">{{ branches_used }} of {{ branch_limit|default:"unlimited" }} location{{ branch_limit|pluralize }} used</p>
+
+    <div class="biz-inquiry">
+        <strong>{{ business.name }}</strong> <span class="biz-empty">Main location — {{ business.town }}, {{ business.county }}</span>
+    </div>
+
+    {% for b in branches %}
+    <div class="biz-inquiry" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <strong>{{ b.name }}</strong>
+            <span class="biz-empty">{{ b.town }}, {{ b.county }}{% if not b.is_active %} · inactive{% endif %}</span>
+        </div>
+        <form method="POST" onsubmit="return confirm('Remove branch {{ b.name }}?');">
+            {% csrf_token %}
+            <input type="hidden" name="delete_id" value="{{ b.id }}">
+            <button type="submit" class="biz-btn">Remove</button>
+        </form>
+    </div>
+    {% empty %}
+    <p class="biz-empty">No additional branches yet.</p>
+    {% endfor %}
+
+    {% if branch_limit is None or branches_used < branch_limit %}
+    <form method="POST" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:160px;">
+                <label>Branch Name</label>
+                {{ form.name.errors }}{{ form.name }}
+            </div>
+            <div style="flex:1;min-width:120px;">
+                <label>County</label>
+                {{ form.county.errors }}{{ form.county }}
+            </div>
+            <div style="flex:1;min-width:120px;">
+                <label>Town</label>
+                {{ form.town.errors }}{{ form.town }}
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+            <div style="flex:1;min-width:140px;"><label>Estate</label>{{ form.estate }}</div>
+            <div style="flex:1;min-width:140px;"><label>Street</label>{{ form.street }}</div>
+            <div style="flex:1;min-width:140px;"><label>Phone</label>{{ form.phone_number }}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+            <div style="flex:1;min-width:120px;"><label>Opens</label>{{ form.opens_at }}</div>
+            <div style="flex:1;min-width:120px;"><label>Closes</label>{{ form.closes_at }}</div>
+            <div style="display:flex;align-items:end;gap:6px;">{{ form.is_active }} <label style="margin:0;">Active</label></div>
+        </div>
+        <button type="submit" class="biz-btn biz-btn-primary" style="margin-top:12px;">Add Branch</button>
+    </form>
+    {% else %}
+    <div class="biz-unlock" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+        <p class="biz-empty">You've used all {{ branch_limit }} locations on your {{ business.get_plan_display }} plan. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

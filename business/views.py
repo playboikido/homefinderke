@@ -15,13 +15,13 @@ from django.contrib.auth import get_user_model
 from core.mpesa import initiate_stk_push
 
 from .forms import (
-    BusinessContactForm, BusinessEditForm, BusinessInfoForm, BusinessLocationForm,
+    BusinessBranchForm, BusinessContactForm, BusinessEditForm, BusinessInfoForm, BusinessLocationForm,
     BusinessProductFormSet, BusinessServiceFormSet, BusinessVerificationForm,
 )
 from .models import (
     PLAN_CHOICES, PLAN_FEATURE_COPY, PLAN_HEADLINE_COUNT, PLAN_LIMITS, PLAN_PRICING,
-    Business, BusinessAIUsage, BusinessBooking, BusinessCoupon, BusinessOrder, BusinessOrderItem,
-    BusinessPayment, BusinessPromotion, BusinessProduct, BusinessQuotation,
+    Business, BusinessAIUsage, BusinessBooking, BusinessBranch, BusinessCoupon, BusinessOrder,
+    BusinessOrderItem, BusinessPayment, BusinessPromotion, BusinessProduct, BusinessQuotation,
     BusinessService, BusinessStaffMember, BusinessSubscription, BusinessVerificationDocument,
 )
 
@@ -1086,4 +1086,45 @@ def ai_assistant_view(request):
     return render(request, 'business/ai_assistant.html', {
         'business': business, 'locked': False, 'active_tab': 'ai_assistant',
         'result': result, 'generations_used': usage.generations_used, 'generation_limit': limit,
+    })
+
+@login_required
+def branches_view(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    limit = business.plan_limits['branches']
+    branches = business.branches.all()
+    branches_used = 1 + branches.count()  # 1 = the main business record itself
+
+    if request.method == 'POST':
+        if 'delete_id' in request.POST:
+            BusinessBranch.objects.filter(pk=request.POST['delete_id'], business=business).delete()
+            messages.success(request, "Branch removed.")
+            return redirect('business:branches')
+
+        if limit is not None and branches_used >= limit:
+            messages.error(request, f"Your current plan allows up to {limit} branches (including your main profile). Upgrade to add more.")
+            return redirect('business:branches')
+
+        form = BusinessBranchForm(request.POST)
+        if form.is_valid():
+            branch = form.save(commit=False)
+            branch.business = business
+            branch.save()
+            messages.success(request, f"Branch '{branch.name}' added.")
+            return redirect('business:branches')
+        else:
+            return render(request, 'business/branches.html', {
+                'business': business, 'branches': branches, 'branches_used': branches_used,
+                'branch_limit': limit, 'form': form, 'active_tab': 'branches',
+            })
+
+    form = BusinessBranchForm()
+    return render(request, 'business/branches.html', {
+        'business': business, 'branches': branches, 'branches_used': branches_used,
+        'branch_limit': limit, 'form': form, 'active_tab': 'branches',
     })
