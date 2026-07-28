@@ -19,6 +19,8 @@
             <a href="{% url 'business:plans' %}" class="biz-nav-item {% if active_tab == 'plans' %}active{% endif %}"><span>💳</span> Subscription</a>
             <a href="{% url 'business:payments' %}" class="biz-nav-item {% if active_tab == 'payments' %}active{% endif %}"><span>🧾</span> Payments</a>
             <a href="{% url 'business:team' %}" class="biz-nav-item {% if active_tab == 'team' %}active{% endif %}"><span>👥</span> Team</a>
+            <a href="{% url 'business:coupons' %}" class="biz-nav-item {% if active_tab == 'coupons' %}active{% endif %}"><span>🎟️</span> Coupons</a>
+            <a href="{% url 'business:promotions' %}" class="biz-nav-item {% if active_tab == 'promotions' %}active{% endif %}"><span>📣</span> Promotions</a>
             <span class="biz-nav-item biz-nav-disabled"><span>✅</span> Verification <em style="opacity:.6;font-size:.7rem;">soon</em></span>
             <a href="{% url 'business:settings' %}" class="biz-nav-item {% if active_tab == 'settings' %}active{% endif %}"><span>⚙️</span> Settings</a>
         </nav>

@@ -1,0 +1,36 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Promotions — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Promotions</h1>
+
+    {% if locked %}
+    <div class="biz-unlock">
+        <p class="biz-empty">Promotions are available on the Standard plan and above. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% else %}
+    {% for p in promotions %}
+    <div class="biz-inquiry">
+        <strong>{{ p.title }}</strong> — {{ p.get_placement_display }}
+        <span class="biz-empty">{{ p.starts_on|date:"d M" }}–{{ p.ends_on|date:"d M Y" }} · {{ p.get_status_display }}</span>
+    </div>
+    {% empty %}
+    <p class="biz-empty">No promotion requests yet.</p>
+    {% endfor %}
+
+    <form method="POST" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Promotion title" required style="flex:2;min-width:200px;">
+        <select name="placement" style="flex:1;min-width:180px;">
+            <option value="category_featured">Featured in category</option>
+            {% if can_request_homepage %}<option value="homepage">Homepage</option>{% endif %}
+            <option value="residence_pages">On Residence pages</option>
+        </select>
+        <input type="date" name="starts_on" required style="flex:1;min-width:140px;">
+        <input type="date" name="ends_on" required style="flex:1;min-width:140px;">
+        <button type="submit" class="biz-btn biz-btn-primary">Request promotion</button>
+    </form>
+    <p class="biz-empty" style="margin-top:8px;">Requests are reviewed by our team before going live.</p>
+    {% endif %}
+</div>
+{% endblock %}

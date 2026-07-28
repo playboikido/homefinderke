@@ -1,0 +1,55 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Coupons — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Coupons</h1>
+
+    {% if locked %}
+    <div class="biz-unlock">
+        <p class="biz-empty">Coupons are available on the Premium plan. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% else %}
+    <p class="biz-subtitle">{{ coupons|length }} coupon{{ coupons|length|pluralize }}</p>
+
+    {% for c in coupons %}
+    <div class="biz-inquiry" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <strong>{{ c.code }}</strong>
+            <span class="biz-empty">
+                {% if c.discount_type == 'percent' %}{{ c.discount_value|floatformat:0 }}% off{% else %}KSh {{ c.discount_value|floatformat:0 }} off{% endif %}
+                · {{ c.valid_from|date:"d M" }}–{{ c.valid_until|date:"d M Y" }}
+                · used {{ c.times_used }}{% if c.max_uses %}/{{ c.max_uses }}{% endif %}
+                {% if not c.is_valid_now %} · <span style="color:var(--danger,#dc2626);">inactive</span>{% endif %}
+            </span>
+            {% if c.description %}<p style="margin-top:4px;font-size:.85rem;">{{ c.description }}</p>{% endif %}
+        </div>
+        <div style="display:flex;gap:6px;">
+            <form method="POST"><input type="hidden" name="toggle_id" value="{{ c.id }}">{% csrf_token %}
+                <button type="submit" class="biz-btn">{% if c.is_active %}Pause{% else %}Resume{% endif %}</button>
+            </form>
+            <form method="POST" onsubmit="return confirm('Delete coupon {{ c.code }}?');"><input type="hidden" name="delete_id" value="{{ c.id }}">{% csrf_token %}
+                <button type="submit" class="biz-btn">Delete</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <p class="biz-empty">No coupons yet.</p>
+    {% endfor %}
+
+    <form method="POST" style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="text" name="code" placeholder="CODE (e.g. MOVE20)" required style="flex:1;min-width:140px;text-transform:uppercase;">
+        <select name="discount_type" style="flex:1;min-width:120px;">
+            <option value="percent">% off</option>
+            <option value="fixed">KSh off</option>
+        </select>
+        <input type="number" step="0.01" name="discount_value" placeholder="Value" required style="width:100px;">
+        <input type="number" name="max_uses" placeholder="Max uses (optional)" style="width:160px;">
+        <input type="date" name="valid_from" required style="flex:1;min-width:140px;">
+        <input type="date" name="valid_until" required style="flex:1;min-width:140px;">
+        <input type="text" name="description" placeholder="Description (optional)" style="flex:2;min-width:200px;">
+        <button type="submit" class="biz-btn biz-btn-primary">Create coupon</button>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

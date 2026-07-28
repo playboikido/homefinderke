@@ -22,8 +22,8 @@ from django.contrib.auth import get_user_model
 
 from .models import (
     PLAN_CHOICES, PLAN_FEATURE_COPY, PLAN_HEADLINE_COUNT, PLAN_LIMITS, PLAN_PRICING,
-    Business, BusinessPayment, BusinessProduct, BusinessStaffMember, BusinessSubscription,
-    BusinessVerificationDocument,
+    Business, BusinessCoupon, BusinessPayment, BusinessPromotion, BusinessProduct,
+    BusinessStaffMember, BusinessSubscription, BusinessVerificationDocument,
 )
 
 STEP_URLS = {
@@ -683,3 +683,116 @@ def business_mpesa_callback(request):
         pass
 
     return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+
+@login_required
+def coupons_view(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if not business.has_feature('coupons'):
+        return render(request, 'business/coupons.html', {
+            'business': business, 'locked': True, 'active_tab': 'coupons',
+        })
+
+    if request.method == 'POST':
+        if 'delete_id' in request.POST:
+            BusinessCoupon.objects.filter(pk=request.POST['delete_id'], business=business).delete()
+            messages.success(request, "Coupon deleted.")
+            return redirect('business:coupons')
+
+        if 'toggle_id' in request.POST:
+            coupon = BusinessCoupon.objects.filter(pk=request.POST['toggle_id'], business=business).first()
+            if coupon:
+                coupon.is_active = not coupon.is_active
+                coupon.save(update_fields=['is_active'])
+            return redirect('business:coupons')
+
+        code = request.POST.get('code', '').strip().upper()
+        discount_type = request.POST.get('discount_type', 'percent')
+        valid_from = request.POST.get('valid_from', '')
+        valid_until = request.POST.get('valid_until', '')
+
+        errors = []
+        if not code or not code.isalnum():
+            errors.append("Coupon code must be letters/numbers only.")
+        elif BusinessCoupon.objects.filter(business=business, code=code).exists():
+            errors.append("You already have a coupon with that code.")
+
+        try:
+            discount_value = float(request.POST.get('discount_value', ''))
+            if discount_type == 'percent' and not (0 < discount_value <= 100):
+                errors.append("Percentage discount must be between 1 and 100.")
+            elif discount_value <= 0:
+                errors.append("Discount value must be greater than 0.")
+        except (TypeError, ValueError):
+            errors.append("Enter a valid discount value.")
+            discount_value = None
+
+        if not valid_from or not valid_until:
+            errors.append("Set both a start and end date.")
+        elif valid_until < valid_from:
+            errors.append("End date must be after start date.")
+
+        if errors:
+            for e in errors:
+                messages.error(request, e)
+        else:
+            BusinessCoupon.objects.create(
+                business=business, code=code, discount_type=discount_type,
+                discount_value=discount_value, description=request.POST.get('description', '').strip(),
+                max_uses=request.POST.get('max_uses') or None,
+                valid_from=valid_from, valid_until=valid_until,
+            )
+            messages.success(request, f"Coupon {code} created.")
+        return redirect('business:coupons')
+
+    coupons = business.coupons.all()
+    return render(request, 'business/coupons.html', {
+        'business': business, 'coupons': coupons, 'locked': False, 'active_tab': 'coupons',
+    })
+
+
+@login_required
+def promotions_view(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if not business.has_feature('promotions'):
+        return render(request, 'business/promotions.html', {
+            'business': business, 'locked': True, 'active_tab': 'promotions',
+        })
+
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        placement = request.POST.get('placement', 'category_featured')
+        starts_on = request.POST.get('starts_on', '')
+        ends_on = request.POST.get('ends_on', '')
+
+        valid_placements = {c for c, _ in BusinessPromotion.PLACEMENT_CHOICES}
+        if placement not in valid_placements:
+            placement = 'category_featured'
+        if placement == 'homepage' and not business.has_feature('homepage_promotion'):
+            messages.error(request, "Homepage placement requires the Premium plan.")
+        elif not title or not starts_on or not ends_on:
+            messages.error(request, "Fill in the title and both dates.")
+        elif ends_on < starts_on:
+            messages.error(request, "End date must be after start date.")
+        else:
+            BusinessPromotion.objects.create(
+                business=business, title=title, placement=placement,
+                starts_on=starts_on, ends_on=ends_on,
+            )
+            messages.success(request, "Promotion request submitted for review. We'll notify you once it's approved.")
+        return redirect('business:promotions')
+
+    promotions = business.promotions.all()
+    return render(request, 'business/promotions.html', {
+        'business': business, 'promotions': promotions, 'locked': False, 'active_tab': 'promotions',
+        'can_request_homepage': business.has_feature('homepage_promotion'),
+    })

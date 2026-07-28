@@ -225,13 +225,13 @@ PLAN_LIMITS = {
 PLAN_FEATURES = {
     'starter':    {'analytics', 'reviews_view', 'gallery'},
     'standard':   {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
-                   'ai_assistant'},
+                   'promotions'},
     'premium':    {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'ai_assistant', 'ai_marketing'},
+                   'promotions', 'coupons'},
     'enterprise': {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'multi_location', 'account_manager', 'ai_assistant', 'ai_marketing'},
+                   'multi_location', 'account_manager', 'promotions', 'coupons'},
 }
 # Human-readable feature bullets shown on the plans page.
 # HEADLINE_COUNT items show by default; the rest appear behind "See more".
@@ -253,7 +253,9 @@ PLAN_FEATURE_COPY = {
         'Featured in category pages + verified badge',
         'Full analytics dashboard',
         'Phone & WhatsApp click tracking',
+        'Promotions (featured placement requests)',
         'Reply to customer reviews',
+        'Standard directory listing'
         'AI Assistant — 30 generations/month',
         '1 staff account',
     ],
@@ -268,6 +270,7 @@ PLAN_FEATURE_COPY = {
         'Priority placement in search & category results',
         'Sponsor badge on directory pages',
         'Eligible for homepage promotion',
+        'Coupons',
         'AI Marketing Assistant — 200 generations/month',
         'Up to 5 staff accounts',
     ],
@@ -624,3 +627,69 @@ class BusinessAnalyticsEvent(models.Model):
         indexes = [
             models.Index(fields=['business', 'event_type', 'created_at']),
         ]
+
+
+class BusinessCoupon(models.Model):
+    DISCOUNT_TYPE_CHOICES = [('percent', 'Percentage Off'), ('fixed', 'Fixed Amount Off')]
+
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='coupons')
+    code = models.CharField(max_length=30)
+    discount_type = models.CharField(max_length=10, choices=DISCOUNT_TYPE_CHOICES, default='percent')
+    discount_value = models.DecimalField(max_digits=8, decimal_places=2)
+    description = models.CharField(max_length=200, blank=True)
+    max_uses = models.PositiveIntegerField(null=True, blank=True, help_text="Blank = unlimited uses")
+    times_used = models.PositiveIntegerField(default=0)
+    valid_from = models.DateField()
+    valid_until = models.DateField()
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('business', 'code')
+
+    def __str__(self):
+        return f'{self.code} ({self.business.name})'
+
+    def save(self, *args, **kwargs):
+        self.code = self.code.strip().upper()
+        super().save(*args, **kwargs)
+
+    @property
+    def is_valid_now(self):
+        from django.utils import timezone
+        today = timezone.localdate()
+        if not self.is_active or today < self.valid_from or today > self.valid_until:
+            return False
+        if self.max_uses is not None and self.times_used >= self.max_uses:
+            return False
+        return True
+
+
+class BusinessPromotion(models.Model):
+    PLACEMENT_CHOICES = [
+        ('category_featured', 'Featured in Category Page'),
+        ('homepage', 'Homepage Featured'),
+        ('residence_pages', 'Featured on Residence Pages'),
+    ]
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('active', 'Active'),
+        ('ended', 'Ended'),
+        ('rejected', 'Rejected'),
+    ]
+
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='promotions')
+    title = models.CharField(max_length=150)
+    placement = models.CharField(max_length=20, choices=PLACEMENT_CHOICES, default='category_featured')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    starts_on = models.DateField()
+    ends_on = models.DateField()
+    admin_notes = models.CharField(max_length=300, blank=True, help_text="Internal notes, not shown to the business")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.title} ({self.business.name})'

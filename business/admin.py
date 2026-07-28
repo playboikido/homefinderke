@@ -12,6 +12,8 @@ from .models import (
     BusinessSubscription,
     BusinessPayment,
     BusinessAnalyticsEvent,
+    BusinessCoupon,
+    BusinessPromotion,
 )
 
 
@@ -79,3 +81,11 @@ admin.site.register(BusinessStaffMember)
 admin.site.register(BusinessGalleryImage)
 admin.site.register(BusinessFavorite)
 admin.site.register(BusinessAnalyticsEvent)
+admin.site.register(BusinessCoupon)
+
+
+@admin.register(BusinessPromotion)
+class BusinessPromotionAdmin(admin.ModelAdmin):
+    list_display = ('title', 'business', 'placement', 'status', 'starts_on', 'ends_on')
+    list_filter = ('placement', 'status')
+    search_fields = ('title', 'business__name')

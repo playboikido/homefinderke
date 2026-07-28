@@ -24,5 +24,7 @@ urlpatterns = [
     path('plans/upgrade/<slug:plan_slug>/', views.request_upgrade, name='request_upgrade'),
     path('team/', views.team_members, name='team'),
     path('payments/', views.business_payments, name='payments'),
+    path('coupons/', views.coupons_view, name='coupons'),
+    path('promotions/', views.promotions_view, name='promotions'),
     path('mpesa-callback/', views.business_mpesa_callback, name='mpesa_callback'),
 ]
