@@ -1,0 +1,54 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Orders — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Orders</h1>
+
+    {% if locked %}
+    <div class="biz-unlock">
+        <p class="biz-empty">Order management is available on the Premium plan. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% else %}
+    <form method="POST" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;">
+        {% csrf_token %}
+        <input type="text" name="customer_name" placeholder="Customer name" required style="flex:1;min-width:160px;">
+        <input type="text" name="customer_phone" placeholder="Phone" style="flex:1;min-width:140px;">
+        <select name="product_id" required style="flex:1;min-width:160px;">
+            <option value="">Select product</option>
+            {% for p in products %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+        </select>
+        <input type="number" name="quantity" placeholder="Qty" value="1" min="1" style="width:80px;">
+        <input type="number" step="0.01" name="unit_price" placeholder="Unit price (KES)" style="width:150px;">
+        <input type="text" name="delivery_address" placeholder="Delivery address (optional)" style="flex:1;min-width:180px;">
+        <button type="submit" name="new_order" value="1" class="biz-btn biz-btn-primary">Create Order</button>
+    </form>
+
+    {% for o in orders %}
+    <div class="biz-inquiry">
+        <div style="display:flex;justify-content:space-between;">
+            <strong>{{ o.customer_name }}</strong>
+            <strong>KSh {{ o.total_amount|floatformat:0 }}</strong>
+        </div>
+        <span class="biz-empty">{{ o.created_at|date:"d M Y" }} · {{ o.customer_phone }}{% if o.delivery_address %} · {{ o.delivery_address }}{% endif %}</span>
+
+        {% for item in o.items.all %}
+        <p style="margin:4px 0 0;font-size:.85rem;">{{ item.quantity }}× {{ item.product_name }} @ KSh {{ item.unit_price|floatformat:0 }} = KSh {{ item.line_total|floatformat:0 }}</p>
+        {% endfor %}
+
+        <form method="POST" style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            {% csrf_token %}
+            <input type="hidden" name="order_id" value="{{ o.id }}">
+            <select name="status">
+                {% for value, label in o.STATUS_CHOICES %}
+                <option value="{{ value }}" {% if o.status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" name="update_status" value="1" class="biz-btn">Update Status</button>
+        </form>
+    </div>
+    {% empty %}
+    <p class="biz-empty">No orders yet.</p>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -20,9 +20,9 @@ from .forms import (
 )
 from .models import (
     PLAN_CHOICES, PLAN_FEATURE_COPY, PLAN_HEADLINE_COUNT, PLAN_LIMITS, PLAN_PRICING,
-    Business, BusinessBooking, BusinessCoupon, BusinessPayment, BusinessPromotion,
-    BusinessProduct, BusinessService, BusinessStaffMember, BusinessSubscription,
-    BusinessVerificationDocument,
+    Business, BusinessBooking, BusinessCoupon, BusinessOrder, BusinessOrderItem,
+    BusinessPayment, BusinessPromotion, BusinessProduct, BusinessQuotation,
+    BusinessService, BusinessStaffMember, BusinessSubscription, BusinessVerificationDocument,
 )
 
 STEP_URLS = {
@@ -861,4 +861,129 @@ def bookings_view(request):
     bookings = business.bookings.select_related('service', 'customer').all()
     return render(request, 'business/bookings.html', {
         'business': business, 'bookings': bookings, 'locked': False, 'active_tab': 'bookings',
+    })
+
+@login_required
+def quotations_view(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if not business.has_feature('inquiries'):
+        return render(request, 'business/quotations.html', {
+            'business': business, 'locked': True, 'active_tab': 'quotations',
+        })
+
+    if request.method == 'POST':
+        quotation = business.quotations.filter(pk=request.POST.get('quotation_id')).first()
+        if quotation:
+            amount = request.POST.get('quoted_amount', '').strip()
+            notes = request.POST.get('quote_notes', '').strip()
+            action = request.POST.get('action', '')
+            if action == 'send_quote' and amount:
+                try:
+                    quotation.quoted_amount = float(amount)
+                    quotation.quote_notes = notes
+                    quotation.status = 'quoted'
+                    quotation.responded_at = timezone.now()
+                    quotation.save(update_fields=['quoted_amount', 'quote_notes', 'status', 'responded_at'])
+                    messages.success(request, "Quote sent.")
+                except (TypeError, ValueError):
+                    messages.error(request, "Enter a valid quote amount.")
+            elif action == 'decline':
+                quotation.status = 'declined'
+                quotation.responded_at = timezone.now()
+                quotation.save(update_fields=['status', 'responded_at'])
+                messages.success(request, "Quotation declined.")
+        return redirect('business:quotations')
+
+    quotations = business.quotations.select_related('product', 'service').all()
+    return render(request, 'business/quotations.html', {
+        'business': business, 'quotations': quotations, 'locked': False, 'active_tab': 'quotations',
+    })
+
+
+def _recalc_order_total(order):
+    total = sum(item.quantity * item.unit_price for item in order.items.all())
+    order.total_amount = total
+    order.save(update_fields=['total_amount'])
+
+
+@login_required
+def orders_view(request):
+    business = _get_business_or_redirect(request)
+    if not business:
+        return redirect('business:onboarding_start')
+    if not business.onboarding_complete:
+        return redirect(STEP_URLS[business.onboarding_step])
+
+    if not business.has_feature('order_management'):
+        return render(request, 'business/orders.html', {
+            'business': business, 'locked': True, 'active_tab': 'orders',
+        })
+
+    if request.method == 'POST':
+        if 'new_order' in request.POST:
+            customer_name = request.POST.get('customer_name', '').strip()
+            product_id = request.POST.get('product_id', '')
+            quantity = request.POST.get('quantity', '1')
+            unit_price = request.POST.get('unit_price', '')
+
+            product = business.products.filter(pk=product_id).first()
+            try:
+                quantity = max(1, int(quantity))
+                unit_price = float(unit_price) if unit_price else float(product.price or 0) if product else 0
+            except (TypeError, ValueError):
+                messages.error(request, "Enter a valid quantity and price.")
+                return redirect('business:orders')
+
+            if not customer_name or not product:
+                messages.error(request, "Customer name and a valid product are required.")
+                return redirect('business:orders')
+
+            order = BusinessOrder.objects.create(
+                business=business, customer_name=customer_name,
+                customer_phone=request.POST.get('customer_phone', '').strip(),
+                delivery_address=request.POST.get('delivery_address', '').strip(),
+            )
+            BusinessOrderItem.objects.create(
+                order=order, product=product, product_name=product.name,
+                quantity=quantity, unit_price=unit_price,
+            )
+            _recalc_order_total(order)
+            messages.success(request, f"Order created for {customer_name}.")
+
+        elif 'add_item' in request.POST:
+            order = business.orders.filter(pk=request.POST.get('order_id')).first()
+            product = business.products.filter(pk=request.POST.get('product_id')).first()
+            if order and product:
+                try:
+                    quantity = max(1, int(request.POST.get('quantity', '1')))
+                    unit_price = float(request.POST.get('unit_price') or product.price or 0)
+                    BusinessOrderItem.objects.create(
+                        order=order, product=product, product_name=product.name,
+                        quantity=quantity, unit_price=unit_price,
+                    )
+                    _recalc_order_total(order)
+                    messages.success(request, "Item added.")
+                except (TypeError, ValueError):
+                    messages.error(request, "Enter a valid quantity and price.")
+
+        elif 'update_status' in request.POST:
+            order = business.orders.filter(pk=request.POST.get('order_id')).first()
+            new_status = request.POST.get('status', '')
+            valid_statuses = {c for c, _ in BusinessOrder.STATUS_CHOICES}
+            if order and new_status in valid_statuses:
+                order.status = new_status
+                order.save(update_fields=['status'])
+                messages.success(request, "Order updated.")
+
+        return redirect('business:orders')
+
+    orders = business.orders.prefetch_related('items').all()
+    return render(request, 'business/orders.html', {
+        'business': business, 'orders': orders, 'products': business.products.filter(is_available=True),
+        'locked': False, 'active_tab': 'orders',
     })

@@ -220,10 +220,10 @@ PLAN_FEATURES = {
                    'promotions'},
     'premium':    {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'promotions', 'coupons', 'bookings'},
+                   'promotions', 'coupons', 'bookings', 'order_management'},
     'enterprise': {'analytics', 'reviews_view', 'reviews_reply', 'click_tracking', 'gallery', 'inquiries',
                    'priority_placement', 'sponsor_listing', 'homepage_promotion', 'advanced_analytics',
-                   'multi_location', 'account_manager', 'promotions', 'coupons', 'bookings'},
+                   'multi_location', 'account_manager', 'promotions', 'coupons', 'bookings', 'order_management'},
 }
 # Human-readable feature bullets shown on the plans page.
 # HEADLINE_COUNT items show by default; the rest appear behind "See more".
@@ -264,6 +264,7 @@ PLAN_FEATURE_COPY = {
         'Eligible for homepage promotion',
         'Coupons',
         'Booking system',
+        'Order management',
         'AI Marketing Assistant — 200 generations/month',
         'Up to 5 staff accounts',
     ],
@@ -735,3 +736,64 @@ class BusinessBooking(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class BusinessQuotation(models.Model):
+    STATUS_CHOICES = [
+        ('requested', 'Requested'),
+        ('quoted', 'Quoted'),
+        ('accepted', 'Accepted'),
+        ('declined', 'Declined'),
+        ('expired', 'Expired'),
+    ]
+
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='quotations')
+    product = models.ForeignKey(BusinessProduct, on_delete=models.SET_NULL, null=True, blank=True, related_name='quotations')
+    service = models.ForeignKey(BusinessService, on_delete=models.SET_NULL, null=True, blank=True, related_name='quotations')
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    customer_name = models.CharField(max_length=150)
+    customer_phone = models.CharField(max_length=20, blank=True)
+    customer_email = models.EmailField(blank=True)
+    request_details = models.TextField()
+    quoted_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    quote_notes = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='requested')
+    responded_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class BusinessOrder(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='orders')
+    customer = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    customer_name = models.CharField(max_length=150)
+    customer_phone = models.CharField(max_length=20, blank=True)
+    delivery_address = models.CharField(max_length=300, blank=True)
+    status = models.CharField(max_length=12, choices=STATUS_CHOICES, default='pending')
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class BusinessOrderItem(models.Model):
+    order = models.ForeignKey(BusinessOrder, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(BusinessProduct, on_delete=models.SET_NULL, null=True, blank=True)
+    product_name = models.CharField(max_length=200, help_text="Snapshot of the name at order time")
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    @property
+    def line_total(self):
+        return self.quantity * self.unit_price

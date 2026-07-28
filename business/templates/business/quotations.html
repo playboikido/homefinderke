@@ -1,0 +1,39 @@
+{% extends "business/_dash_base.html" %}
+{% block title %}Quotations — {{ business.name }}{% endblock %}
+{% block dash_content %}
+<div class="biz-card">
+    <h1>Quotations</h1>
+
+    {% if locked %}
+    <div class="biz-unlock">
+        <p class="biz-empty">Quotations are available on the Standard plan and above. <a href="{% url 'business:plans' %}">Upgrade →</a></p>
+    </div>
+    {% else %}
+    {% for q in quotations %}
+    <div class="biz-inquiry">
+        <strong>{{ q.customer_name }}</strong>
+        {% if q.product %} — {{ q.product.name }}{% elif q.service %} — {{ q.service.name }}{% endif %}
+        <span class="biz-empty">{{ q.created_at|date:"d M Y" }} · {{ q.get_status_display }}</span>
+        <p style="margin-top:6px;">{{ q.request_details }}</p>
+
+        {% if q.status == 'quoted' %}
+        <div style="margin-top:10px;padding:10px 14px;background:var(--muted);border-radius:10px;font-size:0.85rem;">
+            <strong>Quoted:</strong> KSh {{ q.quoted_amount|floatformat:0 }} {% if q.quote_notes %}— {{ q.quote_notes }}{% endif %}
+        </div>
+        {% elif q.status == 'requested' %}
+        <form method="POST" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+            {% csrf_token %}
+            <input type="hidden" name="quotation_id" value="{{ q.id }}">
+            <input type="number" step="0.01" name="quoted_amount" placeholder="Quote amount (KES)" style="width:160px;">
+            <input type="text" name="quote_notes" placeholder="Notes (optional)" style="flex:1;min-width:160px;">
+            <button type="submit" name="action" value="send_quote" class="biz-btn biz-btn-primary">Send Quote</button>
+            <button type="submit" name="action" value="decline" class="biz-btn">Decline</button>
+        </form>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p class="biz-empty">No quotation requests yet.</p>
+    {% endfor %}
+    {% endif %}
+</div>
+{% endblock %}

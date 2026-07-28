@@ -16,6 +16,9 @@ from .models import (
     BusinessPromotion,
     BusinessService,
     BusinessBooking,
+    BusinessQuotation,
+    BusinessOrder,
+    BusinessOrderItem,
 )
 
 
@@ -92,6 +95,26 @@ class BusinessBookingAdmin(admin.ModelAdmin):
     list_display = ('customer_name', 'business', 'service', 'requested_date', 'status')
     list_filter = ('status',)
     search_fields = ('customer_name', 'business__name')
+
+
+@admin.register(BusinessQuotation)
+class BusinessQuotationAdmin(admin.ModelAdmin):
+    list_display = ('customer_name', 'business', 'status', 'quoted_amount', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('customer_name', 'business__name')
+
+
+class BusinessOrderItemInline(admin.TabularInline):
+    model = BusinessOrderItem
+    extra = 0
+
+
+@admin.register(BusinessOrder)
+class BusinessOrderAdmin(admin.ModelAdmin):
+    list_display = ('customer_name', 'business', 'status', 'total_amount', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('customer_name', 'business__name')
+    inlines = [BusinessOrderItemInline]
 
 
 @admin.register(BusinessPromotion)
