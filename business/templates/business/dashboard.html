@@ -1,7 +1,6 @@
 {% extends "business/_dash_base.html" %}
 {% block title %}{{ business.name }} Dashboard{% endblock %}
 
-{% block dash_content %}
 <div class="biz-dash-header">
     <div>
         <h1>Good {% now "G" as h %}{% if h|add:0 < 12 %}morning{% elif h|add:0 < 18 %}afternoon{% else %}evening{% endif %}, {{ business.owner.first_name|default:business.owner.username }} 👋</h1>
