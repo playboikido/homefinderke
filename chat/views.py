@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages as dj_messages
 from django.utils import timezone
 from django.http import JsonResponse
 from .models import Conversation, Message
@@ -11,6 +12,9 @@ User = get_user_model()
 
 @login_required
 def chat_hub(request, conversation_id=None):
+    if getattr(request.user.profile, 'account_type', 'resident') == 'business':
+        dj_messages.info(request, 'Chat is for residence accounts. Manage your business from your dashboard instead.')
+        return redirect('business:dashboard')
     # prefetch participants + messages so the loop below doesn't re-hit the DB
     # 3 extra queries per conversation (N+1) was the main cause of the slow sidebar load.
     my_conversations = request.user.conversations.prefetch_related('participants', 'messages').all()
@@ -74,6 +78,9 @@ def chat_hub(request, conversation_id=None):
 
 @login_required
 def start_conversation(request, owner_id):
+    if getattr(request.user.profile, 'account_type', 'resident') == 'business':
+        dj_messages.info(request, 'Chat is for residence accounts. Manage your business from your dashboard instead.')
+        return redirect('business:dashboard')
     owner = get_object_or_404(User, id=owner_id)
     if owner == request.user:
         return redirect('chat_hub')

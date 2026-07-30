@@ -322,12 +322,6 @@ def ai_fix_description(request):
         print("AI DESCRIPTION FIX ERROR:", e)
         return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
 def home(request):
-    if request.user.is_authenticated:
-        profile = getattr(request.user, 'profile', None)
-        if profile and profile.account_type == 'business':
-            from django.shortcuts import redirect
-            return redirect('business:dashboard')
-
     residences = Residence.objects.filter(approved=True, is_hidden=False)
 
     county = request.GET.get('county')
@@ -446,6 +440,8 @@ def search(request):
 
 
 def residence_list(request):
+    if business_account_blocked(request):
+        return redirect('business:dashboard')
     residences = Residence.objects.filter(approved=True, is_hidden=False).order_by('-is_premium', '-created_at')
     paginator  = Paginator(residences, 9)
     page_obj   = paginator.get_page(request.GET.get('page'))
@@ -639,6 +635,8 @@ def haversine_km(lat1, lng1, lat2, lng2):
     return R * 2 * math.asin(min(1.0, math.sqrt(max(0.0, a))))
 
 def residence_detail(request, pk):
+    if business_account_blocked(request):
+        return redirect('business:dashboard')
     # Allow owners to preview their own unapproved residences
     if request.user.is_authenticated:
         residence = get_object_or_404(Residence, pk=pk)
@@ -1039,6 +1037,8 @@ def request_boost(request, pk):
 
 @login_required
 def my_favorites(request):
+    if business_account_blocked(request):
+        return redirect('business:dashboard')
     favorites = Favorite.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'core/my_favorites.html', {'favorites': favorites})
 
@@ -1094,6 +1094,15 @@ def check_not_suspended(request):
         messages.error(request, 'Your account is restricted. Contact support for help.')
         return False
     return True
+
+
+def business_account_blocked(request):
+    """Returns True (with an info message set) if a business account is trying to reach
+    a residence-only feature (browsing residences, favorites, roommates, chat)."""
+    if request.user.is_authenticated and getattr(request.user.profile, 'account_type', 'resident') == 'business':
+        messages.info(request, 'This section is for residence accounts. Manage your business from your dashboard instead.')
+        return True
+    return False
 def reject_residence(request, pk):
     residence = get_object_or_404(Residence, pk=pk)
     residence.delete()
@@ -1790,6 +1799,8 @@ from .models import RoommateProfile
 
 @login_required
 def roommate_list(request):
+    if business_account_blocked(request):
+        return redirect('business:dashboard')
     profiles = RoommateProfile.objects.filter(is_active=True).exclude(user=request.user)
 
     county = request.GET.get('county')
