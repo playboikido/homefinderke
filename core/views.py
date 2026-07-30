@@ -440,8 +440,6 @@ def search(request):
 
 
 def residence_list(request):
-    if business_account_blocked(request):
-        return redirect('business:dashboard')
     residences = Residence.objects.filter(approved=True, is_hidden=False).order_by('-is_premium', '-created_at')
     paginator  = Paginator(residences, 9)
     page_obj   = paginator.get_page(request.GET.get('page'))
@@ -635,8 +633,6 @@ def haversine_km(lat1, lng1, lat2, lng2):
     return R * 2 * math.asin(min(1.0, math.sqrt(max(0.0, a))))
 
 def residence_detail(request, pk):
-    if business_account_blocked(request):
-        return redirect('business:dashboard')
     # Allow owners to preview their own unapproved residences
     if request.user.is_authenticated:
         residence = get_object_or_404(Residence, pk=pk)
@@ -732,6 +728,8 @@ MAX_LISTINGS_PER_OWNER = 5
 def add_residence(request):
     if request.user.email == 'homefinder.ke.help@gmail.com':
         return redirect('admin_dashboard')
+    if business_account_blocked(request):
+        return redirect('business:dashboard')
     if not check_not_suspended(request):
         return redirect('home')
 

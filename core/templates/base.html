@@ -971,12 +971,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
     </a>
-    {% if not user.is_authenticated or user.profile.account_type != 'business' %}
     <a href="/residences/">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
       Residences
     </a>
-    {% endif %}
     <a href="/search/">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       Search
@@ -994,7 +992,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
       Add Furniture Vendor
     </a>
-    {% else %}
+    {% elif not user.is_authenticated or user.profile.account_type != 'business' %}
     <a href="/add-residence/">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
       Add Listing
@@ -1019,14 +1017,26 @@
     {% endif %}
 
     {% if user.is_authenticated and user.profile.account_type == 'business' %}
-    <a href="{% url 'business:dashboard' %}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Business Dashboard
-    </a>
-    <a href="{% url 'business:orders' %}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7L12 3 4 7m16 0v10l-8 4m8-14L12 11m0 10L4 17V7m8 4L4 7"/></svg>
-      My Orders
-    </a>
+    <div class="drawer-nav-label" style="margin-top:4px;">Business</div>
+    <a href="{% url 'business:dashboard' %}"><span>📊</span> Dashboard</a>
+    <a href="{% url 'business:edit' %}"><span>🏢</span> My Business</a>
+    <a href="{% url 'business:branches' %}"><span>🏬</span> Branches</a>
+    <a href="{% url 'business:products' %}"><span>🛍️</span> Products</a>
+    <a href="{% url 'business:services' %}"><span>🧰</span> Services</a>
+    <a href="{% url 'business:bookings' %}"><span>📅</span> Bookings</a>
+    <a href="{% url 'business:quotations' %}"><span>📄</span> Quotations</a>
+    <a href="{% url 'business:orders' %}"><span>📦</span> Orders</a>
+    <a href="{% url 'business:gallery' %}"><span>🖼️</span> Gallery</a>
+    <a href="{% url 'business:inquiries' %}"><span>💬</span> Inquiries</a>
+    <a href="{% url 'business:reviews' %}"><span>⭐</span> Reviews</a>
+    <a href="{% url 'business:analytics' %}"><span>📈</span> Analytics</a>
+    <a href="{% url 'business:plans' %}"><span>💳</span> Subscription</a>
+    <a href="{% url 'business:payments' %}"><span>🧾</span> Payments</a>
+    <a href="{% url 'business:team' %}"><span>👥</span> Team</a>
+    <a href="{% url 'business:ai_assistant' %}"><span>✨</span> AI Assistant</a>
+    <a href="{% url 'business:coupons' %}"><span>🎟️</span> Coupons</a>
+    <a href="{% url 'business:promotions' %}"><span>📣</span> Promotions</a>
+    <a href="{% url 'business:settings' %}"><span>⚙️</span> Business Settings</a>
     {% endif %}
 
     {% if user.is_authenticated %}
@@ -1061,11 +1071,33 @@
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         Help Center
       </a>    
+    {% if user.is_authenticated and user.profile.account_type == 'business' %}
+      {% if nav_business_plan == 'premium' or nav_business_plan == 'enterprise' %}
+      <div class="pod-upgrade-card">
+        <p class="pod-title">{{ nav_business_plan|title }} Business</p>
+        <p class="pod-sub">You're on the {{ nav_business_plan|title }} plan. Manage billing anytime.</p>
+        <a href="{% url 'business:plans' %}" class="pod-upgrade-btn">Manage Plan</a>
+      </div>
+      {% elif nav_business_plan == 'standard' %}
+      <div class="pod-upgrade-card">
+        <p class="pod-title">Standard Business</p>
+        <p class="pod-sub">Upgrade to Premium for more visibility and quality leads.</p>
+        <a href="{% url 'business:plans' %}" class="pod-upgrade-btn">Upgrade to Premium</a>
+      </div>
+      {% else %}
+      <div class="pod-upgrade-card">
+        <p class="pod-title">Grow Your Business</p>
+        <p class="pod-sub">Upgrade your plan for more visibility and quality leads.</p>
+        <a href="{% url 'business:plans' %}" class="pod-upgrade-btn">Upgrade Now</a>
+      </div>
+      {% endif %}
+    {% else %}
     <div class="pod-upgrade-card">
       <p class="pod-title">Upgrade Your Listings</p>
       <p class="pod-sub">Get more visibility and quality leads with Premium.</p>
       <a href="/" class="pod-upgrade-btn">Upgrade Now</a>
     </div>
+    {% endif %}
   </div>
 
   {% if user.is_authenticated %}

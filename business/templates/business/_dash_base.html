@@ -1,37 +1,5 @@
-{% extends "base.html" %}
-{% load static %}
-{% block extra_head %}
-{% include "business/_styles.html" %}
-{% endblock %}
-
 {% block content %}
 <div class="biz-shell">
-    <aside class="biz-sidebar">
-        <div class="biz-sidebar-logo">🏠 HomeFinderKE</div>
-        <nav class="biz-sidebar-nav">
-            <a href="{% url 'business:dashboard' %}" class="biz-nav-item {% if active_tab == 'dashboard' %}active{% endif %}"><span>📊</span> Dashboard</a>
-            <a href="{% url 'business:edit' %}" class="biz-nav-item {% if active_tab == 'business' %}active{% endif %}"><span>🏢</span> My Business</a>
-            <a href="{% url 'business:branches' %}" class="biz-nav-item {% if active_tab == 'branches' %}active{% endif %}"><span>🏬</span> Branches</a>
-            <a href="{% url 'business:products' %}" class="biz-nav-item {% if active_tab == 'products' %}active{% endif %}"><span>🛍️</span> Products</a>
-            <a href="{% url 'business:services' %}" class="biz-nav-item {% if active_tab == 'services' %}active{% endif %}"><span>🧰</span> Services</a>
-            <a href="{% url 'business:bookings' %}" class="biz-nav-item {% if active_tab == 'bookings' %}active{% endif %}"><span>📅</span> Bookings</a>
-            <a href="{% url 'business:quotations' %}" class="biz-nav-item {% if active_tab == 'quotations' %}active{% endif %}"><span>📄</span> Quotations</a>
-            <a href="{% url 'business:orders' %}" class="biz-nav-item {% if active_tab == 'orders' %}active{% endif %}"><span>📦</span> Orders</a>
-            <a href="{% url 'business:gallery' %}" class="biz-nav-item {% if active_tab == 'gallery' %}active{% endif %}"><span>🖼️</span> Gallery</a>
-            <a href="{% url 'business:inquiries' %}" class="biz-nav-item {% if active_tab == 'inquiries' %}active{% endif %}"><span>💬</span> Inquiries</a>
-            <a href="{% url 'business:reviews' %}" class="biz-nav-item {% if active_tab == 'reviews' %}active{% endif %}"><span>⭐</span> Reviews</a>
-            <a href="{% url 'business:analytics' %}" class="biz-nav-item {% if active_tab == 'analytics' %}active{% endif %}"><span>📈</span> Analytics</a>
-            <a href="{% url 'business:plans' %}" class="biz-nav-item {% if active_tab == 'plans' %}active{% endif %}"><span>💳</span> Subscription</a>
-            <a href="{% url 'business:payments' %}" class="biz-nav-item {% if active_tab == 'payments' %}active{% endif %}"><span>🧾</span> Payments</a>
-            <a href="{% url 'business:team' %}" class="biz-nav-item {% if active_tab == 'team' %}active{% endif %}"><span>👥</span> Team</a>
-            <a href="{% url 'business:ai_assistant' %}" class="biz-nav-item {% if active_tab == 'ai_assistant' %}active{% endif %}"><span>✨</span> AI Assistant</a>
-            <a href="{% url 'business:coupons' %}" class="biz-nav-item {% if active_tab == 'coupons' %}active{% endif %}"><span>🎟️</span> Coupons</a>
-            <a href="{% url 'business:promotions' %}" class="biz-nav-item {% if active_tab == 'promotions' %}active{% endif %}"><span>📣</span> Promotions</a>
-            <span class="biz-nav-item biz-nav-disabled"><span>✅</span> Verification <em style="opacity:.6;font-size:.7rem;">soon</em></span>
-            <a href="{% url 'business:settings' %}" class="biz-nav-item {% if active_tab == 'settings' %}active{% endif %}"><span>⚙️</span> Settings</a>
-        </nav>
-        <a href="{% url 'account_logout' %}" class="biz-nav-item biz-nav-logout"><span>🚪</span> Logout</a>
-    </aside>
     <div class="biz-main">
         {% block dash_content %}{% endblock %}
     </div>
