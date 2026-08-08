@@ -2849,3 +2849,89 @@ def download_agreement_pdf(request, pk):
     response = HttpResponse(pdf_bytes, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="agreement_{residence.id}_{residence.name.replace(" ", "_")}.pdf"'
     return response
+
+# ─── Help Center ────────────────────────────────────────────────────────────
+from .models import Incident
+from .forms import IncidentForm
+
+
+def help_center(request):
+    """Help Center hub — entry point for incident reporting, contact, and the help bot."""
+    my_incidents = None
+    if request.user.is_authenticated:
+        my_incidents = Incident.objects.filter(reporter=request.user)[:5]
+    return render(request, 'core/help_center/index.html', {
+        'my_incidents': my_incidents,
+    })
+
+
+def report_incident(request):
+    if request.method == 'POST':
+        if not check_submission_rate_limit(request, 'report_incident', limit=5, window_seconds=3600):
+            messages.error(request, 'Too many reports submitted. Please try again in an hour.')
+            return redirect('report_incident')
+
+        form = IncidentForm(request.POST)
+        if form.is_valid():
+            incident = form.save(commit=False)
+            if request.user.is_authenticated:
+                incident.reporter = request.user
+            incident.save()
+            messages.success(request, 'Your report has been submitted. Our team will review it shortly.')
+            return redirect('help_center')
+    else:
+        form = IncidentForm()
+
+    return render(request, 'core/help_center/report_incident.html', {'form': form})
+
+
+def help_bot_chat(request):
+    return render(request, 'core/help_center/bot_chat.html')
+
+
+_HELP_BOT_SYSTEM_PROMPT = """You are the HomeFinder KE Help Assistant — a support and safety guide for the
+platform, NOT a property search tool. Do not search for or recommend house listings; if asked about finding a
+house, tell the user to use the main search bar instead.
+
+Your job:
+- Explain how platform features work (listing a vacancy, business accounts, favorites, reviews, verification).
+- Guide users on what to do for emergencies, scams, harassment, or payment issues: tell them to use the
+  "Report an Incident" form in the Help Center for anything serious, and give brief immediate safety advice
+  (e.g. for a scam-in-progress: stop payment, do not share ID/M-Pesa PIN, report it).
+- For life-threatening emergencies, tell the user to contact local emergency services (999 or 112 in Kenya)
+  immediately, in addition to reporting the incident on the platform.
+- Keep answers under 100 words, clear and calm, no jargon.
+- Never invent phone numbers, refund policies, or legal guarantees you're not certain of. If unsure, direct
+  the user to submit a report or use the Contact Support page instead of guessing.
+"""
+
+
+@require_POST
+def help_bot_message(request):
+    try:
+        if not check_submission_rate_limit(request, 'help_bot', limit=20, window_seconds=3600):
+            return JsonResponse({'error': 'Too many messages. Please slow down and try again shortly.'}, status=429)
+
+        data = json.loads(request.body)
+        user_message = data.get('message', '').strip()
+        if not user_message:
+            return JsonResponse({'error': 'Empty message'}, status=400)
+
+        client = _get_groq_client()
+        response = client.chat.completions.create(
+            model="meta-llama/llama-4-maverick-17b-128e-instruct",
+            messages=[
+                {"role": "system", "content": _HELP_BOT_SYSTEM_PROMPT},
+                {"role": "user", "content": user_message},
+            ],
+            temperature=0.2,
+            max_tokens=200,
+        )
+        return JsonResponse({'reply': response.choices[0].message.content})
+
+    except Exception as e:
+        print("HELP BOT ERROR:", e)
+        return JsonResponse({
+            'reply': "Sorry, I couldn't process that right now. For urgent issues, please use the "
+                     "'Report an Incident' form, or call 999/112 for emergencies."
+        })

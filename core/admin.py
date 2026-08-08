@@ -52,3 +52,14 @@ admin.site.register(UserReport)
 
 from .models import IDVerification
 admin.site.register(IDVerification)
+
+from .models import Incident
+
+@admin.register(Incident)
+class IncidentAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'category', 'status', 'reporter', 'created_at')
+    list_filter = ('category', 'status')
+    search_fields = ('subject', 'description', 'contact_phone')
+    list_editable = ('status',)
+    ordering = ('-created_at',)
+    readonly_fields = ('reporter', 'created_at')

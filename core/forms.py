@@ -398,3 +398,15 @@ class UserReportForm(forms.ModelForm):
         widgets = {
             'comment': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Optional — add any extra detail'}),
         }
+
+from .models import Incident
+
+class IncidentForm(forms.ModelForm):
+    class Meta:
+        model = Incident
+        fields = ['category', 'subject', 'description', 'contact_phone']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 5, 'placeholder': 'Describe what happened in as much detail as possible...'}),
+            'subject': forms.TextInput(attrs={'placeholder': 'Brief summary, e.g. "Charged twice for premium plan"'}),
+            'contact_phone': forms.TextInput(attrs={'placeholder': 'Optional — for us to reach you back'}),
+        }        

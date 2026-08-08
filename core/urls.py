@@ -108,7 +108,10 @@ urlpatterns = [
         views.residence_viewers,
         name='residence_viewers'
         ),
-
+    path('help-center/', views.help_center, name='help_center'),
+    path('help-center/report/', views.report_incident, name='report_incident'),
+    path('help-center/bot/', views.help_bot_chat, name='help_bot_chat'),
+    path('help-center/bot/message/', views.help_bot_message, name='help_bot_message'),
     path(
         'edit-profile/',
         views.edit_profile,

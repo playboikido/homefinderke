@@ -923,3 +923,53 @@ class FurnitureVendorFavorite(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta:
         unique_together = ('user', 'vendor')    
+
+INCIDENT_CATEGORY_CHOICES = [
+    ('emergency', 'Emergency / Safety Concern'),
+    ('scam', 'Suspected Scam or Fraud'),
+    ('harassment', 'Harassment or Abusive Behavior'),
+    ('payment', 'Payment / M-Pesa Issue'),
+    ('login', 'Login / Sign-in Problem'),
+    ('account_access', 'Account Locked or Suspended'),
+    ('verification', 'ID or Business Verification Issue'),
+    ('listing_delay', 'Listing Not Approved / Not Going Live'),
+    ('listing_edit', "Listing Info Wrong or Won't Update"),
+    ('notifications', 'Notifications Not Working'),
+    ('messaging', 'Chat / Messaging Problem'),
+    ('bug', 'Bug or Technical Issue'),
+    ('other', 'Other'),
+]
+
+INCIDENT_STATUS_CHOICES = [
+    ('open', 'Open'),
+    ('in_review', 'In Review'),
+    ('resolved', 'Resolved'),
+]
+
+
+class Incident(models.Model):
+    """General help-center incident report — not tied to a specific
+    residence or user, unlike ResidenceReport/UserReport. Covers
+    emergencies, scams, payment issues, bugs, and general safety concerns."""
+
+    reporter = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='incidents_filed'
+    )
+    category = models.CharField(max_length=20, choices=INCIDENT_CATEGORY_CHOICES)
+    subject = models.CharField(max_length=200)
+    description = models.TextField()
+    contact_phone = models.CharField(max_length=20, blank=True)
+    status = models.CharField(max_length=20, choices=INCIDENT_STATUS_CHOICES, default='open')
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(blank=True, null=True)
+    admin_notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"[{self.get_category_display()}] {self.subject}"        

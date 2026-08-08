@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Help Center — HomeFinder KE{% endblock %}
+
+{% block content %}
+<style>
+  .hc-wrap { max-width: 880px; margin: 0 auto; padding: 32px 20px 60px; }
+  .hc-header { text-align: center; margin-bottom: 32px; }
+  .hc-header h1 { font-size: 1.6rem; color: var(--fg); margin: 0 0 6px; }
+  .hc-header p { color: var(--fg-muted); font-size: 0.92rem; margin: 0; }
+
+  .hc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .hc-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 22px; text-decoration: none; color: inherit; display: block;
+    box-shadow: var(--shadow-sm); transition: var(--transition);
+  }
+  .hc-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+  .hc-card-icon { font-size: 1.6rem; margin-bottom: 10px; }
+  .hc-card-title { font-weight: 700; color: var(--fg); font-size: 1rem; margin-bottom: 4px; }
+  .hc-card-desc { color: var(--fg-muted); font-size: 0.85rem; line-height: 1.4; }
+  .hc-card.urgent { border-color: var(--danger); }
+  .hc-card.urgent .hc-card-title { color: var(--danger); }
+
+  .hc-emergency-note {
+    background: var(--gold-bg); border: 1px solid var(--gold); border-radius: var(--radius);
+    padding: 14px 16px; font-size: 0.85rem; color: #7C5300; margin-bottom: 28px;
+  }
+
+  .hc-recent { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; }
+  .hc-recent h2 { font-size: 1rem; color: var(--fg); margin: 0 0 12px; }
+  .hc-incident-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+  .hc-incident-row:last-child { border-bottom: none; }
+  .hc-status { padding: 2px 10px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 600; }
+  .hc-status.open { background: var(--gold-bg); color: #7C5300; }
+  .hc-status.in_review { background: #DBEAFE; color: #1D4ED8; }
+  .hc-status.resolved { background: var(--green-bg); color: var(--green-text); }
+
+  .hc-faq { border-bottom: 1px solid var(--border); padding: 10px 0; }
+  .hc-faq:last-child { border-bottom: none; }
+  .hc-faq summary { cursor: pointer; font-weight: 600; color: var(--fg); font-size: 0.88rem; list-style: none; }
+  .hc-faq summary::-webkit-details-marker { display: none; }
+  .hc-faq summary::before { content: '+ '; color: var(--primary); font-weight: 700; }
+  .hc-faq[open] summary::before { content: '– '; }
+  .hc-faq p { color: var(--fg-muted); font-size: 0.83rem; line-height: 1.5; margin: 8px 0 0; }
+</style>
+
+<div class="hc-wrap">
+  <div class="hc-header">
+    <h1>Help Center</h1>
+    <p>Report a problem, chat with our help assistant, or get in touch with support.</p>
+  </div>
+
+  <div class="hc-emergency-note">
+    ⚠️ <strong>In a life-threatening emergency,</strong> contact local emergency services immediately (999 or 112 in Kenya) before using this page.
+  </div>
+
+  <div class="hc-grid">
+    <a href="{% url 'report_incident' %}" class="hc-card urgent">
+      <div class="hc-card-icon">🚨</div>
+      <div class="hc-card-title">Report an Incident</div>
+      <div class="hc-card-desc">Scams, safety concerns, payment issues, harassment, or bugs — file a report our team will review.</div>
+    </a>
+
+    <a href="{% url 'help_bot_chat' %}" class="hc-card">
+      <div class="hc-card-icon">💬</div>
+      <div class="hc-card-title">Chat with Help Assistant</div>
+      <div class="hc-card-desc">Ask how a feature works or what to do next — a quick guide, available any time.</div>
+    </a>
+
+    <a href="{% url 'about' %}#contact" class="hc-card">
+      <div class="hc-card-icon">✉️</div>
+      <div class="hc-card-title">Contact Support</div>
+      <div class="hc-card-desc">Send our team a message directly and we'll get back to you by email.</div>
+    </a>
+  </div>
+
+  <div class="hc-recent" style="margin-bottom:24px;">
+    <h2>Common Issues</h2>
+    <details class="hc-faq">
+      <summary>I can't log in / forgot my password</summary>
+      <p>Use "Forgot Password" on the login screen to reset it by email. If you signed up with Google, use the "Continue with Google" button instead of a password. Still stuck? Chat with the Help Assistant or file a report below.</p>
+    </details>
+    <details class="hc-faq">
+      <summary>My listing hasn't gone live yet</summary>
+      <p>New listings are reviewed by our team before they appear publicly — this usually takes a short while, longer during busy periods. Check that your photos passed the AI quality check when you submitted. If it's been more than 48 hours, file a report and we'll look into it.</p>
+    </details>
+    <details class="hc-faq">
+      <summary>My account was suspended or restricted</summary>
+      <p>Accounts are usually restricted after a report or a policy violation. You'll see a message explaining why when you try to act on the site. If you believe it's a mistake, file a report under "Account Locked or Suspended" and our team will review it.</p>
+    </details>
+    <details class="hc-faq">
+      <summary>My verification (ID or business document) was rejected</summary>
+      <p>Make sure the photo is clear, well-lit, and shows the full document with no cropping or glare. Re-upload from Settings → Verification. If it keeps failing, file a report under "ID or Business Verification Issue."</p>
+    </details>
+    <details class="hc-faq">
+      <summary>I'm not getting notifications</summary>
+      <p>Check Settings → Notifications to confirm they're enabled, and check your email spam folder for messages from us. If everything looks right but nothing arrives, file a report under "Notifications Not Working."</p>
+    </details>
+    <details class="hc-faq">
+      <summary>Someone is scamming me or acting suspiciously</summary>
+      <p>Never send money outside the app, share your M-Pesa PIN, or send your ID to someone you haven't verified in person. Stop contact immediately and file an "Suspected Scam or Fraud" report — include usernames and screenshots if you have them.</p>
+    </details>
+  </div>
+
+  {% if my_incidents is not None %}
+  <div class="hc-recent">
+    <h2>Your Recent Reports</h2>
+    {% if my_incidents %}
+      {% for incident in my_incidents %}
+      <div class="hc-incident-row">
+        <span>{{ incident.subject }} <span style="color:var(--fg-muted);">— {{ incident.get_category_display }}</span></span>
+        <span class="hc-status {{ incident.status }}">{{ incident.get_status_display }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:var(--fg-muted); font-size:0.85rem; margin:0;">You haven't filed any reports yet.</p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

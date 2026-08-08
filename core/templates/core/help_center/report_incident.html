@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report an Incident — Help Center — HomeFinder KE{% endblock %}
+
+{% block content %}
+<style>
+  .hc-form-wrap { max-width: 560px; margin: 0 auto; padding: 32px 20px 60px; }
+  .hc-back { color: var(--fg-muted); text-decoration: none; font-size: 0.85rem; display: inline-block; margin-bottom: 16px; }
+  .hc-form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 26px; box-shadow: var(--shadow-sm); }
+  .hc-form-card h1 { font-size: 1.3rem; color: var(--fg); margin: 0 0 6px; }
+  .hc-form-card > p { color: var(--fg-muted); font-size: 0.85rem; margin: 0 0 20px; }
+  .hc-field { margin-bottom: 16px; }
+  .hc-field label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+  .hc-field input, .hc-field select, .hc-field textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 0.9rem; box-sizing: border-box;
+  }
+  .hc-field .errorlist { list-style: none; padding: 0; margin: 6px 0 0; color: var(--danger); font-size: 0.78rem; }
+  .hc-submit-btn {
+    width: 100%; padding: 12px; border: none; border-radius: var(--radius); background: var(--primary);
+    color: #fff; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: var(--transition);
+  }
+  .hc-submit-btn:hover { background: var(--primary-dark); }
+</style>
+
+<div class="hc-form-wrap">
+  <a href="{% url 'help_center' %}" class="hc-back">← Back to Help Center</a>
+
+  <div class="hc-form-card">
+    <h1>Report an Incident</h1>
+    <p>Give us as much detail as you can. If this is a life-threatening emergency, contact 999 or 112 first.</p>
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="hc-field">
+        <label for="{{ form.category.id_for_label }}">Category</label>
+        {{ form.category }}
+        {{ form.category.errors }}
+      </div>
+      <div class="hc-field">
+        <label for="{{ form.subject.id_for_label }}">Subject</label>
+        {{ form.subject }}
+        {{ form.subject.errors }}
+      </div>
+      <div class="hc-field">
+        <label for="{{ form.description.id_for_label }}">Description</label>
+        {{ form.description }}
+        {{ form.description.errors }}
+      </div>
+      <div class="hc-field">
+        <label for="{{ form.contact_phone.id_for_label }}">Phone Number (optional)</label>
+        {{ form.contact_phone }}
+        {{ form.contact_phone.errors }}
+      </div>
+      <button type="submit" class="hc-submit-btn">Submit Report</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
