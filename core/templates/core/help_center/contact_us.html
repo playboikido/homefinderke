@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us — HomeFinder KE{% endblock %}
+
+{% block content %}
+<style>
+  .cu-wrap { max-width: 640px; margin: 0 auto; padding: 32px 20px 60px; }
+  .cu-back { color: var(--fg-muted); text-decoration: none; font-size: 0.85rem; display: inline-block; margin-bottom: 16px; }
+  .cu-header { text-align: center; margin-bottom: 28px; }
+  .cu-header h1 { font-size: 1.5rem; color: var(--fg); margin: 0 0 6px; }
+  .cu-header p { color: var(--fg-muted); font-size: 0.9rem; margin: 0; }
+
+  .cu-buttons { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; margin-bottom: 32px; }
+  .cu-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    padding: 20px 12px; border-radius: var(--radius-lg); text-decoration: none;
+    font-weight: 700; font-size: 0.88rem; color: #fff; box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+  }
+  .cu-btn:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .cu-btn svg { width: 24px; height: 24px; }
+  .cu-btn.whatsapp { background: #25D366; }
+  .cu-btn.sms { background: var(--accent); }
+  .cu-btn.call { background: var(--primary); }
+  .cu-btn.email { background: var(--secondary); }
+
+  .cu-form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 26px; box-shadow: var(--shadow-sm); }
+  .cu-form-card h2 { font-size: 1.05rem; color: var(--fg); margin: 0 0 6px; }
+  .cu-form-card > p { color: var(--fg-muted); font-size: 0.85rem; margin: 0 0 20px; }
+  .cu-form-card form p { margin-bottom: 14px; }
+  .cu-form-card form label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+  .cu-form-card form input,
+  .cu-form-card form textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 0.9rem; box-sizing: border-box;
+  }
+  .cu-submit-btn {
+    width: 100%; padding: 12px; border: none; border-radius: var(--radius); background: var(--primary);
+    color: #fff; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: var(--transition);
+  }
+  .cu-submit-btn:hover { background: var(--primary-dark); }
+</style>
+
+<div class="cu-wrap">
+  <a href="{% url 'help_center' %}" class="cu-back">← Back to Help Center</a>
+
+  <div class="cu-header">
+    <h1>Contact Us</h1>
+    <p>Reach us directly, or send a message below.</p>
+  </div>
+
+  <div class="cu-buttons">
+    <a href="https://wa.me/254758999426?text=Hi%20HomeFinder%20KE%2C%20I%20need%20help%20with..." target="_blank" rel="noopener" class="cu-btn whatsapp">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.92C21.96 6.45 17.5 2 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.11.82.83-3.03-.2-.31a8.17 8.17 0 0 1-1.25-4.39c0-4.54 3.7-8.24 8.24-8.24 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.55-3.7 8.24-8.24 8.24zm4.52-6.17c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.13-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.04-.38-1.99-1.22-.73-.66-1.23-1.46-1.37-1.71-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43-.14-.01-.31-.01-.48-.01a.9.9 0 0 0-.66.31c-.23.25-.87.85-.87 2.08s.89 2.42 1.02 2.58c.12.17 1.75 2.67 4.23 3.75.59.25 1.05.4 1.41.52.59.19 1.13.16 1.55.1.47-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.14-1.18-.06-.11-.23-.17-.48-.29z"/></svg>
+      WhatsApp
+    </a>
+    <a href="sms:+254758999426?body=Hi%20HomeFinder%20KE%2C%20I%20need%20help%20with..." class="cu-btn sms">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      SMS
+    </a>
+    <a href="tel:+254758999426" class="cu-btn call">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+      Call
+    </a>
+    <a href="mailto:homefinder.ke.help@gmail.com" class="cu-btn email">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      Email
+    </a>
+  </div>
+
+  <div class="cu-form-card">
+    <h2>Send us a message</h2>
+    <p>Prefer to write it out? Fill this in and we'll reply by email.</p>
+
+    <form method="POST">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="cu-submit-btn">Send Message</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

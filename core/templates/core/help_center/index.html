@@ -51,11 +51,6 @@
     <h1>Help Center</h1>
     <p>Report a problem, chat with our help assistant, or get in touch with support.</p>
   </div>
-
-  <div class="hc-emergency-note">
-    ⚠️ <strong>In a life-threatening emergency,</strong> contact local emergency services immediately (999 or 112 in Kenya) before using this page.
-  </div>
-
   <div class="hc-grid">
     <a href="{% url 'report_incident' %}" class="hc-card urgent">
       <div class="hc-card-icon">🚨</div>
@@ -69,7 +64,7 @@
       <div class="hc-card-desc">Ask how a feature works or what to do next — a quick guide, available any time.</div>
     </a>
 
-    <a href="{% url 'about' %}#contact" class="hc-card">
+    <a href="{% url 'contact_us' %}" class="hc-card">
       <div class="hc-card-icon">✉️</div>
       <div class="hc-card-title">Contact Support</div>
       <div class="hc-card-desc">Send our team a message directly and we'll get back to you by email.</div>

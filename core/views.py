@@ -348,37 +348,7 @@ def home(request):
 
 
 def about(request):
-    form = ContactForm()   
-
-    if request.method == 'POST':
-        form = ContactForm(request.POST)
-        
-        if not check_submission_rate_limit(request, 'contact'):
-            messages.error(request, 'Too many messages sent. Please try again in an hour.')
-            return redirect('about')
-
-        if form.is_valid():
-            try:
-                send_mail(
-                    subject=form.cleaned_data['subject'],
-                    message=f"""
-From: {form.cleaned_data['name']}
-Email: {form.cleaned_data['email']}
-
-Message:
-{form.cleaned_data['message']}
-                    """,
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=['homefinder.ke.help@gmail.com'],
-                    fail_silently=False,
-                )
-                messages.success(request, 'Your message has been sent successfully.')
-            except Exception as e:
-                print("CONTACT FORM EMAIL ERROR:", e)
-                messages.error(request, "Sorry, your message couldn't be sent right now. Please try again shortly, or reach us directly at homefinder.ke.help@gmail.com.")
-            return redirect('about')
-
-    return render(request, 'core/about.html', {'form': form})
+    return render(request, 'core/about.html')
 
 def search(request):
     residences = Residence.objects.filter(approved=True, is_hidden=False).order_by('-is_premium', '-created_at')
@@ -2935,3 +2905,39 @@ def help_bot_message(request):
             'reply': "Sorry, I couldn't process that right now. For urgent issues, please use the "
                      "'Report an Incident' form, or call 999/112 for emergencies."
         })
+
+def contact_us(request):
+    """Standalone contact page — pulled out of about.html so it has its own URL.
+    Same ContactForm/email logic as before, plus one-tap WhatsApp/SMS/Call buttons."""
+    form = ContactForm()
+
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+
+        if not check_submission_rate_limit(request, 'contact'):
+            messages.error(request, 'Too many messages sent. Please try again in an hour.')
+            return redirect('contact_us')
+
+        if form.is_valid():
+            try:
+                send_mail(
+                    subject=form.cleaned_data['subject'],
+                    message=f"""
+From: {form.cleaned_data['name']}
+Email: {form.cleaned_data['email']}
+
+Message:
+{form.cleaned_data['message']}
+                    """,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=['homefinder.ke.help@gmail.com'],
+                    fail_silently=False,
+                )
+                messages.success(request, 'Your message has been sent successfully.')
+            except Exception as e:
+                print("CONTACT FORM EMAIL ERROR:", e)
+                messages.error(request, "Sorry, your message couldn't be sent right now. Please try again shortly, or reach us directly at homefinder.ke.help@gmail.com.")
+            return redirect('contact_us')
+
+    return render(request, 'core/help_center/contact_us.html', {'form': form})
+    

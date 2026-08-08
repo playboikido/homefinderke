@@ -117,7 +117,7 @@ urlpatterns = [
         views.edit_profile,
         name='edit_profile'
         ),
-
+    path('help-center/contact/', views.contact_us, name='contact_us'),
     path(
         'settings/profile/',
         views.settings_profile,
