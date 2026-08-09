@@ -1,0 +1,17 @@
+{% extends "core/onboarding/_base.html" %}
+{% block title %}Verification{% endblock %}
+{% block resident_content %}
+<h1>Nothing to verify — you're good</h1>
+<p class="res-subtitle">
+    As a normal resident, you're not claiming ownership of any property, so there's no ID or
+    document upload required here. If you ever list a property, you'll be confirming you've
+    borrowed permission from its owner, landlord, or caretaker — not that you own it.
+</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="res-form-actions">
+        <button type="submit" class="res-btn">Continue →</button>
+    </div>
+</form>
+{% endblock %}

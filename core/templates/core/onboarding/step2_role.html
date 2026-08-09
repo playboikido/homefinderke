@@ -1,0 +1,30 @@
+{% extends "core/onboarding/_base.html" %}
+{% block title %}Which best describes you?{% endblock %}
+{% block resident_content %}
+<h1>Which best describes you?</h1>
+<p class="res-subtitle">Step 2 of 4 — this decides what (if anything) we'll ask you to verify next.</p>
+
+<form method="POST">
+    {% csrf_token %}
+    {% if form.resident_role.errors %}
+        <ul class="res-errorlist">{% for e in form.resident_role.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    {% for radio in form.resident_role %}
+        <div class="res-checkbox-row">
+            {{ radio.tag }}
+            <label for="{{ radio.id_for_label }}">
+                {% if radio.data.value == 'normal' %}Normal / Renter — just renting or browsing, no documents needed
+                {% elif radio.data.value == 'landlord' %}Landlord — I own the property/properties I'll list
+                {% elif radio.data.value == 'agent' %}Agent — I list/manage properties on behalf of owners
+                {% elif radio.data.value == 'caretaker' %}Caretaker — I manage a property day-to-day for the owner
+                {% endif %}
+            </label>
+        </div>
+    {% endfor %}
+
+    <div class="res-form-actions">
+        <button type="submit" class="res-btn">Continue →</button>
+    </div>
+</form>
+{% endblock %}

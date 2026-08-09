@@ -1,0 +1,25 @@
+{% extends "core/onboarding/_base.html" %}
+{% block title %}Verification{% endblock %}
+{% block resident_content %}
+<h1>Verification</h1>
+{% if resident_role == 'caretaker' %}
+<p class="res-subtitle">Step 3 of 4 — upload your National ID to get the HomeFinder Verified badge.</p>
+{% else %}
+<p class="res-subtitle">Step 3 of 4 — upload these documents to get the HomeFinder Verified badge and confirm your right to list property.</p>
+{% endif %}
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    {% for field in form %}
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for e in field.errors %}<div class="res-errorlist">{{ e }}</div>{% endfor %}
+    {% endfor %}
+
+    <div class="res-form-actions">
+        <button type="submit" class="res-btn">Continue →</button>
+    </div>
+</form>
+{% endblock %}

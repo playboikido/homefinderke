@@ -1,0 +1,40 @@
+{% extends "core/onboarding/_base.html" %}
+{% block title %}Tell us about you{% endblock %}
+{% block resident_content %}
+<h1>Tell us about you</h1>
+<p class="res-subtitle">Step 1 of 4 — a few quick details so we know who's using HomeFinder KE.</p>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <label for="{{ form.first_name.id_for_label }}">First name</label>
+    {{ form.first_name }}
+    {% for e in form.first_name.errors %}<div class="res-errorlist">{{ e }}</div>{% endfor %}
+
+    <label for="{{ form.last_name.id_for_label }}">Last name</label>
+    {{ form.last_name }}
+    {% for e in form.last_name.errors %}<div class="res-errorlist">{{ e }}</div>{% endfor %}
+
+    <label for="{{ form.phone_number.id_for_label }}">Phone number</label>
+    {{ form.phone_number }}
+    {% for e in form.phone_number.errors %}<div class="res-errorlist">{{ e }}</div>{% endfor %}
+
+    <label for="{{ form.email.id_for_label }}">Email (optional)</label>
+    {{ form.email }}
+
+    <label for="{{ form.bio.id_for_label }}">Short bio</label>
+    {{ form.bio }}
+
+    <label for="{{ form.profile_picture.id_for_label }}">Photo (optional)</label>
+    {{ form.profile_picture }}
+
+    <div class="res-checkbox-row">
+        {{ form.show_phone_publicly }}
+        <label for="{{ form.show_phone_publicly.id_for_label }}">{{ form.show_phone_publicly.label }}</label>
+    </div>
+
+    <div class="res-form-actions">
+        <button type="submit" class="res-btn">Continue →</button>
+    </div>
+</form>
+{% endblock %}

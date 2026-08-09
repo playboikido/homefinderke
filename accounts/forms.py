@@ -47,6 +47,7 @@ class SocialSignupForm(SocialSignupFormBase):
         label="I agree to the Terms of Service and Privacy Policy",
         error_messages={"required": "You must agree to the Terms of Service and Privacy Policy to create an account."},
     )
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

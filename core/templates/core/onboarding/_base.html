@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    .res-wrap { max-width: 640px; margin: 0 auto; padding: 32px 20px 60px; }
+    .res-progress { display: flex; gap: 6px; margin-bottom: 28px; }
+    .res-progress span { flex: 1; height: 6px; border-radius: var(--radius-full); background: var(--muted); }
+    .res-progress span.done, .res-progress span.active { background: var(--primary); }
+    .res-card {
+        background: var(--bg-card); border-radius: var(--radius-xl); padding: 32px;
+        box-shadow: var(--shadow-lg); border: 1px solid var(--border);
+    }
+    .res-card h1 { font-size: 1.4rem; color: var(--fg); margin-bottom: 6px; }
+    .res-subtitle { color: var(--fg-muted); margin-bottom: 24px; font-size: 0.9rem; }
+    .res-card label { display: block; margin-bottom: 6px; font-weight: 600; color: var(--fg); font-size: 0.88rem; }
+    .res-card input, .res-card textarea, .res-card select {
+        width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+        font-size: 0.92rem; margin-bottom: 18px; background: var(--bg-card); color: var(--fg);
+    }
+    .res-errorlist { color: #DC2626; list-style: none; margin-bottom: 10px; font-size: 0.8rem; padding: 0; }
+    .res-checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+    .res-checkbox-row input { width: auto; margin: 3px 0 0; }
+    .res-checkbox-row label { margin-bottom: 0; font-weight: 500; }
+    .res-btn {
+        padding: 13px 24px; border-radius: var(--radius); border: none; font-weight: 700;
+        font-size: 0.9rem; cursor: pointer; background: var(--primary); color: #fff;
+    }
+    .res-btn:hover { background: var(--primary-dark); }
+    .res-form-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="res-wrap">
+    <div class="res-progress">
+        {% for n in "1234" %}
+            <span class="{% if step > forloop.counter %}done{% elif step == forloop.counter %}active{% endif %}"></span>
+        {% endfor %}
+    </div>
+    <div class="res-card">
+        {% block resident_content %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

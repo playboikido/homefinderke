@@ -388,3 +388,60 @@ class IncidentForm(forms.ModelForm):
             'subject': forms.TextInput(attrs={'placeholder': 'Brief summary, e.g. "Charged twice for premium plan"'}),
             'contact_phone': forms.TextInput(attrs={'placeholder': 'Optional — for us to reach you back'}),
         }        
+
+class ResidentDetailsForm(forms.Form):
+    """Step 1 of resident onboarding — name, phone, email, bio, photo."""
+
+    first_name = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'placeholder': 'First name'}))
+    last_name = forms.CharField(max_length=150, widget=forms.TextInput(attrs={'placeholder': 'Last name'}))
+    phone_number = forms.CharField(max_length=20, widget=forms.TextInput(attrs={'placeholder': '07XX XXX XXX'}))
+    email = forms.EmailField(required=False, widget=forms.EmailInput(attrs={'placeholder': 'Optional'}))
+    bio = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 3, 'placeholder': 'A short description about you (optional)'}))
+    profile_picture = forms.ImageField(required=False)
+    show_phone_publicly = forms.BooleanField(
+        required=False,
+        label='Show my phone number on my public profile',
+        help_text='Off by default — only your name, bio, photo, verification status, and account type show publicly either way.',
+    )   
+
+class ResidentRoleForm(forms.Form):
+    """Step 2 of resident onboarding — which role are they?"""
+
+    resident_role = forms.ChoiceField(
+        choices=Profile.RESIDENT_ROLE_CHOICES,
+        widget=forms.RadioSelect,
+        label='Which best describes you?',
+    )       
+
+class ResidentVerificationForm(forms.ModelForm):
+    """Step 3 of resident onboarding — document uploads, tailored to role:
+    normal -> none, caretaker -> ID only, landlord/agent -> ID + KRA + proof."""
+
+    class Meta:
+        model = IDVerification
+        fields = ['document', 'kra_pin_document', 'property_proof_document']
+        labels = {
+            'document': 'National ID',
+            'kra_pin_document': 'KRA PIN Certificate',
+            'property_proof_document': 'Proof of ownership / payment (title deed, rent receipt, management agreement, etc.)',
+        }
+
+    def __init__(self, *args, resident_role=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        needs_landlord_docs = resident_role in ('landlord', 'agent')
+        self.fields['document'].required = resident_role in ('caretaker', 'landlord', 'agent')
+        self.fields['kra_pin_document'].required = needs_landlord_docs
+        self.fields['property_proof_document'].required = needs_landlord_docs
+        if not needs_landlord_docs:
+            # Caretakers only need the ID field.
+            del self.fields['kra_pin_document']
+            del self.fields['property_proof_document']
+
+class ResidentAgreementForm(forms.Form):
+    """Step 4 of resident onboarding — final role-specific consent."""
+
+    agree = forms.BooleanField(
+        required=True,
+        label='I have read and agree to the terms above',
+        error_messages={'required': 'You must agree to the terms above to continue.'},
+    )            

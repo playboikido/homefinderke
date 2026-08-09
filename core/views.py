@@ -255,6 +255,185 @@ def set_account_intent(request, account_type):
     return redirect(f"{reverse('account_signup')}?type={account_type}")
 
 
+# Resident onboarding wizard: Step 1 details -> Step 2 role -> Step 3 verification -> Step 4 agreement
+from .forms import ResidentDetailsForm, ResidentRoleForm, ResidentVerificationForm, ResidentAgreementForm
+from .models import ResidentAgreement, RESIDENT_ROLE_TERMS_TEXT, RESIDENT_TERMS_VERSION
+
+RESIDENT_STEP_URLS = {
+    1: 'resident_onboarding_details',
+    2: 'resident_onboarding_role',
+    3: 'resident_onboarding_verification',
+    4: 'resident_onboarding_agreement',
+}
+
+
+def _resident_guard_step(profile, requested_step):
+    """Blocks jumping ahead of the step the resident has actually reached."""
+    if profile.onboarding_complete:
+        return None
+    if requested_step > profile.onboarding_step:
+        return redirect(RESIDENT_STEP_URLS[profile.onboarding_step])
+    return None
+
+
+def _resident_advance_step(profile, completed_step):
+    if profile.onboarding_step == completed_step and not profile.onboarding_complete:
+        profile.onboarding_step = completed_step + 1
+        profile.save(update_fields=['onboarding_step'])
+
+
+@login_required
+def resident_onboarding_start(request):
+    profile = request.user.profile
+    if profile.account_type != 'resident':
+        return redirect('business:onboarding_start')
+    if profile.onboarding_complete:
+        return redirect('dashboard')
+    step = min(max(profile.onboarding_step, 1), 4)
+    return redirect(RESIDENT_STEP_URLS[step])
+
+
+@login_required
+def resident_onboarding_details(request):
+    profile = request.user.profile
+    if profile.account_type != 'resident':
+        return redirect('business:onboarding_start')
+    guard = _resident_guard_step(profile, 1)
+    if guard:
+        return guard
+
+    if request.method == 'POST':
+        form = ResidentDetailsForm(request.POST, request.FILES)
+        if form.is_valid():
+            request.user.first_name = form.cleaned_data['first_name']
+            request.user.last_name = form.cleaned_data['last_name']
+            request.user.save(update_fields=['first_name', 'last_name'])
+
+            profile.phone_number = form.cleaned_data['phone_number']
+            profile.bio = form.cleaned_data['bio']
+            profile.hide_phone = not form.cleaned_data['show_phone_publicly']
+            if form.cleaned_data.get('email'):
+                request.user.email = form.cleaned_data['email']
+                request.user.save(update_fields=['email'])
+            if form.cleaned_data.get('profile_picture'):
+                profile.profile_picture = form.cleaned_data['profile_picture']
+            profile.save()
+
+            _resident_advance_step(profile, 1)
+            return redirect('resident_onboarding_role')
+    else:
+        form = ResidentDetailsForm(initial={
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'phone_number': profile.phone_number,
+            'email': request.user.email,
+            'bio': profile.bio,
+            'show_phone_publicly': not profile.hide_phone,
+        })
+
+    return render(request, 'core/onboarding/step1_details.html', {'form': form, 'step': 1})
+
+
+@login_required
+def resident_onboarding_role(request):
+    profile = request.user.profile
+    if profile.account_type != 'resident':
+        return redirect('business:onboarding_start')
+    guard = _resident_guard_step(profile, 2)
+    if guard:
+        return guard
+
+    if request.method == 'POST':
+        form = ResidentRoleForm(request.POST)
+        if form.is_valid():
+            profile.resident_role = form.cleaned_data['resident_role']
+            profile.save(update_fields=['resident_role'])
+            _resident_advance_step(profile, 2)
+            return redirect('resident_onboarding_verification')
+    else:
+        form = ResidentRoleForm(initial={'resident_role': profile.resident_role or 'normal'})
+
+    return render(request, 'core/onboarding/step2_role.html', {'form': form, 'step': 2})
+
+
+@login_required
+def resident_onboarding_verification(request):
+    profile = request.user.profile
+    if profile.account_type != 'resident':
+        return redirect('business:onboarding_start')
+    guard = _resident_guard_step(profile, 3)
+    if guard:
+        return guard
+
+    # 'normal' residents have nothing to verify — skip straight through.
+    if profile.resident_role == 'normal':
+        if request.method == 'POST':
+            _resident_advance_step(profile, 3)
+            return redirect('resident_onboarding_agreement')
+        return render(request, 'core/onboarding/step3_verification_normal.html', {'step': 3})
+
+    verification, _ = IDVerification.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = ResidentVerificationForm(
+            request.POST, request.FILES, instance=verification, resident_role=profile.resident_role,
+        )
+        if form.is_valid():
+            verification = form.save(commit=False)
+            verification.status = 'pending'
+            verification.submitted_at = timezone.now()
+            verification.save()
+            messages.success(request, 'Documents submitted — our team will review them shortly.')
+            _resident_advance_step(profile, 3)
+            return redirect('resident_onboarding_agreement')
+    else:
+        form = ResidentVerificationForm(instance=verification, resident_role=profile.resident_role)
+
+    return render(request, 'core/onboarding/step3_verification.html', {
+        'form': form, 'step': 3, 'resident_role': profile.resident_role,
+    })
+
+
+def _get_client_ip(request):
+    return request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.META.get('REMOTE_ADDR')
+
+
+@login_required
+def resident_onboarding_agreement(request):
+    profile = request.user.profile
+    if profile.account_type != 'resident':
+        return redirect('business:onboarding_start')
+    guard = _resident_guard_step(profile, 4)
+    if guard:
+        return guard
+
+    role = profile.resident_role or 'normal'
+    terms_text = RESIDENT_ROLE_TERMS_TEXT.get(role, RESIDENT_ROLE_TERMS_TEXT['normal'])
+
+    if request.method == 'POST':
+        form = ResidentAgreementForm(request.POST)
+        if form.is_valid():
+            ResidentAgreement.objects.create(
+                user=request.user,
+                role=role,
+                terms_version=RESIDENT_TERMS_VERSION,
+                terms_snapshot=terms_text,
+                ip_address=_get_client_ip(request),
+                user_agent=request.META.get('HTTP_USER_AGENT', ''),
+            )
+            profile.onboarding_complete = True
+            profile.onboarding_step = 5
+            profile.save(update_fields=['onboarding_complete', 'onboarding_step'])
+            messages.success(request, "You're all set! Welcome to HomeFinder KE.")
+            return redirect('dashboard')
+    else:
+        form = ResidentAgreementForm()
+
+    return render(request, 'core/onboarding/step4_agreement.html', {
+        'form': form, 'step': 4, 'terms_text': terms_text, 'resident_role': role,
+    })
+
+
 def _ai_image_check(image_field):
     """Use an NVIDIA vision model to check if the image is a real property photo."""
     try:

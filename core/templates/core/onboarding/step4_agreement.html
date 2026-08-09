@@ -1,0 +1,21 @@
+{% extends "core/onboarding/_base.html" %}
+{% block title %}Agreement{% endblock %}
+{% block resident_content %}
+<h1>One last thing</h1>
+<p class="res-subtitle">Step 4 of 4 — please read and confirm before we finish setting up your account.</p>
+
+<div style="background: var(--muted); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 20px; max-height: 320px; overflow-y: auto; font-size: 0.85rem; line-height: 1.7; color: var(--fg); white-space: pre-line;">{{ terms_text }}</div>
+
+<form method="POST">
+    {% csrf_token %}
+    <div class="res-checkbox-row">
+        {{ form.agree }}
+        <label for="{{ form.agree.id_for_label }}">{{ form.agree.label }}</label>
+    </div>
+    {% for e in form.agree.errors %}<div class="res-errorlist">{{ e }}</div>{% endfor %}
+
+    <div class="res-form-actions">
+        <button type="submit" class="res-btn">Finish setup →</button>
+    </div>
+</form>
+{% endblock %}

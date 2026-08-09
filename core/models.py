@@ -414,11 +414,24 @@ class Profile(models.Model):
 
     VISIBILITY_CHOICES = [('public', 'Public'), ('private', 'Private')]
     profile_visibility = models.CharField(max_length=7, choices=VISIBILITY_CHOICES, default='public')
-    hide_phone = models.BooleanField(default=False)
+    hide_phone = models.BooleanField(default=True)
     hide_email = models.BooleanField(default=True)
 
     phone_verified = models.BooleanField(default=False)
     terms_accepted_at = models.DateTimeField(null=True, blank=True)
+
+    RESIDENT_ROLE_CHOICES = [
+        ('normal', 'Normal / Renter'),
+        ('landlord', 'Landlord'),
+        ('agent', 'Agent'),
+        ('caretaker', 'Caretaker'),
+    ]
+    resident_role = models.CharField(
+        max_length=10, choices=RESIDENT_ROLE_CHOICES, blank=True,
+        help_text='Only meaningful when account_type is resident.',
+    )
+    onboarding_step = models.PositiveSmallIntegerField(default=1)
+    onboarding_complete = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         if self.profile_picture and hasattr(self.profile_picture, 'file'):
@@ -597,6 +610,70 @@ class ListingAgreement(models.Model):
     def __str__(self):
         return f"Agreement — {self.residence.name} — {self.agreed_at.strftime('%d %b %Y')}"
 
+RESIDENT_TERMS_VERSION = 'v1.0'
+
+NORMAL_RESIDENT_TERMS_TEXT = """
+By continuing as a Normal resident on HomeFinder KE, I confirm that any property I list is one
+I have been given permission to list — by the owner, landlord, or caretaker in charge of it —
+and I am borrowing that permission, not claiming ownership. I am solely responsible for making
+sure I actually have that permission before posting. HomeFinder KE has no way to verify it on
+my behalf and takes no responsibility for, and no blame in, any dispute arising from a listing
+I post without proper authorization.
+"""
+
+LANDLORD_TERMS_TEXT = """
+By continuing as a Landlord on HomeFinder KE, I confirm that I own, or have a legal right to
+let out, any property I list, and that the documents I submit for verification are genuine.
+I accept that HomeFinder KE may list my properties publicly, and that HomeFinder KE is a
+listings platform only — not a party to any tenancy agreement, rent collection, or dispute
+between myself and any tenant.
+"""
+
+AGENT_TERMS_TEXT = """
+By continuing as an Agent on HomeFinder KE, I confirm that I am authorized to represent and
+market the properties I list on behalf of their owners or landlords, and that the documents I
+submit for verification are genuine and accurately reflect my mandate. HomeFinder KE is a
+listings platform only — not a party to any tenancy agreement, rent collection, or dispute
+between myself, the property owner, and any tenant.
+"""
+
+CARETAKER_TERMS_TEXT = """
+By continuing as a Caretaker on HomeFinder KE, I confirm that I have been authorized by the
+landlord or property owner to manage and list the properties I post on their behalf, and that
+the ID I submit for verification is genuine. HomeFinder KE is a listings platform only — not a
+party to any tenancy agreement, rent collection, or dispute connected to a property I manage.
+"""
+
+RESIDENT_ROLE_TERMS_TEXT = {
+    'normal': NORMAL_RESIDENT_TERMS_TEXT,
+    'landlord': LANDLORD_TERMS_TEXT,
+    'agent': AGENT_TERMS_TEXT,
+    'caretaker': CARETAKER_TERMS_TEXT,
+}
+
+class ResidentAgreement(models.Model):
+    """
+    Signed once during resident onboarding, for the 'normal' (non-landlord,
+    non-agent) role: acknowledges up front — before any listing exists — that
+    they bear responsibility for having permission to list a property. Deliberately
+    a log (FK, not OneToOne) rather than a single row: if CURRENT_TERMS_VERSION is
+    ever bumped, the user re-consents and a new row is added rather than the old
+    consent being overwritten or lost.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resident_agreements')
+    role = models.CharField(max_length=10, choices=Profile.RESIDENT_ROLE_CHOICES, blank=True)
+    terms_version = models.CharField(max_length=20)
+    terms_snapshot = models.TextField(help_text="Full terms text as it existed at the moment of consent")
+    agreed_at = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ['-agreed_at']
+
+    def __str__(self):
+        return f"Resident agreement — {self.user.username} — {self.agreed_at.strftime('%d %b %Y')}"
+
 
 class Notification(models.Model):
 
@@ -661,6 +738,14 @@ class IDVerification(models.Model):
         related_name='id_verification'
     )
     document = models.FileField(upload_to='verification/id_documents/', blank=True, null=True)
+    kra_pin_document = models.FileField(
+        upload_to='verification/kra_pin/', blank=True, null=True,
+        help_text='Required for landlords and agents.',
+    )
+    property_proof_document = models.FileField(
+        upload_to='verification/property_proof/', blank=True, null=True,
+        help_text='Agents only: proof of the rental properties/homes you manage or represent.',
+    )
     status = models.CharField(max_length=13, choices=STATUS_CHOICES, default='not_submitted')
     rejection_reason = models.CharField(max_length=255, blank=True)
     submitted_at = models.DateTimeField(null=True, blank=True)
@@ -972,4 +1057,4 @@ class Incident(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"[{self.get_category_display()}] {self.subject}"        
+        return f"[{self.get_category_display()}] {self.subject}"
