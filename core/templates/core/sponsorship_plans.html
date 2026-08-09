@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sponsor Your Listing — HomeFinder KE{% endblock %}
+
+{% block content %}
+<style>
+  .sp-wrap { max-width: 700px; margin: 0 auto; padding: 32px 20px 60px; }
+  .sp-header { text-align: center; margin-bottom: 28px; }
+  .sp-header h1 { font-size: 1.5rem; color: var(--fg); margin: 0 0 6px; }
+  .sp-header p { color: var(--fg-muted); font-size: 0.9rem; margin: 0; }
+
+  .sp-price-card {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff;
+    border-radius: var(--radius-lg); padding: 24px; text-align: center; margin-bottom: 28px; box-shadow: var(--shadow);
+  }
+  .sp-price-card .amount { font-size: 2rem; font-weight: 800; }
+  .sp-price-card .desc { font-size: 0.85rem; opacity: 0.9; margin-top: 4px; }
+
+  .sp-listing-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    padding: 18px; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  }
+  .sp-listing-name { font-weight: 700; color: var(--fg); font-size: 0.95rem; }
+  .sp-listing-meta { color: var(--fg-muted); font-size: 0.8rem; margin-top: 2px; }
+  .sp-badge { padding: 3px 10px; border-radius: var(--radius-full); font-size: 0.72rem; font-weight: 700; background: var(--gold-bg); color: #7C5300; }
+  .sp-badge.premium { background: var(--green-bg); color: var(--green-text); }
+
+  .sp-pay-btn {
+    border: none; border-radius: var(--radius); background: var(--primary); color: #fff;
+    padding: 10px 18px; font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: var(--transition);
+  }
+  .sp-pay-btn:hover { background: var(--primary-dark); }
+
+  .sp-modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .sp-modal-overlay.open { display: flex; }
+  .sp-modal { background: var(--bg-card); border-radius: var(--radius-lg); padding: 24px; max-width: 380px; width: 100%; box-shadow: var(--shadow-lg); }
+  .sp-modal h3 { margin: 0 0 6px; color: var(--fg); font-size: 1.05rem; }
+  .sp-modal p { color: var(--fg-muted); font-size: 0.85rem; margin: 0 0 16px; }
+  .sp-modal input {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--bg); color: var(--fg); font-size: 0.9rem; box-sizing: border-box; margin-bottom: 14px;
+  }
+  .sp-modal-actions { display: flex; gap: 10px; }
+  .sp-modal-actions button { flex: 1; padding: 10px; border-radius: var(--radius); font-weight: 700; font-size: 0.85rem; cursor: pointer; border: none; }
+  .sp-modal-cancel { background: var(--muted); color: var(--fg); }
+  .sp-modal-confirm { background: var(--primary); color: #fff; }
+</style>
+
+<div class="sp-wrap">
+  <div class="sp-header">
+    <h1>Sponsor Your Listing</h1>
+    <p>Boost a listing to Premium — top placement in search and higher visibility.</p>
+  </div>
+
+  <div class="sp-price-card">
+    <div class="amount">KSh {{ sponsorship_price }}</div>
+    <div class="desc">Flat fee · 30 days of Premium placement</div>
+  </div>
+
+  {% for residence in my_residences %}
+  <div class="sp-listing-card">
+    <div>
+      <div class="sp-listing-name">{{ residence.name }}</div>
+      <div class="sp-listing-meta">{{ residence.town }}, {{ residence.county }}</div>
+    </div>
+    {% if residence.is_premium %}
+      <span class="sp-badge premium">⭐ Premium Active</span>
+    {% elif residence.boost_requested %}
+      <span class="sp-badge">Payment Pending</span>
+    {% else %}
+      <button class="sp-pay-btn" onclick="openSpModal({{ residence.pk }}, '{{ residence.name|escapejs }}', '{{ residence.phone_number|escapejs }}')">Sponsor This Listing</button>
+    {% endif %}
+  </div>
+  {% empty %}
+  <p style="color:var(--fg-muted); text-align:center;">You don't have any listings yet.</p>
+  {% endfor %}
+</div>
+
+<div class="sp-modal-overlay" id="spModalOverlay">
+  <div class="sp-modal">
+    <h3 id="spModalTitle">Sponsor Listing</h3>
+    <p>Enter the M-Pesa number to receive the payment prompt on.</p>
+    <form method="POST" id="spModalForm">
+      {% csrf_token %}
+      <input type="tel" name="phone_number" id="spModalPhone" placeholder="07XXXXXXXX">
+      <div class="sp-modal-actions">
+        <button type="button" class="sp-modal-cancel" onclick="closeSpModal()">Cancel</button>
+        <button type="submit" class="sp-modal-confirm">Pay KSh {{ sponsorship_price }}</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openSpModal(pk, name, phone) {
+    document.getElementById('spModalTitle').textContent = 'Sponsor "' + name + '"';
+    document.getElementById('spModalPhone').value = phone || '';
+    document.getElementById('spModalForm').action = '/sponsorship/' + pk + '/pay/';
+    document.getElementById('spModalOverlay').classList.add('open');
+  }
+  function closeSpModal() {
+    document.getElementById('spModalOverlay').classList.remove('open');
+  }
+</script>
+{% endblock %}

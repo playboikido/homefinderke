@@ -208,6 +208,9 @@ urlpatterns = [
         views.compare_residences,
         name='compare_residences'
     ),
+    path('sponsorship/', views.sponsorship_plans, name='sponsorship_plans'),
+    path('sponsorship/<int:pk>/pay/', views.initiate_sponsorship, name='initiate_sponsorship'),
+    path('mpesa/residence-callback/', views.residence_mpesa_callback, name='residence_mpesa_callback'),
     path('business/', include('business.urls')),
     path('moving-essentials/', views.moving_essentials, name='moving_essentials'),
     path('directory-search/', views.directory_search_suggestions, name='directory_search_suggestions'),

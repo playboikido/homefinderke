@@ -64,21 +64,17 @@ class IncidentAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     readonly_fields = ('reporter', 'created_at')
 
-# ResidenceSponsorship was never actually created as a model — admin was
-# registered ahead of the model existing, which crashes app boot (admin
-# autodiscovery runs on every startup, not per-request). Re-enable once
-# that model + its migration exist.
-# from .models import ResidenceSponsorship
-#
-# @admin.register(ResidenceSponsorship)
-# class ResidenceSponsorshipAdmin(admin.ModelAdmin):
-#     list_display = ('residence', 'owner', 'amount', 'status', 'mpesa_receipt', 'created_at')
-#     list_filter = ('status',)
-#     search_fields = ('residence__name', 'owner__username', 'mpesa_receipt', 'checkout_request_id')
-#     actions = ['activate_selected']
-#
-#     @admin.action(description='Activate selected (grants Premium) — use for manual/cash payments')
-#     def activate_selected(self, request, queryset):
-#         for payment in queryset.filter(status='pending'):
-#             payment.activate()
-#         self.message_user(request, f"Activated {queryset.filter(status='completed').count()} payment(s).")
+from .models import ResidenceSponsorship
+
+@admin.register(ResidenceSponsorship)
+class ResidenceSponsorshipAdmin(admin.ModelAdmin):
+    list_display = ('residence', 'owner', 'amount', 'status', 'mpesa_receipt', 'created_at')
+    list_filter = ('status',)
+    search_fields = ('residence__name', 'owner__username', 'mpesa_receipt', 'checkout_request_id')
+    actions = ['activate_selected']
+
+    @admin.action(description='Activate selected (grants Premium) — use for manual/cash payments')
+    def activate_selected(self, request, queryset):
+        for payment in queryset.filter(status='pending'):
+            payment.activate()
+        self.message_user(request, f"Activated {queryset.filter(status='completed').count()} payment(s).")

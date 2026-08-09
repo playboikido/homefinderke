@@ -15,6 +15,7 @@ from django.db.models import Sum
 from django.db.models import Prefetch, Count, Avg
 from django.contrib import messages
 import math
+from .mpesa import initiate_stk_push
 from django.contrib.auth.models import User
 from .models import Review
 from .forms import ReviewForm
@@ -1181,6 +1182,93 @@ def request_boost(request, pk):
         messages.info(request, 'This listing already has Premium or a pending request.')
     return redirect('dashboard')
 
+# ─── Residence Sponsorship (automatic M-Pesa upgrade) ──────────────────────
+from django.views.decorators.csrf import csrf_exempt
+from .models import ResidenceSponsorship
+
+
+@login_required
+def sponsorship_plans(request):
+    """Hub page — lists the user's own residences with their Premium status
+    and a 'Sponsor This Listing' action for each non-premium one."""
+    my_residences = Residence.objects.filter(owner=request.user).order_by('-is_premium', '-created_at')
+    return render(request, 'core/sponsorship_plans.html', {
+        'my_residences': my_residences,
+        'sponsorship_price': ResidenceSponsorship._meta.get_field('amount').default,
+    })
+
+
+@login_required
+def initiate_sponsorship(request, pk):
+    residence = get_object_or_404(Residence, pk=pk, owner=request.user)
+
+    if residence.is_premium:
+        messages.info(request, 'This listing already has Premium.')
+        return redirect('sponsorship_plans')
+
+    if request.method != 'POST':
+        return redirect('sponsorship_plans')
+
+    phone = request.POST.get('phone_number', '').strip() or residence.phone_number
+    if not phone:
+        messages.error(request, 'Please provide a phone number to receive the M-Pesa prompt.')
+        return redirect('sponsorship_plans')
+
+    payment = ResidenceSponsorship.objects.create(
+        residence=residence,
+        owner=request.user,
+        amount=ResidenceSponsorship._meta.get_field('amount').default,
+        status='pending',
+    )
+
+    result = initiate_stk_push(
+        phone,
+        payment.amount,
+        callback_url=settings.MPESA_RESIDENCE_CALLBACK_URL,
+        account_reference=f"HFKE-R{residence.pk}"[:20],
+        transaction_desc=f"Sponsor listing: {residence.name}"[:50],
+    )
+
+    if result.get('ResponseCode') == '0':
+        payment.checkout_request_id = result.get('CheckoutRequestID', '')
+        payment.merchant_request_id = result.get('MerchantRequestID', '')
+        payment.save(update_fields=['checkout_request_id', 'merchant_request_id'])
+        messages.success(request, 'Check your phone and enter your M-Pesa PIN to complete the upgrade.')
+    else:
+        payment.status = 'failed'
+        payment.save(update_fields=['status'])
+        messages.error(request, result.get('errorMessage', 'Could not start the payment. Please try again.'))
+
+    return redirect('sponsorship_plans')
+
+
+@csrf_exempt
+@require_POST
+def residence_mpesa_callback(request):
+    data = json.loads(request.body)
+    result = data.get('Body', {}).get('stkCallback', {})
+    checkout_id = result.get('CheckoutRequestID')
+
+    try:
+        payment = ResidenceSponsorship.objects.get(checkout_request_id=checkout_id)
+        if result.get('ResultCode') == 0:
+            items = result.get('CallbackMetadata', {}).get('Item', [])
+            for item in items:
+                if item.get('Name') == 'MpesaReceiptNumber':
+                    payment.mpesa_receipt = item.get('Value', '')
+            payment.save(update_fields=['mpesa_receipt'])
+            payment.activate()
+            Notification.objects.create(
+                user=payment.owner,
+                message=f'🌟 Payment received — "{payment.residence.name}" is now Premium!'
+            )
+        else:
+            payment.status = 'failed'
+            payment.save(update_fields=['status'])
+    except ResidenceSponsorship.DoesNotExist:
+        pass
+
+    return JsonResponse({'ResultCode': 0, 'ResultDesc': 'Accepted'})
 
 @login_required
 def my_favorites(request):

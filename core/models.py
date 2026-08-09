@@ -1058,3 +1058,34 @@ class Incident(models.Model):
 
     def __str__(self):
         return f"[{self.get_category_display()}] {self.subject}"
+
+RESIDENCE_SPONSORSHIP_PRICE = 300  # KSh, flat fee to feature one listing for 30 days
+
+class ResidenceSponsorship(models.Model):
+    """Payment record for boosting a single residence listing to Premium.
+    Mirrors business.models.BusinessPayment's STK-push pattern so both
+    flows can go live together once Daraja credentials are registered."""
+
+    STATUS_CHOICES = [('pending', 'Pending'), ('completed', 'Completed'), ('failed', 'Failed')]
+
+    residence = models.ForeignKey(Residence, on_delete=models.CASCADE, related_name='sponsorships')
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='residence_sponsorships')
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=RESIDENCE_SPONSORSHIP_PRICE)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    checkout_request_id = models.CharField(max_length=100, blank=True)
+    merchant_request_id = models.CharField(max_length=100, blank=True)
+    mpesa_receipt = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def activate(self):
+        """Marks payment completed and grants Premium on the residence.
+        Called by the M-Pesa callback on a real payment, or manually via
+        Django admin while live Daraja credentials are pending."""
+        self.status = 'completed'
+        self.save(update_fields=['status'])
+        self.residence.is_premium = True
+        self.residence.boost_requested = False
+        self.residence.save(update_fields=['is_premium', 'boost_requested'])    
