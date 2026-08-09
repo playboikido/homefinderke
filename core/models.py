@@ -51,10 +51,9 @@ def compress_image(image_field, max_size=(1280, 1280), quality=70):
         return None
         
 from django.conf import settings
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.exceptions import ValidationError
-
 
 @receiver(post_save, sender=User)
 def notify_admin_new_account(sender, instance, created, **kwargs):
@@ -449,6 +448,23 @@ class Profile(models.Model):
     )
     onboarding_step = models.PositiveSmallIntegerField(default=1)
     onboarding_complete = models.BooleanField(default=False)
+
+    followers_count = models.PositiveIntegerField(default=0)
+    following_count = models.PositiveIntegerField(default=0)
+    total_likes = models.PositiveIntegerField(default=0)
+    is_verified = models.BooleanField(default=False, help_text='Auto-granted at 500 followers.')
+    is_creator = models.BooleanField(default=False, help_text='Auto-granted at 1000 followers — eligible for payouts.')
+
+    def check_milestones(self):
+        changed = False
+        if self.followers_count >= 500 and not self.is_verified:
+            self.is_verified = True
+            changed = True
+        if self.followers_count >= 1000 and not self.is_creator:
+            self.is_creator = True
+            changed = True
+        if changed:
+            self.save(update_fields=['is_verified', 'is_creator'])
 
     def save(self, *args, **kwargs):
         if self.profile_picture and hasattr(self.profile_picture, 'file'):
@@ -1105,4 +1121,59 @@ class ResidenceSponsorship(models.Model):
         self.save(update_fields=['status'])
         self.residence.is_premium = True
         self.residence.boost_requested = False
-        self.residence.save(update_fields=['is_premium', 'boost_requested'])    
+        self.residence.save(update_fields=['is_premium', 'boost_requested'])   
+
+class Follow(models.Model):
+    follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='following_set')
+    following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followers_set')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('follower', 'following')
+        ordering = ['-created_at']
+
+    def clean(self):
+        if self.follower_id == self.following_id:
+            raise ValidationError("You can't follow yourself.")
+
+    def __str__(self):
+        return f"{self.follower.username} follows {self.following.username}"
+
+
+@receiver(post_save, sender=Follow)
+def _follow_created(sender, instance, created, **kwargs):
+    if not created:
+        return
+    fp, _ = Profile.objects.get_or_create(user=instance.follower)
+    tp, _ = Profile.objects.get_or_create(user=instance.following)
+    fp.following_count = Follow.objects.filter(follower=instance.follower).count()
+    tp.followers_count = Follow.objects.filter(following=instance.following).count()
+    fp.save(update_fields=['following_count'])
+    tp.save(update_fields=['followers_count'])
+    tp.check_milestones()
+
+
+@receiver(post_delete, sender=Follow)
+def _follow_deleted(sender, instance, **kwargs):
+    fp, _ = Profile.objects.get_or_create(user=instance.follower)
+    tp, _ = Profile.objects.get_or_create(user=instance.following)
+    fp.following_count = Follow.objects.filter(follower=instance.follower).count()
+    tp.followers_count = Follow.objects.filter(following=instance.following).count()
+    fp.save(update_fields=['following_count'])
+    tp.save(update_fields=['followers_count'])
+
+
+@receiver(post_save, sender=Favorite)
+def _like_added(sender, instance, created, **kwargs):
+    if created and instance.residence.owner_id:
+        op, _ = Profile.objects.get_or_create(user=instance.residence.owner)
+        op.total_likes = Favorite.objects.filter(residence__owner=instance.residence.owner).count()
+        op.save(update_fields=['total_likes'])
+
+
+@receiver(post_delete, sender=Favorite)
+def _like_removed(sender, instance, **kwargs):
+    if instance.residence.owner_id:
+        op, _ = Profile.objects.get_or_create(user=instance.residence.owner)
+        op.total_likes = Favorite.objects.filter(residence__owner=instance.residence.owner).count()
+        op.save(update_fields=['total_likes'])         
