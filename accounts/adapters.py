@@ -24,6 +24,13 @@ class SafeAccountAdapter(DefaultAccountAdapter):
                 template_prefix, email, e,
             )
 
+    def get_signup_redirect_url(self, request):
+        """Right after creating a brand new account (email or Google), send
+        them to the choose page (business vs resident) — not straight to the
+        homepage. Regular logins are unaffected; this only fires on signup."""
+        from django.urls import reverse
+        return reverse('business:choose')
+
 
 class SafeSocialAccountAdapter(DefaultSocialAccountAdapter):
     """

@@ -13,12 +13,6 @@ class CaptchaLoginForm(LoginForm):
 
 
 class CaptchaSignupForm(SignupForm):
-    account_type = forms.ChoiceField(
-        choices=Profile.ACCOUNT_TYPE_CHOICES,
-        widget=forms.RadioSelect,
-        initial='resident',
-        label="I'm signing up as a",
-    )
     terms_agreed = forms.BooleanField(
         required=True,
         label="I agree to the Terms of Service and Privacy Policy",
@@ -29,13 +23,26 @@ class CaptchaSignupForm(SignupForm):
     def save(self, request):
         user = super().save(request)
         profile, _ = Profile.objects.get_or_create(user=user)
-        profile.account_type = self.cleaned_data['account_type']
         profile.terms_accepted_at = timezone.now()
-        profile.save(update_fields=['account_type', 'terms_accepted_at'])
+        profile.save(update_fields=['terms_accepted_at'])
         return user
 
 
 class SocialSignupForm(SocialSignupFormBase):
+    terms_agreed = forms.BooleanField(
+        required=True,
+        label="I agree to the Terms of Service and Privacy Policy",
+        error_messages={"required": "You must agree to the Terms of Service and Privacy Policy to create an account."},
+    )
+    captcha = ReCaptchaField(widget=ReCaptchaV2Checkbox())
+
+    def save(self, request):
+        user = super().save(request)
+        profile, _ = Profile.objects.get_or_create(user=user)
+        profile.terms_accepted_at = timezone.now()
+        profile.save(update_fields=['terms_accepted_at'])
+        request.session.pop('intended_account_type', None)
+        return user
     account_type = forms.ChoiceField(
         choices=Profile.ACCOUNT_TYPE_CHOICES,
         widget=forms.RadioSelect,
