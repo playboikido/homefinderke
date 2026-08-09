@@ -19,7 +19,7 @@ from .mpesa import initiate_stk_push
 from django.contrib.auth.models import User
 from .models import Review
 from .forms import ReviewForm
-from django.db.models import Sum, Prefetch
+from django.db.models import Sum, Prefetch, F
 from django.core.paginator import Paginator
 from .forms import ProfileForm, SettingsUserForm, SettingsProfileForm, NotificationPreferenceForm, AppearanceForm, PrivacyForm, IDVerificationForm
 from .models import Residence, Profile, NotificationPreference, IDVerification
@@ -566,6 +566,14 @@ def search(request):
     if max_rent:
         residences = residences.filter(rent_price__lte=max_rent)
 
+    if county:
+        # Popularity boost: within a county search, residences whose owners
+        # have more followers (and the "star" milestone) surface first —
+        # after Premium, before plain recency.
+        residences = residences.annotate(
+            owner_followers=F('owner__profile__followers_count')
+        ).order_by('-is_premium', '-owner_followers', '-created_at')
+
     paginator = Paginator(residences, 9)
     page_obj  = paginator.get_page(request.GET.get('page'))
 
@@ -851,6 +859,16 @@ def residence_detail(request, pk):
     share_url = request.build_absolute_uri()
     share_text = f"Check out {residence.name} on HomeFinder Kenya: {share_url}"
 
+    is_favorited = (
+        request.user.is_authenticated
+        and Favorite.objects.filter(user=request.user, residence=residence).exists()
+    )
+    is_following_owner = (
+        request.user.is_authenticated
+        and residence.owner_id
+        and Follow.objects.filter(follower=request.user, following_id=residence.owner_id).exists()
+    )
+
     context = {
         'residence': residence,
         'related_residences': related_residences,
@@ -860,6 +878,9 @@ def residence_detail(request, pk):
         'sponsored_vendors': sponsored_vendors,
         'share_url': share_url,
         'share_text': share_text,
+        'is_favorited': is_favorited,
+        'is_following_owner': is_following_owner,
+        'likes_count': residence.favorited_by.count(),
     }
     return render(request, 'core/residence_detail.html', context)
 

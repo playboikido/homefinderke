@@ -764,9 +764,9 @@
         <div class="rd-hero-topbar">
           <div class="rd-hero-actions">
             {% if user.is_authenticated %}
-            <a href="{% url 'save_favorite' residence.id %}" class="rd-btn rd-btn-white">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-              Save
+            <a href="{% url 'save_favorite' residence.id %}" class="rd-btn rd-btn-white" style="{% if is_favorited %}color:#e11d48;{% endif %}">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="{% if is_favorited %}#e11d48{% else %}none{% endif %}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+              {% if is_favorited %}Liked{% else %}Like{% endif %} · {{ likes_count }}
             </a>
             {% endif %}
           </div>
@@ -792,7 +792,18 @@
               <span class="rd-hero-meta-item">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 <a href="{% url 'owner_profile' residence.owner.id %}" style="color:rgba(255,255,255,.78);text-decoration:none;">{{ residence.owner.username }}</a>
+                {% if residence.owner.profile.is_verified %}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#f59e0b" stroke="#f59e0b" stroke-width="1" style="width:13px;height:13px;vertical-align:-1px;"><path d="m12 1 2.6 6.3 6.4.5-4.9 4.2 1.5 6.3L12 15l-5.6 3.3 1.5-6.3-4.9-4.2 6.4-.5z"/></svg>
+                {% endif %}
               </span>
+              {% if request.user.is_authenticated and request.user.id != residence.owner.id %}
+              <form method="post" action="{% url 'toggle_follow' residence.owner.id %}?next={{ request.path|urlencode }}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="rd-btn rd-btn-ghost" style="padding:3px 12px;font-size:0.72rem;">
+                  {% if is_following_owner %}Following{% else %}+ Follow{% endif %}
+                </button>
+              </form>
+              {% endif %}
               {% endif %}
             </div>
             <div class="rd-hero-actions" style="margin-top:18px;">

@@ -34,6 +34,7 @@ def chat_hub(request, conversation_id=None):
         conversation_rows.append({
             'id': convo.id,
             'other_user': other,
+            'other_user_verified': getattr(getattr(other, 'profile', None), 'is_verified', False),
             'last_text': (last_msg.text if last_msg and last_msg.text else
                           ('📷 Photo' if last_msg and last_msg.image else 'No messages yet')),
             'unread_count': unread_count,
