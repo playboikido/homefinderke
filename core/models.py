@@ -412,6 +412,23 @@ class Profile(models.Model):
     reduce_motion = models.BooleanField(default=False)
     compact_mode = models.BooleanField(default=False)
 
+    ACCENT_COLOR_CHOICES = [
+        ('teal', 'Teal'),
+        ('blue', 'Blue'),
+        ('purple', 'Purple'),
+        ('green', 'Green'),
+        ('rose', 'Rose'),
+        ('orange', 'Orange'),
+    ]
+    accent_color = models.CharField(max_length=10, choices=ACCENT_COLOR_CHOICES, default='teal')
+
+    FONT_SIZE_CHOICES = [
+        ('small', 'Small'),
+        ('medium', 'Medium'),
+        ('large', 'Large'),
+    ]
+    font_size = models.CharField(max_length=6, choices=FONT_SIZE_CHOICES, default='medium')
+
     VISIBILITY_CHOICES = [('public', 'Public'), ('private', 'Private')]
     profile_visibility = models.CharField(max_length=7, choices=VISIBILITY_CHOICES, default='public')
     hide_phone = models.BooleanField(default=True)

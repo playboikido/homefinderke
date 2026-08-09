@@ -147,11 +147,33 @@
   </div>
 
   <div class="settings-card">
-    <div class="settings-section-title">
-      Accent Color &amp; Font Size
-      <span class="soon-inline">Soon</span>
+    <div class="settings-section-title">Accent Color</div>
+    <div class="settings-section-desc">Choose the accent used for buttons and highlights across the site.</div>
+
+    <div class="accent-options">
+      {% for radio in form.accent_color %}
+        <label class="accent-option">
+          {{ radio.tag }}
+          <div class="accent-swatch {{ radio.data.value }}"></div>
+          <div class="accent-option-label">{{ radio.choice_label }}</div>
+        </label>
+      {% endfor %}
     </div>
-    <div class="settings-section-desc">Custom accent colors and adjustable font sizing are planned for a future update.</div>
+  </div>
+
+  <div class="settings-card">
+    <div class="settings-section-title">Font Size</div>
+    <div class="settings-section-desc">Adjust text size across the site.</div>
+
+    <div class="fontsize-options">
+      {% for radio in form.font_size %}
+        <label class="fontsize-option">
+          {{ radio.tag }}
+          <div class="fontsize-preview {{ radio.data.value }}">Aa</div>
+          <div class="fontsize-option-label">{{ radio.choice_label }}</div>
+        </label>
+      {% endfor %}
+    </div>
   </div>
 
   <div class="sticky-save-bar">

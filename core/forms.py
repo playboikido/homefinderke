@@ -187,11 +187,13 @@ class PrivacyForm(forms.ModelForm):
 class AppearanceForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['theme_preference', 'reduce_motion', 'compact_mode']
+        fields = ['theme_preference', 'reduce_motion', 'compact_mode', 'accent_color', 'font_size']
         widgets = {
             'theme_preference': forms.RadioSelect(),
             'reduce_motion': forms.CheckboxInput(),
             'compact_mode': forms.CheckboxInput(),
+            'accent_color': forms.RadioSelect(),
+            'font_size': forms.RadioSelect(),
         }
 
 
