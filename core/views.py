@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse
-from .models import Residence, ResidenceReport, UserReport
+from .models import Follow, Residence, ResidenceReport, UserReport
 from .models import Residence, ResidenceReport, ResidenceView
 from .forms import ResidenceForm, ResidenceReportForm, MoverForm, FurnitureVendorForm, MoverSponsorForm, FurnitureVendorSponsorForm
 from django.contrib import messages
@@ -23,6 +23,7 @@ from django.db.models import Sum, Prefetch
 from django.core.paginator import Paginator
 from .forms import ProfileForm, SettingsUserForm, SettingsProfileForm, NotificationPreferenceForm, AppearanceForm, PrivacyForm, IDVerificationForm
 from .models import Residence, Profile, NotificationPreference, IDVerification
+from .models import Follow
 from accounts.models import KnownDevice
 from django.contrib.sessions.models import Session
 from django.utils import timezone
@@ -1470,6 +1471,28 @@ def save_favorite(request, pk):
     return redirect('residence_detail', pk=residence.pk)
 
 
+@login_required
+def toggle_follow(request, user_id):
+    target = get_object_or_404(User, pk=user_id)
+
+    if target.id == request.user.id:
+        messages.warning(request, "You can't follow yourself.")
+        return redirect('owner_profile', user_id=target.id)
+
+    follow = Follow.objects.filter(follower=request.user, following=target).first()
+    if follow:
+        follow.delete()
+        messages.info(request, f'You unfollowed {target.username}.')
+    else:
+        Follow.objects.create(follower=request.user, following=target)
+        messages.success(request, f'You are now following {target.username}.')
+
+    next_url = request.POST.get('next') or request.GET.get('next')
+    if next_url:
+        return redirect(next_url)
+    return redirect('owner_profile', user_id=target.id)
+
+
 def owner_profile(request, user_id):
     owner    = get_object_or_404(User, id=user_id)
     residences = Residence.objects.filter(owner=owner, approved=True)
@@ -1482,11 +1505,17 @@ def owner_profile(request, user_id):
         and not request.user.is_staff
     )
 
+    is_following = (
+        request.user.is_authenticated
+        and Follow.objects.filter(follower=request.user, following=owner).exists()
+    )
+
     context = {
         'owner': owner,
         'profile': profile,
         'residences': residences,
         'is_private': is_private,
+        'is_following': is_following,
     }
     return render(request, 'core/owner_profile.html', context)
 
