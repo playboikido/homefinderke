@@ -1,520 +1,743 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Home Directory — HomeFinder Kenya{% endblock %}
-{% block meta_description %}Discover trusted movers, furniture, and home essentials businesses across Kenya — with prices, photos, and contact details.{% endblock %}
+{% block title %}Business Directory — HomeFinder Kenya{% endblock %}
+{% block meta_description %}Discover trusted movers, furniture stores, electronics, cleaning services, and more across Kenya. Browse the business directory with real photos, locations, and direct contact.{% endblock %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
 
 {% block extra_head %}
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
-  :root {
-    --hd-primary: #16A34A;
-    --hd-accent: #22C55E;
-    --hd-dark: #0F172A;
-    --hd-bg: #F8FAFC;
-    --hd-card: #FFFFFF;
-    --hd-border: #E5E7EB;
-    --hd-text-muted: #64748B;
-    --hd-r: 16px;
-    --hd-r-lg: 20px;
-    --hd-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
-    --hd-shadow-lg: 0 12px 32px rgba(15,23,42,0.10), 0 4px 8px rgba(15,23,42,0.04);
-    --hd-font: 'Inter', system-ui, sans-serif;
-    --hd-font-head: 'Manrope', 'Inter', sans-serif;
-  }
-  [data-theme="dark"] {
-    --hd-dark: #F1F5F9;
-    --hd-bg: #0F172A;
-    --hd-card: #1E293B;
-    --hd-border: #334155;
-    --hd-text-muted: #94A3B8;
-  }
+    :root {
+        --bd-bg: #F0FDFA;
+        --bd-card-bg: #FFFFFF;
+        --bd-text: #134E4A;
+        --bd-muted: #5EAFA8;
+        --bd-border: #A7F3D0;
+        --bd-primary: #0F766E;
+        --bd-accent: #14B8A6;
+        --bd-shadow: 0 4px 18px rgba(15, 118, 110, 0.08);
+        --bd-radius: 24px;
+    }
 
-  .hd-wrap {
-    font-family: var(--hd-font);
-    background: var(--hd-bg);
-    min-height: 100vh;
-    color: var(--hd-dark);
-  }
+    [data-theme="dark"] {
+        --bd-bg: #021210;
+        --bd-card-bg: #062019;
+        --bd-text: #ECFDF5;
+        --bd-muted: #6EE7B7;
+        --bd-border: #064E3B;
+        --bd-primary: #34D399;
+        --bd-accent: #10B981;
+        --bd-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+    }
 
-  .hd-hero {
-    padding: 64px 24px 48px;
-    text-align: center;
-    position: relative;
-    color: #fff;
-    background: linear-gradient(rgba(15,23,42,0.55), rgba(15,23,42,0.65)),
-                url('https://images.unsplash.com/photo-1558907530-fe311178388a?auto=format&fit=crop&w=1600&q=80');
-    background-size: cover;
-    background-position: center;
-  }
-  .hd-hero h1 {
-    font-family: var(--hd-font-head);
-    font-size: 2.4rem;
-    font-weight: 800;
-    margin-bottom: 10px;
-  }
-  .hd-hero p {
-    color: rgba(255,255,255,0.85);
-    max-width: 560px;
-    margin: 0 auto 28px;
-    font-size: 1.05rem;
-  }
+    body { background: var(--bd-bg); color: var(--bd-text); font-family: 'Fira Sans', system-ui, sans-serif; }
 
-  .hd-search-bar {
-    max-width: 620px;
-    margin: 0 auto;
-    display: flex;
-    gap: 10px;
-    background: var(--hd-card);
-    padding: 8px;
-    border-radius: var(--hd-r-lg);
-    box-shadow: var(--hd-shadow-lg);
-    border: 1px solid var(--hd-border);
-  }
-  .hd-search-bar input {
-    flex: 1;
-    min-width: 0;
-    border: none;
-    outline: none;
-    padding: 12px 16px;
-    font-family: var(--hd-font);
-    font-size: 0.95rem;
-    background: transparent;
-    color: var(--hd-dark);
-  }
-  .hd-search-bar button {
-    background: var(--hd-primary);
-    color: #fff;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-family: var(--hd-font);
-    cursor: pointer;
-    flex-shrink: 0;
-    white-space: nowrap;
-    transition: background 0.2s ease;
-  }
-  .hd-search-bar button:hover { background: #128A3E; }
+    /* ── Main container ── */
+    .biz-feed-wrap {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 0 0 90px;
+        background: var(--bd-bg);
+        min-height: 100vh;
+    }
 
-  .hd-locate-btn {
-    margin-top: 12px;
-    background: none;
-    border: none;
-    color: #fff;
-    text-decoration: underline;
-    cursor: pointer;
-    font-size: 0.85rem;
-  }
+    /* ── Sticky Header ── */
+    .biz-feed-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(240, 253, 250, 0.93);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-bottom: 1.5px solid var(--bd-border);
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
 
-  .hd-suggestions {
-    max-width: 620px;
-    margin: 4px auto 0;
-    background: var(--hd-card);
-    border-radius: 12px;
-    box-shadow: var(--hd-shadow-lg);
-    overflow: hidden;
-    text-align: left;
-    display: none;
-    position: relative;
-    z-index: 20;
-  }
-  .hd-suggestions a {
-    display: block;
-    padding: 10px 16px;
-    text-decoration: none;
-    color: var(--hd-dark);
-    border-bottom: 1px solid var(--hd-border);
-  }
-  .hd-suggestions a:last-child { border-bottom: none; }
-  .hd-suggestions a:hover { background: var(--hd-bg); }
-  @media (max-width: 600px) {
-  .hd-hero {
-    padding: 44px 16px 32px;
-  }
-  .hd-hero h1 {
-    font-size: 1.7rem;
-  }
-  .hd-hero p {
-    font-size: 0.95rem;
-  }
-  .hd-search-bar {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .hd-search-bar input {
-    width: 100%;
-    padding: 14px 16px;
-    font-size: 16px; /* prevents iOS auto-zoom on focus */
-  }
-  .hd-search-bar button {
-    width: 100%;
-    padding: 14px;
-  }
-}
-  .hd-stars {
-    color: #F59E0B;
-    font-weight: 700;
-    font-size: 0.85rem;
-    margin-bottom: 4px;
-  }
+    [data-theme="dark"] .biz-feed-header {
+        background: rgba(2, 18, 16, 0.93);
+    }
 
-  .hd-categories {
-    max-width: 1100px;
-    margin: 40px auto;
-    padding: 0 24px 12px;
-    display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 14px;
-    scroll-snap-type: x proximity;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-  }
-  .hd-categories::-webkit-scrollbar { height: 6px; }
-  .hd-categories::-webkit-scrollbar-thumb { background: var(--hd-border); border-radius: 999px; }
-  .hd-cat-card {
-    background: var(--hd-card);
-    border: 1px solid var(--hd-border);
-    border-radius: var(--hd-r);
-    padding: 20px 12px;
-    text-align: center;
-    text-decoration: none;
-    color: var(--hd-dark);
-    box-shadow: var(--hd-shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    flex: 0 0 130px;
-    scroll-snap-align: start;
-  }
-  .hd-cat-card:hover { transform: translateY(-4px); box-shadow: var(--hd-shadow-lg); }
-  .hd-cat-card.active { border-color: var(--hd-primary); background: rgba(22,163,74,0.06); }
-  .hd-cat-icon { font-size: 1.8rem; display: block; margin-bottom: 8px; }
-  .hd-cat-name { font-weight: 700; font-size: 0.85rem; display: block; white-space: nowrap; }
-  .hd-cat-count { font-size: 0.75rem; color: var(--hd-text-muted); white-space: nowrap; }
+    .biz-feed-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
 
-  .hd-body {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 24px 70px;
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 32px;
-  }
-  @media (max-width: 800px) {
-    .hd-body { grid-template-columns: 1fr; }
-  }
+    .biz-feed-logo-badge {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--bd-primary), var(--bd-accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(15, 118, 110, 0.3);
+    }
 
-  .hd-filters {
-    background: var(--hd-card);
-    border: 1px solid var(--hd-border);
-    border-radius: var(--hd-r);
-    padding: 20px;
-    height: fit-content;
-    box-shadow: var(--hd-shadow);
-  }
-  .hd-filters label {
-    font-weight: 700;
-    font-size: 0.85rem;
-    display: block;
-    margin-bottom: 8px;
-  }
-  .hd-filters input[type="text"] {
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--hd-border);
-    font-family: var(--hd-font);
-    background: var(--hd-bg);
-    color: var(--hd-dark);
-  }
-  .hd-filters button {
-    margin-top: 14px;
-    width: 100%;
-    background: var(--hd-primary);
-    color: #fff;
-    border: none;
-    padding: 10px;
-    border-radius: 10px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .hd-clear-link {
-    display: block;
-    text-align: center;
-    margin-top: 10px;
-    font-size: 0.85rem;
-    color: var(--hd-text-muted);
-  }
+    .biz-brand-text {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--bd-text);
+        line-height: 1.1;
+    }
 
-  .hd-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 20px;
-  }
-  .hd-card {
-    background: var(--hd-card);
-    border: 1px solid var(--hd-border);
-    border-radius: var(--hd-r-lg);
-    overflow: hidden;
-    box-shadow: var(--hd-shadow);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    display: flex;
-    flex-direction: column;
-  }
-  .hd-card:hover { transform: translateY(-3px); box-shadow: var(--hd-shadow-lg); }
-  .hd-card-img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-    background: var(--hd-border);
-  }
-  .hd-card-body {
-    padding: 18px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  .hd-verified {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(22,163,74,0.1);
-    color: var(--hd-primary);
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 999px;
-    width: fit-content;
-    margin-bottom: 8px;
-  }
-  .hd-sponsor { background: #FEF3C7; color: #B45309; }
-  .hd-card h3 {
-    font-family: var(--hd-font-head);
-    font-size: 1.05rem;
-    margin-bottom: 4px;
-  }
-  .hd-card-loc {
-    font-size: 0.85rem;
-    color: var(--hd-text-muted);
-    margin-bottom: 6px;
-  }
-  .hd-price-from {
-    font-size: 0.85rem;
-    color: var(--hd-primary);
-    font-weight: 700;
-    margin-bottom: 12px;
-  }
-  .hd-actions {
-    margin-top: auto;
-    display: flex;
-    gap: 8px;
-  }
-  .hd-btn {
-    flex: 1;
-    text-align: center;
-    padding: 10px;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 0.85rem;
-  }
-  .hd-btn-primary { background: var(--hd-primary); color: #fff; }
-  .hd-btn-outline { border: 1px solid var(--hd-border); color: var(--hd-dark); }
-  .hd-empty {
-    grid-column: 1/-1;
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--hd-text-muted);
-  }
+    .biz-brand-text span { color: var(--bd-primary); }
+
+    .biz-brand-tag {
+        font-size: 0.62rem;
+        color: var(--bd-muted);
+        font-weight: 500;
+    }
+
+    .biz-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .biz-header-btn {
+        color: var(--bd-text);
+        text-decoration: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, color 0.2s;
+    }
+
+    .biz-header-btn svg {
+        width: 22px;
+        height: 22px;
+        stroke-width: 2;
+    }
+
+    .biz-header-btn:hover { transform: scale(1.1); color: var(--bd-primary); }
+
+    /* ── Inline search bar (toggleable) ── */
+    .biz-search-bar {
+        display: none;
+        padding: 10px 18px 12px;
+        background: rgba(240, 253, 250, 0.95);
+        backdrop-filter: blur(14px);
+        border-bottom: 1.5px solid var(--bd-border);
+        position: sticky;
+        top: 63px;
+        z-index: 99;
+    }
+
+    [data-theme="dark"] .biz-search-bar { background: rgba(2, 18, 16, 0.95); }
+    .biz-search-bar.open { display: block; }
+
+    .biz-search-inner {
+        display: flex;
+        gap: 8px;
+        background: var(--bd-card-bg);
+        border: 1.5px solid var(--bd-border);
+        border-radius: 14px;
+        overflow: hidden;
+        padding: 0 14px;
+        align-items: center;
+    }
+
+    .biz-search-inner input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 12px 0;
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 0.95rem;
+        background: transparent;
+        color: var(--bd-text);
+    }
+
+    .biz-search-inner input::placeholder { color: var(--bd-muted); }
+
+    .biz-search-inner svg {
+        width: 18px;
+        height: 18px;
+        color: var(--bd-muted);
+        flex-shrink: 0;
+    }
+
+    .biz-search-submit {
+        background: var(--bd-primary);
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.82rem;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .biz-suggestions {
+        background: var(--bd-card-bg);
+        border: 1.5px solid var(--bd-border);
+        border-radius: 12px;
+        margin-top: 8px;
+        overflow: hidden;
+        display: none;
+        box-shadow: var(--bd-shadow);
+    }
+
+    .biz-suggestions a {
+        display: block;
+        padding: 10px 14px;
+        font-size: 0.88rem;
+        text-decoration: none;
+        color: var(--bd-text);
+        border-bottom: 1px solid var(--bd-border);
+        transition: background 0.15s;
+    }
+
+    .biz-suggestions a:last-child { border-bottom: none; }
+    .biz-suggestions a:hover { background: rgba(15, 118, 110, 0.06); }
+
+    /* ── Category Tabs (sticky below search) ── */
+    .biz-cat-tabs {
+        position: sticky;
+        top: 63px;
+        z-index: 98;
+        background: rgba(240, 253, 250, 0.93);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1.5px solid var(--bd-border);
+        display: flex;
+        gap: 8px;
+        padding: 10px 16px;
+        overflow-x: auto;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .biz-cat-tabs::-webkit-scrollbar { display: none; }
+    [data-theme="dark"] .biz-cat-tabs { background: rgba(2, 18, 16, 0.93); }
+
+    .biz-cat-tab {
+        flex-shrink: 0;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 7px 14px;
+        border-radius: 999px;
+        text-decoration: none;
+        color: var(--bd-muted);
+        border: 1.5px solid var(--bd-border);
+        background: transparent;
+        transition: all 0.2s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .biz-cat-tab:hover {
+        color: var(--bd-primary);
+        border-color: var(--bd-primary);
+        background: rgba(15, 118, 110, 0.06);
+    }
+
+    .biz-cat-tab.active {
+        color: #fff;
+        background: linear-gradient(135deg, var(--bd-primary), var(--bd-accent));
+        border-color: transparent;
+        box-shadow: 0 3px 10px rgba(15, 118, 110, 0.3);
+    }
+
+    /* ── Feed grid ── */
+    .biz-feed-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 16px;
+    }
+
+    /* ── Business Card ── */
+    .biz-card {
+        background: var(--bd-card-bg);
+        border: 1.5px solid var(--bd-border);
+        border-radius: var(--bd-radius);
+        overflow: hidden;
+        box-shadow: var(--bd-shadow);
+        transition: transform 0.25s cubic-bezier(0.1, 0.8, 0.2, 1), border-color 0.2s;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .biz-card:hover {
+        transform: translateY(-2px);
+        border-color: var(--bd-primary);
+    }
+
+    .biz-card-media-anchor { display: block; text-decoration: none; }
+
+    .biz-card-media {
+        position: relative;
+        width: 100%;
+        padding-top: 75%; /* 4:3 landscape */
+        background: linear-gradient(135deg, var(--bd-primary), var(--bd-accent));
+        overflow: hidden;
+    }
+
+    .biz-card-img {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        object-fit: cover;
+    }
+
+    .biz-card-img-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, var(--bd-primary), var(--bd-accent));
+        color: rgba(255,255,255,0.9);
+    }
+
+    .biz-card-img-placeholder svg {
+        width: 48px;
+        height: 48px;
+        opacity: 0.55;
+        stroke: #fff;
+    }
+
+    .biz-card-img-placeholder span {
+        font-family: 'Fira Code', monospace;
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: rgba(255,255,255,0.85);
+    }
+
+    .biz-card-cat-badge {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        z-index: 3;
+    }
+
+    .biz-badge-sponsor {
+        background: rgba(245, 158, 11, 0.92);
+        backdrop-filter: blur(6px);
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+        letter-spacing: 0.04em;
+    }
+
+    .biz-badge-cat {
+        background: rgba(15, 118, 110, 0.88);
+        backdrop-filter: blur(6px);
+        color: #fff;
+        font-size: 0.68rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    /* ── Card body ── */
+    .biz-card-body {
+        padding: 16px 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .biz-card-name-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .biz-card-name {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--bd-text);
+        margin: 0;
+        line-height: 1.25;
+    }
+
+    .biz-card-name a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .biz-card-name a:hover { color: var(--bd-primary); }
+
+    .biz-verified-tick {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--bd-primary), var(--bd-accent));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .biz-verified-tick svg {
+        width: 12px;
+        height: 12px;
+        stroke: #fff;
+        stroke-width: 3;
+    }
+
+    .biz-card-meta {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--bd-primary);
+    }
+
+    .biz-meta-cat {
+        background: rgba(15, 118, 110, 0.1);
+        border: 1px solid rgba(15, 118, 110, 0.2);
+        padding: 3px 10px;
+        border-radius: 999px;
+    }
+
+    .biz-card-detail {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        font-size: 0.84rem;
+        color: var(--bd-muted);
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .biz-card-detail svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+        margin-top: 1px;
+        stroke: var(--bd-primary);
+    }
+
+    .biz-card-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+        align-items: center;
+    }
+
+    .biz-btn-view {
+        flex: 1;
+        text-align: center;
+        background: linear-gradient(135deg, var(--bd-primary), var(--bd-accent));
+        color: #fff;
+        text-decoration: none;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        transition: transform 0.15s, box-shadow 0.15s;
+        box-shadow: 0 3px 10px rgba(15, 118, 110, 0.25);
+    }
+
+    .biz-btn-view:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 5px 16px rgba(15, 118, 110, 0.35);
+    }
+
+    .biz-btn-wa {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #16A34A;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        flex-shrink: 0;
+        transition: transform 0.15s, box-shadow 0.15s;
+        box-shadow: 0 3px 8px rgba(22, 163, 74, 0.3);
+    }
+
+    .biz-btn-wa:hover { transform: translateY(-1px); box-shadow: 0 5px 14px rgba(22, 163, 74, 0.4); }
+
+    /* ── Empty state ── */
+    .biz-empty {
+        text-align: center;
+        padding: 56px 24px;
+        color: var(--bd-muted);
+    }
+
+    .biz-empty svg {
+        width: 56px;
+        height: 56px;
+        opacity: 0.35;
+        margin-bottom: 16px;
+    }
+
+    .biz-empty h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--bd-text);
+        margin-bottom: 8px;
+    }
+
+    .biz-empty p { font-size: 0.9rem; }
+
+    /* ── Loader ── */
+    .biz-loader {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 24px 0;
+        min-height: 48px;
+    }
+
+    .biz-spinner {
+        width: 26px;
+        height: 26px;
+        border: 3px solid var(--bd-border);
+        border-top-color: var(--bd-primary);
+        border-radius: 50%;
+        animation: bizSpin 0.8s linear infinite;
+    }
+
+    @keyframes bizSpin { to { transform: rotate(360deg); } }
+
+    /* ── Location btn ── */
+    .biz-locate-row {
+        text-align: center;
+        padding: 8px;
+    }
+
+    .biz-locate-btn {
+        background: none;
+        border: 1.5px solid var(--bd-border);
+        color: var(--bd-muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 6px 14px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .biz-locate-btn:hover {
+        border-color: var(--bd-primary);
+        color: var(--bd-primary);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="hd-wrap">
+<div class="biz-feed-wrap">
 
-  <div class="hd-hero">
-    <h1>Everything For Your New Home</h1>
-    <p>Discover trusted movers and home essentials businesses near you — with real prices, photos, and direct contact.</p>
-
-    <form class="hd-search-bar" method="get" id="hd-search-form">
-      <input type="text" name="county" id="hd-search-input" placeholder="Search by county or business name" value="{{ selected_county }}" autocomplete="off">
-      <input type="hidden" name="lat" id="hd-lat">
-      <input type="hidden" name="lng" id="hd-lng">
-      <button type="submit">Search</button>
-    </form>
-
-    <div class="hd-suggestions" id="hd-suggestions"></div>
-
-    <button type="button" class="hd-locate-btn" onclick="hdUseMyLocation()">📍 Use my location to sort by distance</button>
-  </div>
-
-  <div class="hd-categories">
-    {% for cat in categories %}
-      <a class="hd-cat-card {% if selected_category == cat.key %}active{% endif %}"
-         href="?category={{ cat.key }}{% if selected_county %}&county={{ selected_county }}{% endif %}">
-        <span class="hd-cat-icon">{{ cat.icon }}</span>
-        <span class="hd-cat-name">{{ cat.label }}</span>
-        <span class="hd-cat-count">{{ cat.count }} listed</span>
-      </a>
-    {% endfor %}
-  </div>
-
-  <div class="hd-body">
-    <aside class="hd-filters">
-      <form method="get">
-        <label>County</label>
-        <input type="text" name="county" value="{{ selected_county }}" placeholder="e.g. Nairobi">
-        {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
-        <button type="submit">Apply</button>
-      </form>
-      {% if selected_category or selected_county %}
-        <a href="{% url 'moving_essentials' %}" class="hd-clear-link">Clear filters</a>
-      {% endif %}
-    </aside>
-
-    <div class="hd-grid">
-
-      {% for mover in movers %}
-        <div class="hd-card">
-          {% if mover.logo %}
-            <img class="hd-card-img" src="{{ mover.logo.url }}" alt="{{ mover.name }}">
-          {% endif %}
-          <div class="hd-card-body">
-            {% if mover.is_major_sponsor %}
-              <span class="hd-verified hd-sponsor">Sponsored</span>
-            {% elif mover.is_approved %}
-              <span class="hd-verified">✓ Verified</span>
-            {% endif %}
-
-            <h3>{{ mover.name }}</h3>
-
-            {% if mover.average_rating %}
-              <div class="hd-stars">★ {{ mover.average_rating }} ({{ mover.review_count }})</div>
-            {% endif %}
-
-            {% if mover.distance_km %}
-              <div class="hd-card-loc">📍 {{ mover.distance_km|floatformat:1 }} km away</div>
-            {% endif %}
-
-            <div class="hd-card-loc">🚚 Serves {{ mover.service_counties|default:"multiple counties" }}</div>
-
-            {% with first_product=mover.products.all|first %}
-              {% if first_product and first_product.price %}
-                <div class="hd-price-from">From KSh {{ first_product.price }}</div>
-              {% endif %}
-            {% endwith %}
-
-            <div class="hd-actions">
-              <a class="hd-btn hd-btn-primary" href="{{ mover.detail_url }}">View Details</a>
-              {% if mover.whatsapp_number %}
-                <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ mover.whatsapp_number }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-              {% endif %}
+    <!-- ── Sticky Header ── -->
+    <header class="biz-feed-header">
+        <a href="{% url 'home' %}" class="biz-feed-logo">
+            <div class="biz-feed-logo-badge">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </div>
-          </div>
-        </div>
-      {% endfor %}
-
-      {% for vendor in vendors %}
-        <div class="hd-card">
-          {% if vendor.image %}
-            <img class="hd-card-img" src="{{ vendor.image.url }}" alt="{{ vendor.name }}">
-          {% endif %}
-          <div class="hd-card-body">
-            {% if vendor.is_major_sponsor %}
-              <span class="hd-verified hd-sponsor">Sponsored</span>
-            {% elif vendor.is_approved %}
-              <span class="hd-verified">✓ Verified</span>
-            {% endif %}
-
-            <h3>{{ vendor.name }}</h3>
-
-            {% if vendor.average_rating %}
-              <div class="hd-stars">★ {{ vendor.average_rating }} ({{ vendor.review_count }})</div>
-            {% endif %}
-
-            {% if vendor.distance_km %}
-              <div class="hd-card-loc">📍 {{ vendor.distance_km|floatformat:1 }} km away</div>
-            {% endif %}
-
-            <div class="hd-card-loc">📍 {{ vendor.location }}</div>
-
-            {% with first_product=vendor.products.all|first %}
-              {% if first_product and first_product.price %}
-                <div class="hd-price-from">From KSh {{ first_product.price }}</div>
-              {% endif %}
-            {% endwith %}
-
-            <div class="hd-actions">
-              <a class="hd-btn hd-btn-primary" href="{{ vendor.detail_url }}">View Details</a>
-              {% if vendor.whatsapp_number %}
-                <a class="hd-btn hd-btn-outline" href="https://wa.me/{{ vendor.whatsapp_number }}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-              {% endif %}
+            <div>
+                <div class="biz-brand-text">HomeFinder <span>KE</span></div>
+                <div class="biz-brand-tag">Business Directory</div>
             </div>
-          </div>
+        </a>
+        <div class="biz-header-actions">
+            <!-- Search toggle -->
+            <button class="biz-header-btn" id="bizSearchToggle" title="Search businesses" aria-label="Toggle search">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </button>
+            <!-- Notifications -->
+            <a href="{% if user.is_authenticated %}{% url 'notifications' %}{% else %}{% url 'account_login' %}{% endif %}" class="biz-header-btn" title="Notifications">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            </a>
         </div>
-      {% endfor %}
+    </header>
 
-      {% if not movers and not vendors %}
-        <div class="hd-empty">No businesses found{% if selected_county %} in "{{ selected_county }}"{% endif %}. Try clearing filters.</div>
-      {% endif %}
-
+    <!-- ── Inline Search Bar ── -->
+    <div class="biz-search-bar" id="bizSearchBar">
+        <form method="get" id="bizSearchForm">
+            <div class="biz-search-inner">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <input type="text" name="county" id="bizSearchInput" placeholder="Search by business or county…" value="{{ selected_county }}" autocomplete="off">
+                {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+                <button type="submit" class="biz-search-submit">Go</button>
+            </div>
+            <div class="biz-suggestions" id="bizSuggestions"></div>
+        </form>
+        <div class="biz-locate-row">
+            <button type="button" class="biz-locate-btn" onclick="bizUseLocation()">📍 Sort by my location</button>
+            <input type="hidden" id="bizLat">
+            <input type="hidden" id="bizLng">
+        </div>
     </div>
-  </div>
+
+    <!-- ── Category Tabs ── -->
+    <nav class="biz-cat-tabs" id="bizCatTabs" aria-label="Business categories">
+        <a href="{% url 'moving_essentials' %}{% if selected_county %}?county={{ selected_county }}{% endif %}"
+           class="biz-cat-tab {% if not selected_category %}active{% endif %}">
+            🏬 All
+        </a>
+        {% for cat in categories %}
+            {% if cat.count > 0 %}
+            <a href="?category={{ cat.key }}{% if selected_county %}&county={{ selected_county }}{% endif %}"
+               class="biz-cat-tab {% if selected_category == cat.key %}active{% endif %}">
+                {{ cat.icon }} {{ cat.label }}
+            </a>
+            {% endif %}
+        {% endfor %}
+    </nav>
+
+    <!-- ── Feed Cards ── -->
+    <div class="biz-feed-grid" id="bizFeedGrid">
+        {% for biz in page_obj.object_list %}
+            {% include 'core/partials/biz_feed_card.html' with biz=biz %}
+        {% empty %}
+            <div class="biz-empty">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                <h3>No businesses found</h3>
+                <p>{% if selected_county %}Nothing matched "{{ selected_county }}". {% endif %}Try clearing your filters or choosing a different category.</p>
+                {% if selected_category or selected_county %}
+                    <a href="{% url 'moving_essentials' %}" style="display:inline-block;margin-top:14px;color:var(--bd-primary);font-weight:700;font-size:0.88rem;text-decoration:none;">Clear filters →</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- ── Infinite Scroll Loader ── -->
+    <div class="biz-loader" id="bizLoader" style="display:none;">
+        <div class="biz-spinner"></div>
+    </div>
+
 </div>
 
 <script>
-  function hdUseMyLocation() {
-    if (!navigator.geolocation) {
-      alert('Geolocation not supported on this device.');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(function (pos) {
-      document.getElementById('hd-lat').value = pos.coords.latitude;
-      document.getElementById('hd-lng').value = pos.coords.longitude;
-      document.getElementById('hd-search-form').submit();
-    }, function () {
-      alert('Could not get your location.');
-    });
-  }
-
-  (function () {
-    const hdInput = document.getElementById('hd-search-input');
-    const hdBox = document.getElementById('hd-suggestions');
-    let hdTimer;
-
-    hdInput.addEventListener('input', function () {
-      clearTimeout(hdTimer);
-      const q = this.value;
-      hdTimer = setTimeout(function () {
-        if (q.length < 2) {
-          hdBox.style.display = 'none';
-          return;
+    // ── Search toggle ──
+    const searchToggle = document.getElementById('bizSearchToggle');
+    const searchBar = document.getElementById('bizSearchBar');
+    searchToggle.addEventListener('click', () => {
+        searchBar.classList.toggle('open');
+        if (searchBar.classList.contains('open')) {
+            document.getElementById('bizSearchInput').focus();
+            // adjust cat tabs top position
+            document.getElementById('bizCatTabs').style.top = '63px';
         }
-        fetch("{% url 'directory_search_suggestions' %}?q=" + encodeURIComponent(q))
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            if (!data.results.length) {
-              hdBox.style.display = 'none';
-              return;
-            }
-            hdBox.innerHTML = data.results.map(function (r) {
-              return '<a href="' + r.url + '">' + r.name +
-                ' <span style="color:var(--hd-text-muted);font-size:0.8rem;">(' + r.type + ')</span></a>';
-            }).join('');
-            hdBox.style.display = 'block';
-          })
-          .catch(function () {
-            hdBox.style.display = 'none';
-          });
-      }, 250);
     });
 
-    document.addEventListener('click', function (e) {
-      if (!hdBox.contains(e.target) && e.target !== hdInput) {
-        hdBox.style.display = 'none';
-      }
+    // ── Autocomplete suggestions ──
+    (function() {
+        const input = document.getElementById('bizSearchInput');
+        const box = document.getElementById('bizSuggestions');
+        let timer;
+        input.addEventListener('input', function() {
+            clearTimeout(timer);
+            const q = this.value;
+            timer = setTimeout(function() {
+                if (q.length < 2) { box.style.display = 'none'; return; }
+                fetch("{% url 'directory_search_suggestions' %}?q=" + encodeURIComponent(q))
+                    .then(r => r.json())
+                    .then(data => {
+                        if (!data.results.length) { box.style.display = 'none'; return; }
+                        box.innerHTML = data.results.map(r =>
+                            `<a href="${r.url}">${r.name} <span style="color:var(--bd-muted);font-size:0.78rem;">(${r.type})</span></a>`
+                        ).join('');
+                        box.style.display = 'block';
+                    })
+                    .catch(() => { box.style.display = 'none'; });
+            }, 250);
+        });
+        document.addEventListener('click', function(e) {
+            if (!box.contains(e.target) && e.target !== input) box.style.display = 'none';
+        });
+    })();
+
+    // ── Location ──
+    function bizUseLocation() {
+        if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            document.getElementById('bizLat').value = pos.coords.latitude;
+            document.getElementById('bizLng').value = pos.coords.longitude;
+            // Append lat/lng to current URL and reload
+            const url = new URL(window.location.href);
+            url.searchParams.set('lat', pos.coords.latitude);
+            url.searchParams.set('lng', pos.coords.longitude);
+            window.location.href = url.toString();
+        }, function() {
+            alert('Could not get your location.');
+        });
+    }
+
+    // ── Infinite Scroll ──
+    let bizPage = {{ page_obj.number }};
+    let bizHasNext = {% if page_obj.has_next %}true{% else %}false{% endif %};
+    let bizLoading = false;
+
+    function bizLoadMore() {
+        if (!bizHasNext || bizLoading) return;
+        bizLoading = true;
+        const loader = document.getElementById('bizLoader');
+        loader.style.display = 'flex';
+        bizPage += 1;
+
+        const url = new URL(window.location.href);
+        url.searchParams.set('page', bizPage);
+
+        fetch(url.toString(), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.html) {
+                const grid = document.getElementById('bizFeedGrid');
+                grid.insertAdjacentHTML('beforeend', data.html);
+            }
+            bizHasNext = data.has_next;
+        })
+        .catch(() => { bizHasNext = false; })
+        .finally(() => {
+            bizLoading = false;
+            loader.style.display = 'none';
+        });
+    }
+
+    // Observe loader for intersection
+    const bizLoaderEl = document.getElementById('bizLoader');
+    const bizObserver = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting && bizHasNext && !bizLoading) bizLoadMore();
+    }, { rootMargin: '200px' });
+
+    if (bizHasNext) {
+        bizLoaderEl.style.display = 'flex';
+        bizObserver.observe(bizLoaderEl);
+    }
+
+    // Scroll active category tab into view
+    document.addEventListener('DOMContentLoaded', () => {
+        const activeTab = document.querySelector('.biz-cat-tab.active');
+        if (activeTab) activeTab.scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
     });
-  })();
 </script>
 {% endblock %}

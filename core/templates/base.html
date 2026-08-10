@@ -1021,18 +1021,233 @@
       Admin
     </a>
     {% elif user.is_authenticated %}
-    <a href="{% url 'owner_profile' user.id %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'owner_profile' %}active{% endif %}">
+    <!-- Profile button opens quick-action sheet instead of direct navigation -->
+    <button class="bottom-nav-item" id="profileMenuBtn" onclick="openProfileSheet()" aria-label="Open profile menu" style="background:none;border:none;cursor:pointer;">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Profile
-    </a>
+    </button>
     {% else %}
-    <a href="/accounts/login/" class="bottom-nav-item">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-      Login
-    </a>
+    <!-- Not logged in: clicking profile opens the sheet with login option -->
+    <button class="bottom-nav-item" id="profileMenuBtn" onclick="openProfileSheet()" aria-label="Open menu" style="background:none;border:none;cursor:pointer;">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      Menu
+    </button>
     {% endif %}
   </div>
 </nav>
+
+<!-- ═══════════════════════════════════════
+     PROFILE QUICK-ACTION SHEET
+═══════════════════════════════════════ -->
+<div id="profileSheetOverlay" onclick="closeProfileSheet()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1200;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);"></div>
+
+<div id="profileSheet" style="
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:1201;
+  background:var(--bg-card,#fff);
+  border-radius:24px 24px 0 0;
+  box-shadow:0 -8px 40px rgba(0,0,0,0.18);
+  transform:translateY(110%);
+  transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);
+  max-height:92vh;
+  overflow-y:auto;
+  font-family:var(--font-body,'Fira Sans',sans-serif);
+">
+  <!-- Drag handle -->
+  <div style="display:flex;justify-content:center;padding:14px 0 4px;">
+    <div style="width:40px;height:4px;border-radius:99px;background:var(--border,#ccc);"></div>
+  </div>
+
+  <!-- User identity header -->
+  {% if user.is_authenticated %}
+  <div style="display:flex;align-items:center;gap:14px;padding:16px 22px 14px;border-bottom:1px solid var(--border,#e5e7eb);">
+    {% if user.profile.profile_picture %}
+      <img src="{{ user.profile.profile_picture.url }}" alt="{{ user.username }}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2.5px solid var(--primary,#0F766E);flex-shrink:0;">
+    {% else %}
+      <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary,#0F766E),var(--secondary,#14B8A6));display:flex;align-items:center;justify-content:center;font-size:1.3rem;font-weight:800;color:#fff;font-family:var(--font-mono,'Fira Code',monospace);flex-shrink:0;">{{ user.username|first|upper }}</div>
+    {% endif %}
+    <div style="flex:1;min-width:0;">
+      <div style="font-weight:700;font-size:1rem;color:var(--fg,#134E4A);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ user.username }}</div>
+      <div style="font-size:0.78rem;color:var(--fg-muted,#5EAFA8);margin-top:2px;">{{ user.email }}</div>
+    </div>
+    <a href="{% url 'owner_profile' user.id %}" style="text-decoration:none;background:rgba(15,118,110,0.1);border:1.5px solid rgba(15,118,110,0.2);color:var(--primary,#0F766E);font-size:0.75rem;font-weight:700;padding:6px 13px;border-radius:99px;">View</a>
+  </div>
+  {% else %}
+  <div style="padding:18px 22px 14px;border-bottom:1px solid var(--border,#e5e7eb);">
+    <div style="font-weight:800;font-size:1.1rem;color:var(--fg,#134E4A);">Welcome!</div>
+    <div style="font-size:0.85rem;color:var(--fg-muted,#5EAFA8);margin-top:4px;">Sign in to access your profile and settings.</div>
+  </div>
+  {% endif %}
+
+  <!-- Quick action links -->
+  <div style="padding:10px 10px 24px;">
+    <!-- Always: Home -->
+    <a href="{% url 'home' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(15,118,110,0.12);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary,#0F766E)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <span class="pqs-label">Home</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+
+    {% if user.is_authenticated %}
+    <!-- Dashboard -->
+    {% if user.profile.account_type == 'business' %}
+    <a href="{% url 'business:dashboard' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(99,102,241,0.12);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <span class="pqs-label">Business Dashboard</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+    <!-- Upgrade -->
+    <a href="{% url 'business:plans' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(245,158,11,0.12);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <span class="pqs-label">Upgrade Plan</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+    {% else %}
+    <a href="{% url 'dashboard' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(99,102,241,0.12);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <span class="pqs-label">Dashboard</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+    {% endif %}
+
+    <!-- Notifications -->
+    <a href="{% url 'notifications' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(239,68,68,0.1);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      </div>
+      <span class="pqs-label">Notifications
+        {% if unread_notifications > 0 %}<span style="background:#EF4444;color:#fff;font-size:0.65rem;font-weight:700;padding:2px 7px;border-radius:99px;margin-left:6px;">{{ unread_notifications }}</span>{% endif %}
+      </span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+
+    <!-- Edit Profile -->
+    <a href="{% url 'edit_profile' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(16,185,129,0.1);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+      <span class="pqs-label">Edit Profile</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+
+    <!-- Settings -->
+    <a href="{% url 'settings_profile' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(107,114,128,0.1);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#6B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <span class="pqs-label">Settings</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+
+    <!-- Help -->
+    <a href="{% url 'help_center' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(59,130,246,0.1);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <span class="pqs-label">Help Center</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+
+    <!-- Log Out -->
+    <a href="/accounts/logout/" class="pqs-item pqs-danger">
+      <div class="pqs-icon" style="background:rgba(220,38,38,0.1);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <span class="pqs-label" style="color:#DC2626;">Log Out</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+
+    {% else %}
+    <!-- Not authenticated -->
+    <a href="/accounts/login/" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(15,118,110,0.12);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary,#0F766E)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      </div>
+      <span class="pqs-label">Log In</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+    <a href="{% url 'help_center' %}" class="pqs-item">
+      <div class="pqs-icon" style="background:rgba(59,130,246,0.1);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <span class="pqs-label">Help Center</span>
+      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </a>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  /* ── Profile Quick Sheet items ── */
+  .pqs-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 14px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--fg, #134E4A);
+    font-weight: 600;
+    font-size: 0.92rem;
+    transition: background 0.15s;
+    margin-bottom: 2px;
+  }
+  .pqs-item:hover, .pqs-item:active { background: rgba(15,118,110,0.06); }
+  .pqs-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .pqs-icon svg { width: 20px; height: 20px; }
+  .pqs-label { flex: 1; display: flex; align-items: center; }
+  .pqs-arrow { width: 16px; height: 16px; color: var(--fg-muted, #5EAFA8); flex-shrink: 0; }
+  .pqs-danger:hover { background: rgba(220,38,38,0.06); }
+  [data-theme="dark"] .pqs-item:hover { background: rgba(255,255,255,0.06); }
+  [data-theme="dark"] #profileSheet { background: var(--bg-card, #1a2e2b); }
+</style>
+
+<script>
+  function openProfileSheet() {
+    const overlay = document.getElementById('profileSheetOverlay');
+    const sheet = document.getElementById('profileSheet');
+    overlay.style.display = 'block';
+    sheet.style.transform = 'translateY(0)';
+    document.body.style.overflow = 'hidden';
+  }
+  function closeProfileSheet() {
+    const overlay = document.getElementById('profileSheetOverlay');
+    const sheet = document.getElementById('profileSheet');
+    sheet.style.transform = 'translateY(110%)';
+    setTimeout(() => { overlay.style.display = 'none'; }, 300);
+    document.body.style.overflow = '';
+  }
+  // Close on Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeProfileSheet();
+  });
+  // Basic swipe-down-to-close
+  (function() {
+    const sheet = document.getElementById('profileSheet');
+    if (!sheet) return;
+    let startY = 0;
+    sheet.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
+    sheet.addEventListener('touchend', e => {
+      const diff = e.changedTouches[0].clientY - startY;
+      if (diff > 80) closeProfileSheet();
+    }, { passive: true });
+  })();
+</script>
+
 
 <button class="ai-fab" id="aiFabBtn" title="Ask a rental question">
   <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>

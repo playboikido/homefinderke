@@ -815,18 +815,42 @@ class BusinessDirectoryAdapter:
         return self._b.is_featured
 
     @property
+    def is_featured(self):
+        return self._b.is_featured
+
+    @property
+    def is_approved(self):
+        return self._b.is_approved
+
+    @property
+    def phone_number(self):
+        return self._b.phone_number or self._b.whatsapp_number
+
+    @property
+    def whatsapp_number(self):
+        return self._b.whatsapp_number
+
+    def get_category_display(self):
+        """Return the human-readable category label."""
+        return self._b.get_category_display()
+
+    @property
     def detail_url(self):
         return reverse('business_detail', args=[self._b.slug])
 
 
 def moving_essentials(request):
     from django.db.models import Q
+    from django.core.paginator import Paginator
+    from django.template.loader import render_to_string
     from business.models import BusinessProduct, CATEGORY_CHOICES as BUSINESS_CATEGORY_CHOICES
 
     county = request.GET.get('county', '').strip()
     category = request.GET.get('category', '').strip()
     user_lat = request.GET.get('lat')
     user_lng = request.GET.get('lng')
+    page_num = int(request.GET.get('page', 1))
+    per_page = 12
 
     movers_qs = Mover.objects.filter(is_approved=True).prefetch_related(
         Prefetch('products', queryset=MoverProduct.objects.filter(is_active=True))
@@ -846,41 +870,62 @@ def moving_essentials(request):
         )
 
     if category and category != 'movers':
-        vendors_qs = vendors_qs.filter(category=category)
+        vendors_qs = vendors_qs.none()
         businesses_qs = businesses_qs.filter(category=category)
     elif category == 'movers':
         vendors_qs = vendors_qs.none()
         businesses_qs = businesses_qs.filter(category='movers')
 
-    movers = list(movers_qs) if category in ('', 'movers') else []
-    for m in movers:
-        m.detail_url = reverse('mover_detail', args=[m.pk])
+    # Build unified list of all directory items
+    all_items = []
 
-    vendors = list(vendors_qs) if category != 'movers' else []
-    for v in vendors:
-        v.detail_url = reverse('furniture_vendor_detail', args=[v.pk])
+    if not category or category == 'movers':
+        movers = list(movers_qs)
+        for m in movers:
+            m.detail_url = reverse('mover_detail', args=[m.pk])
+            m.distance_km = None
+        all_items.extend(movers)
+
+    if category != 'movers':
+        vendors = list(vendors_qs)
+        for v in vendors:
+            v.detail_url = reverse('furniture_vendor_detail', args=[v.pk])
+            v.distance_km = None
+        all_items.extend(vendors)
 
     for b in businesses_qs:
         adapter = BusinessDirectoryAdapter(b)
-        if b.category == 'movers':
-            movers.append(adapter)
-        else:
-            vendors.append(adapter)
+        adapter.distance_km = None
+        all_items.append(adapter)
 
     if user_lat and user_lng:
-        for obj in movers + vendors:
+        for obj in all_items:
             try:
                 obj.distance_km = haversine_km(user_lat, user_lng, getattr(obj, 'latitude', None), getattr(obj, 'longitude', None))
             except (TypeError, ValueError):
                 obj.distance_km = None
-        movers.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
-        vendors.sort(key=lambda o: (o.distance_km is None, not o.is_major_sponsor, o.distance_km or 9999))
+        all_items.sort(key=lambda o: (o.distance_km is None, not getattr(o, 'is_major_sponsor', False), o.distance_km or 9999))
     else:
-        for obj in movers + vendors:
-            obj.distance_km = None
-        movers.sort(key=lambda o: (not o.is_major_sponsor, -o.created_at.timestamp()))
-        vendors.sort(key=lambda o: (not o.is_major_sponsor, -o.created_at.timestamp()))
+        all_items.sort(key=lambda o: (not getattr(o, 'is_major_sponsor', False), -o.created_at.timestamp()))
 
+    # Paginate
+    paginator = Paginator(all_items, per_page)
+    page_obj = paginator.get_page(page_num)
+
+    # AJAX infinite scroll: return JSON with rendered HTML
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        html = render_to_string(
+            'core/partials/biz_feed_card.html',
+            {'biz': None},  # placeholder; we render each card individually
+            request=request,
+        )
+        cards_html = ''.join(
+            render_to_string('core/partials/biz_feed_card.html', {'biz': item}, request=request)
+            for item in page_obj.object_list
+        )
+        return JsonResponse({'html': cards_html, 'has_next': page_obj.has_next()})
+
+    # Build category list for the tabs
     vendor_category_counts = {
         c['category']: c['count'] for c in
         FurnitureVendor.objects.filter(is_approved=True).values('category').annotate(count=Count('id'))
@@ -901,12 +946,11 @@ def moving_essentials(request):
             'key': key, 'label': label, 'count': count,
             'icon': DIRECTORY_CATEGORY_ICONS.get(key, '📦'),
         })
-    # Movers first, then everything else in the order defined on the Business model
+    # Movers first, then alphabetical by label
     categories.sort(key=lambda c: (c['key'] != 'movers',))
 
     return render(request, 'core/moving_essentials.html', {
-        'movers': movers,
-        'vendors': vendors,
+        'page_obj': page_obj,
         'selected_county': county,
         'selected_category': category,
         'categories': categories,
