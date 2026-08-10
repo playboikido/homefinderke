@@ -5,12 +5,15 @@
             <div class="card-media-container video-mode">
                 <video src="{{ item.video_url }}" class="feed-media-video" autoplay muted loop playsinline></video>
                 <div class="video-overlay-badge">
-                    <span class="video-play-icon">▶</span> Apartment Tour
+                    <span class="video-play-icon">▶</span> Virtual Apartment Tour
                 </div>
-                <div class="video-tap-hint">Tap to watch full tour</div>
+                <div class="video-tap-hint">Tap to watch tour</div>
             </div>
         {% else %}
             <div class="card-media-container image-mode image-cycler" data-current-index="0">
+                <div class="video-overlay-badge" style="background: rgba(16, 185, 129, 0.9);">
+                    📷 3D Virtual Tour Preview
+                </div>
                 {% if item.images %}
                     {% for img in item.images %}
                         <img src="{{ img }}" class="cycler-image {% if forloop.first %}active{% endif %}" alt="{{ item.name }}" loading="lazy">
@@ -39,8 +42,8 @@
             </button>
         </div>
 
-        <div class="card-row location-row">
-            <span class="pin-icon">📍</span> {{ item.town }}, {{ item.county }}
+        <div class="card-row spec-location-row">
+            📍 {{ item.landmark }}, {{ item.town }}, {{ item.county }} • {{ item.house_type }} • {{ item.distance_str }}
         </div>
 
         <div class="card-row pricing-row">
@@ -48,23 +51,25 @@
             <span class="rent-suffix">/month</span>
         </div>
 
-        <div class="card-row meta-specs-row">
-            <span class="house-spec-chip">{{ item.house_type }}</span>
-            {% if item.is_verified %}
-                <span class="verified-status-chip">✓ Verified</span>
-            {% endif %}
-        </div>
-
-        <div class="card-row footer-row">
+        <div class="card-row card-footer-user-row">
             {% if item.contributor_id %}
                 <a href="/owner/{{ item.contributor_id }}/" class="contributor-handle">@{{ item.contributor }}</a>
             {% else %}
                 <span class="contributor-handle">@{{ item.contributor }}</span>
             {% endif %}
 
-            <a href="{{ item.review_url }}" class="community-review-badge">
-                ⭐ Community Review {% if item.avg_rating %}{{ item.avg_rating }}{% else %}4.5{% endif %}
-            </a>
+            {% if item.contributor_id and item.contributor_id != user.id %}
+                <button class="follow-toggle-btn {% if item.is_following %}following{% endif %}"
+                        data-user-id="{{ item.contributor_id }}"
+                        data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}">
+                    {% if item.is_following %}✓ Following{% else %}+ Follow{% endif %}
+                </button>
+            {% else %}
+                <button class="follow-toggle-btn following" style="opacity:0.75;" disabled>
+                    ✓ Verified Host
+                </button>
+            {% endif %}
         </div>
     </div>
 </div>
+

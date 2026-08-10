@@ -1603,4 +1603,58 @@
     }, { passive: true });
   }
 </script>
+
+<!-- Endless Residence Details Stream ("Never ending in any circumstances") -->
+<div id="endlessResidenceStream" style="max-width:1200px; margin:0 auto; padding:0 24px;"></div>
+<div id="endlessDetailLoader" style="text-align:center; padding:36px 0;">
+  <div style="display:inline-block; width:28px; height:28px; border:3px solid var(--c-border); border-top-color:var(--c-primary); border-radius:50%; animation:spin 0.8s linear infinite;"></div>
+  <p style="margin-top:10px; font-weight:600; font-size:0.9rem; color:var(--c-subtle);">Loading next recommended residence details...</p>
+</div>
+
+<script>
+  (function() {
+    let currentPk = {{ residence.pk }};
+    let excludePks = [currentPk];
+    let loadingNext = false;
+    let hasMoreResidences = true;
+
+    const streamContainer = document.getElementById('endlessResidenceStream');
+    const loaderEl = document.getElementById('endlessDetailLoader');
+
+    if (streamContainer && loaderEl) {
+      const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && !loadingNext && hasMoreResidences) {
+          loadingNext = true;
+          loaderEl.style.display = 'block';
+
+          fetch(`/residences/${currentPk}/next/?exclude=${excludePks.join(',')}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.has_next && data.html) {
+              streamContainer.insertAdjacentHTML('beforeend', data.html);
+              excludePks.push(data.next_pk);
+              currentPk = data.next_pk;
+              if (history.pushState) {
+                history.pushState(null, '', data.next_url);
+              }
+            } else {
+              hasMoreResidences = false;
+              loaderEl.style.display = 'none';
+            }
+          })
+          .catch(err => {
+            console.error('Endless detail loading error:', err);
+          })
+          .finally(() => {
+            loadingNext = false;
+          });
+        }
+      }, { rootMargin: '250px' });
+
+      observer.observe(loaderEl);
+    }
+  })();
+</script>
 {% endblock %}

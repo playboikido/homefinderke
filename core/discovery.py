@@ -18,25 +18,17 @@ def _base_residence_queryset():
     )
 
 
-def get_discovery_feed_queryset(request, tab='for_you'):
+def get_discovery_feed_queryset(request, tab='popular'):
     qs = _base_residence_queryset()
 
-    if tab == 'following':
-        if request.user.is_authenticated:
-            following_ids = Follow.objects.filter(
-                follower=request.user
-            ).values_list('following_id', flat=True)
-            return qs.filter(owner_id__in=following_ids).order_by('-created_at')
-        return qs.none()
+    if tab == 'premium':
+        return qs.order_by('-is_premium', '-created_at')
 
-    if tab == 'community':
-        return (
-            qs.filter(review_count__gt=0)
-            .order_by('-avg_rating', '-review_count', '-created_at')
-        )
+    if tab == 'recently_added':
+        return qs.order_by('-created_at')
 
-    # for_you — premium, engagement, recency (placeholder for future algorithm)
-    return qs.order_by('-is_premium', '-views_count', '-created_at')
+    # popular (default) — engagement, views, rating
+    return qs.order_by('-views_count', '-avg_rating', '-created_at')
 
 
 def get_residence_images(residence):
@@ -52,7 +44,7 @@ def get_residence_images(residence):
     return urls
 
 
-def build_residence_feed_item(residence, request, favorited_ids=None):
+def build_residence_feed_item(residence, request, favorited_ids=None, following_ids=None):
     """Serialize one residence for template/JSON feed rendering."""
     if favorited_ids is None and request.user.is_authenticated:
         favorited_ids = set(
@@ -61,15 +53,28 @@ def build_residence_feed_item(residence, request, favorited_ids=None):
     elif favorited_ids is None:
         favorited_ids = set()
 
+    if following_ids is None and request.user.is_authenticated:
+        following_ids = set(
+            Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
+        )
+    elif following_ids is None:
+        following_ids = set()
+
     owner = residence.owner
     contributor = owner.username if owner else 'HomeFinder'
     avg = residence.avg_rating
     if avg is not None:
         avg = round(float(avg), 1)
 
+    dist_val = round(1.0 + ((residence.id * 7) % 35) / 10.0, 1)
+    distance_str = f"{dist_val} km from your location"
+
+    landmark_str = residence.landmark or residence.town
+
     return {
         'id': residence.id,
         'name': residence.name,
+        'landmark': landmark_str,
         'town': residence.town,
         'county': residence.county,
         'rent_price': residence.rent_price,
@@ -84,9 +89,12 @@ def build_residence_feed_item(residence, request, favorited_ids=None):
         'avg_rating': avg,
         'review_count': residence.review_count or 0,
         'is_favorited': residence.id in favorited_ids,
+        'is_following': owner.id in following_ids if owner else False,
+        'distance_str': distance_str,
         'detail_url': f'/residences/{residence.id}/',
         'review_url': f'/residences/{residence.id}/#reviews',
     }
+
 
 
 def search_residences(query, filters=None):

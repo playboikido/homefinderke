@@ -1,0 +1,61 @@
+<div class="residence-detail-block" data-residence-id="{{ residence.id }}" style="margin-top:40px; padding-top:40px; border-top:3px solid var(--c-border);">
+  <!-- Residence Header & Name -->
+  <div style="background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-xl); padding:24px; margin-bottom:24px; box-shadow:var(--shadow);">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+      <div>
+        <span style="background:var(--c-green-bg); color:var(--c-green-text); font-size:0.75rem; font-weight:700; padding:4px 12px; border-radius:var(--r-full); text-transform:uppercase; letter-spacing:0.05em; display:inline-block; margin-bottom:8px;">
+          ✓ Verified Listing
+        </span>
+        <h1 style="font-family:var(--font-mono); font-size:1.75rem; font-weight:700; color:var(--c-fg); margin-bottom:6px;">
+          {{ residence.name }}
+        </h1>
+        <p style="color:var(--c-subtle); font-size:0.95rem; display:flex; align-items:center; gap:6px;">
+          📍 {{ residence.landmark|default:residence.town }}, {{ residence.town }}, {{ residence.county }} • {{ residence.get_house_type_display }}
+        </p>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:var(--font-mono); font-size:1.8rem; font-weight:700; color:var(--c-primary);">
+          KSh {{ residence.rent_price|floatformat:"0" }}
+          <span style="font-size:0.85rem; font-weight:500; color:var(--c-subtle);">/mo</span>
+        </div>
+        <a href="/residences/{{ residence.id }}/" class="btn-primary" style="display:inline-block; margin-top:8px; padding:8px 18px; background:var(--c-primary); color:#FFF; border-radius:var(--r); text-decoration:none; font-weight:600; font-size:0.85rem;">
+          View Full Specs & Contact
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Media Gallery Grid -->
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:12px; margin-bottom:24px;">
+    {% if residence.front_image %}
+      <img src="{{ residence.front_image.url }}" alt="{{ residence.name }}" style="width:100%; height:260px; object-fit:cover; border-radius:var(--r-lg); border:1px solid var(--c-border);" loading="lazy">
+    {% endif %}
+    {% for photo in residence.photos.all|slice:":3" %}
+      <img src="{{ photo.image.url }}" alt="{{ residence.name }}" style="width:100%; height:260px; object-fit:cover; border-radius:var(--r-lg); border:1px solid var(--c-border);" loading="lazy">
+    {% endfor %}
+  </div>
+
+  <!-- Features & Specs -->
+  <div style="background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-xl); padding:24px; margin-bottom:24px; box-shadow:var(--shadow);">
+    <h3 style="font-family:var(--font-mono); font-size:1.1rem; color:var(--c-fg); margin-bottom:14px; border-bottom:1px solid var(--c-border); padding-bottom:8px;">
+      🏡 Overview & Features
+    </h3>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px; margin-bottom:16px;">
+      <div style="background:var(--c-bg); padding:10px 14px; border-radius:var(--r); font-size:0.88rem;">
+        <span style="color:var(--c-subtle); display:block; font-size:0.75rem;">Deposit</span>
+        <strong>KSh {{ residence.deposit_amount|default:residence.rent_price|floatformat:"0" }}</strong>
+      </div>
+      <div style="background:var(--c-bg); padding:10px 14px; border-radius:var(--r); font-size:0.88rem;">
+        <span style="color:var(--c-subtle); display:block; font-size:0.75rem;">Water Supply</span>
+        <strong>{{ residence.water_availability|default:"Reliable 24/7" }}</strong>
+      </div>
+      <div style="background:var(--c-bg); padding:10px 14px; border-radius:var(--r); font-size:0.88rem;">
+        <span style="color:var(--c-subtle); display:block; font-size:0.75rem;">Electricity</span>
+        <strong>Token Meter</strong>
+      </div>
+    </div>
+    <p style="font-size:0.92rem; color:var(--c-text); line-height:1.6;">
+      {{ residence.description|truncatewords:60 }}
+    </p>
+  </div>
+</div>

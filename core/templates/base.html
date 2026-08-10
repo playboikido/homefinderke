@@ -922,6 +922,7 @@
      NAVBAR
 ═══════════════════════════════════════ -->
 {% block header %}
+{% if request.resolver_match.url_name == 'owner_profile' or request.resolver_match.url_name == 'profile' %}
 <nav class="navbar">
 
     <!-- Brand -->
@@ -946,19 +947,26 @@
     </button>
 
 </nav>
+{% endif %}
 {% endblock %}
 
 <script>
   function openDrawer() {
-    document.getElementById('navDrawer').classList.add('is-open');
-    document.getElementById('navOverlay').classList.add('is-open');
-    document.getElementById('navHamburger').classList.add('is-open');
+    const drawer = document.getElementById('navDrawer');
+    const overlay = document.getElementById('navOverlay');
+    const hamburger = document.getElementById('navHamburger');
+    if (drawer) drawer.classList.add('is-open');
+    if (overlay) overlay.classList.add('is-open');
+    if (hamburger) hamburger.classList.add('is-open');
     document.body.style.overflow = 'hidden';
   }
   function closeDrawer() {
-    document.getElementById('navDrawer').classList.remove('is-open');
-    document.getElementById('navOverlay').classList.remove('is-open');
-    document.getElementById('navHamburger').classList.remove('is-open');
+    const drawer = document.getElementById('navDrawer');
+    const overlay = document.getElementById('navOverlay');
+    const hamburger = document.getElementById('navHamburger');
+    if (drawer) drawer.classList.remove('is-open');
+    if (overlay) overlay.classList.remove('is-open');
+    if (hamburger) hamburger.classList.remove('is-open');
     document.body.style.overflow = '';
   }
   // Close on Escape key
@@ -997,116 +1005,30 @@
     {% block content %}{% endblock %}
 </main>
 
-<!-- ═══════════════════════════════════════
-     FOOTER
-═══════════════════════════════════════ -->
-{% block footer %}
-<footer>
-    <div class="container">
-        <div class="footer-grid">
-            <!-- Brand col -->
-            <div class="footer-brand">
-                <div class="footer-name">HomeFinder KE</div>
-                <p>Kenya's premier platform to discover quality rental homes — from bedsitters to full apartments. Finding your perfect appartment just got effortless.</p>
-                <div style="display:flex;gap:10px;margin-top:20px;">
-                    <a href="https://www.tiktok.com/@homefinder.ke?is_from_webapp=1&sender_device=pc" class="footer-social-btn" aria-label="Tiktok">
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
-                    </a>
-                    <a href="https://www.instagram.com/home_.finderke?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" class="footer-social-btn" aria-label="Instagram">
-                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                    </a>
-                    <a href="https://www.facebook.com/homefinderke" class="footer-social-btn" aria-label="Facebook">
+<!-- Footer completely removed as requested -->
+{% block footer %}{% endblock %}
 
-                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                    </a>
-                </div>
-                
-            </div>
-
-            <!-- Quick links -->
-            <div class="footer-col">
-                <h4>Quick Links</h4>
-                <a href="/">Home</a>
-                <a href="/residences/">Browse Residences</a>
-                <a href="/search/">Search</a>
-                <a href="{% url 'my_saved_searches' %}">Saved Searches</a>
-                {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
-                <a href="{% url 'add_mover' %}">Add Mover</a>
-                <a href="{% url 'add_furniture_vendor' %}">Add Furniture Vendor</a>
-                {% else %}
-                <a href="/add-residence/">List Your Property</a>
-                {% endif %}
-                <a href="/about/">About Us</a>
-                <button id="pwaInstallBtn" style="display:none; background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:600; cursor:pointer; margin:16px auto; display:none;">
-                     📲Install HomeFinder App
-                 </button>
-            </div>
-            <!-- Contact -->
-            <div class="footer-col">
-                <h4>Contact</h4>
-                <a href="mailto:homefinder.ke.help@gmail.com">homefinder.ke.help@gmail.com</a>
-                <a href="tel:+254758999426">+254 758999426</a>
-                <a href="#">Nairobi, Kenya</a>
-               <a href="{% url 'business:choose' %}">Login / Register</a>
-            </div>
-        </div>
-
-        <div class="footer-bottom">
-            <span>&copy; 2026 HomeFinder KE. All rights reserved.</span>
-            <span style="display:flex; gap:16px;">
-                <a href="{% url 'privacy_policy' %}" style="color:inherit; text-decoration:none;">
-                    Privacy Policy
-                </a>
-                <a href="{% url 'terms_of_service' %}" style="color:inherit; text-decoration:none;">
-                    Terms of Service
-                </a>
-            </span>
-            
-        </div>
-    </div>
-</footer>
-{% endblock %}
-{% if request.resolver_match.url_name != 'search' %}
-<a href="{% url 'search' %}" class="fab-search show-fab">
-  <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-</a>
-{% endif %}
+{% if request.resolver_match.url_name == 'owner_profile' or request.resolver_match.url_name == 'profile' %}
 <nav class="bottom-nav" aria-label="Main navigation">
   <div class="bottom-nav-inner">
     <a href="{% url 'home' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
     </a>
-    <a href="{% url 'search' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'search' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      Search
-    </a>
-    {% if user.is_authenticated and user.profile.account_type == 'business' %}
-    <a href="{% url 'business:dashboard' %}" class="bottom-nav-item {% if request.resolver_match.namespace == 'business' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+    <a href="{% url 'dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Business
+      Dashboard
     </a>
-    <a href="{% url 'business:orders' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7L12 3 4 7m16 0v10l-8 4m8-14L12 11m0 10L4 17V7m8 4L4 7"/></svg>
-      Orders
+    <a href="{% url 'sponsorship_plans' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'sponsorship_plans' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Upgrades
     </a>
-    {% else %}
-    <a href="{% url 'add_residence' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'add_residence' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      List
+    {% if user.is_authenticated %}
+    <a href="{% url 'settings_profile' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'settings_profile' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
     </a>
-    <a href="{% url 'moving_essentials' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'moving_essentials' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Directory
-    </a>
-    {% endif %}
-    {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
-    <a href="{% url 'admin_dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Admin
-    </a>
-    {% elif user.is_authenticated %}
-    <a href="{% url 'owner_profile' user.id %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'owner_profile' %}active{% endif %}">
+    <a href="{% url 'owner_profile' user.id %}" class="bottom-nav-item active">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Profile
     </a>
@@ -1118,6 +1040,7 @@
     {% endif %}
   </div>
 </nav>
+{% endif %}
 
 <button class="ai-fab" id="aiFabBtn" title="Ask a rental question">
   <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>

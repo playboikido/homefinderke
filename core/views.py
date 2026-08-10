@@ -512,26 +512,30 @@ def home(request):
 
 
 def discovery_feed(request):
-    """Resident discovery feed — visual residence browsing (For You / Following / Community)."""
+    """Resident discovery feed — visual residence browsing (Popular / Premium / Recently Added)."""
     if business_account_blocked(request):
         return redirect('business:dashboard')
 
-    tab = request.GET.get('tab', 'for_you')
-    if tab not in ('for_you', 'following', 'community'):
-        tab = 'for_you'
+    tab = request.GET.get('tab', 'popular')
+    if tab not in ('popular', 'premium', 'recently_added'):
+        tab = 'popular'
 
     queryset = get_discovery_feed_queryset(request, tab)
     paginator = Paginator(queryset, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     favorited_ids = set()
+    following_ids = set()
     if request.user.is_authenticated:
         favorited_ids = set(
             Favorite.objects.filter(user=request.user).values_list('residence_id', flat=True)
         )
+        following_ids = set(
+            Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
+        )
 
     feed_items = [
-        build_residence_feed_item(r, request, favorited_ids)
+        build_residence_feed_item(r, request, favorited_ids, following_ids)
         for r in page_obj
     ]
 
@@ -545,22 +549,26 @@ def discovery_feed(request):
 
 def discovery_feed_api(request):
     """JSON/HTML fragment loader for infinite scroll on the discovery feed."""
-    tab = request.GET.get('tab', 'for_you')
-    if tab not in ('for_you', 'following', 'community'):
-        tab = 'for_you'
+    tab = request.GET.get('tab', 'popular')
+    if tab not in ('popular', 'premium', 'recently_added'):
+        tab = 'popular'
 
     queryset = get_discovery_feed_queryset(request, tab)
     paginator = Paginator(queryset, 10)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     favorited_ids = set()
+    following_ids = set()
     if request.user.is_authenticated:
         favorited_ids = set(
             Favorite.objects.filter(user=request.user).values_list('residence_id', flat=True)
         )
+        following_ids = set(
+            Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
+        )
 
     items = [
-        build_residence_feed_item(r, request, favorited_ids)
+        build_residence_feed_item(r, request, favorited_ids, following_ids)
         for r in page_obj
     ]
 
@@ -581,6 +589,7 @@ def discovery_feed_api(request):
         })
 
     return JsonResponse({'items': items, 'has_next': page_obj.has_next()})
+
 
 
 @login_required
@@ -1632,21 +1641,97 @@ def toggle_follow(request, user_id):
     target = get_object_or_404(User, pk=user_id)
 
     if target.id == request.user.id:
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'error': "You can't follow yourself."}, status=400)
         messages.warning(request, "You can't follow yourself.")
         return redirect('owner_profile', user_id=target.id)
 
     follow = Follow.objects.filter(follower=request.user, following=target).first()
     if follow:
         follow.delete()
-        messages.info(request, f'You unfollowed {target.username}.')
+        is_following = False
+        msg = f'You unfollowed {target.username}.'
     else:
         Follow.objects.create(follower=request.user, following=target)
-        messages.success(request, f'You are now following {target.username}.')
+        is_following = True
+        msg = f'You are now following {target.username}.'
 
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'is_following': is_following, 'message': msg})
+
+    messages.info(request, msg)
     next_url = request.POST.get('next') or request.GET.get('next')
     if next_url:
         return redirect(next_url)
     return redirect('owner_profile', user_id=target.id)
+
+
+def residence_next_detail_api(request, pk):
+    """API endpoint to load the next recommended residence block for endless scrolling in residence detail."""
+    exclude_raw = request.GET.get('exclude', '')
+    exclude_ids = set()
+    if exclude_raw:
+        for x in exclude_raw.split(','):
+            if x.strip().isdigit():
+                exclude_ids.add(int(x.strip()))
+    exclude_ids.add(pk)
+
+    next_residence = (
+        Residence.objects.filter(approved=True, is_hidden=False)
+        .exclude(pk__in=exclude_ids)
+        .order_by('-is_premium', '-views_count', '-created_at')
+        .first()
+    )
+
+    if not next_residence:
+        next_residence = (
+            Residence.objects.filter(approved=True, is_hidden=False)
+            .exclude(pk=pk)
+            .order_by('?')
+            .first()
+        )
+
+    if not next_residence:
+        return JsonResponse({'has_next': False})
+
+    related_residences = Residence.objects.filter(
+        approved=True,
+        county=next_residence.county
+    ).exclude(pk=next_residence.pk).order_by('-is_premium', '-views_count')[:4]
+
+    share_url = request.build_absolute_uri(f'/residences/{next_residence.pk}/')
+    share_text = f"Check out {next_residence.name} on HomeFinder Kenya: {share_url}"
+
+    is_favorited = (
+        request.user.is_authenticated
+        and Favorite.objects.filter(user=request.user, residence=next_residence).exists()
+    )
+    is_following_owner = (
+        request.user.is_authenticated
+        and next_residence.owner_id
+        and Follow.objects.filter(follower=request.user, following_id=next_residence.owner_id).exists()
+    )
+
+    context = {
+        'residence': next_residence,
+        'related_residences': related_residences,
+        'share_url': share_url,
+        'share_text': share_text,
+        'is_favorited': is_favorited,
+        'is_following_owner': is_following_owner,
+        'likes_count': next_residence.favorited_by.count(),
+        'user': request.user,
+    }
+
+    html = render_to_string('core/partials/residence_detail_block.html', context, request=request)
+    return JsonResponse({
+        'has_next': True,
+        'next_pk': next_residence.pk,
+        'next_name': next_residence.name,
+        'next_url': f'/residences/{next_residence.pk}/',
+        'html': html,
+    })
+
 
 
 def owner_profile(request, user_id):

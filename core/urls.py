@@ -15,6 +15,11 @@ urlpatterns = [
         views.residence_detail,
         name='residence_detail'
     ),
+    path(
+        'residences/<int:pk>/next/',
+        views.residence_next_detail_api,
+        name='residence_next_detail_api'
+    ),
     path('staff-tools/vendors/', views.vendor_dashboard, name='vendor_dashboard'),
     path('residence/<int:pk>/edit/', views.edit_residence, name='edit_residence'),
     path(
