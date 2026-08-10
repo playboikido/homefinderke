@@ -500,11 +500,11 @@
         </div>
     </header>
 
-    <!-- Popular, Premium, Recently Added Tabs -->
+    <!-- For You, Following, Community Tabs -->
     <nav class="feed-tabs">
-        <a href="{% url 'home' %}?tab=popular" class="feed-tab {% if tab == 'popular' %}active{% endif %}">🔥 Popular</a>
-        <a href="{% url 'home' %}?tab=premium" class="feed-tab {% if tab == 'premium' %}active{% endif %}">✨ Premium</a>
-        <a href="{% url 'home' %}?tab=recently_added" class="feed-tab {% if tab == 'recently_added' %}active{% endif %}">⚡ Recently Added</a>
+        <a href="{% url 'home' %}?tab=for_you" class="feed-tab {% if tab == 'for_you' %}active{% endif %}">For You</a>
+        <a href="{% url 'home' %}?tab=following" class="feed-tab {% if tab == 'following' %}active{% endif %}">Following</a>
+        <a href="{% url 'home' %}?tab=community" class="feed-tab {% if tab == 'community' %}active{% endif %}">Community</a>
     </nav>
 
     <!-- Feed Cards Container -->

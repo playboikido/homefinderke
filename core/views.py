@@ -512,13 +512,13 @@ def home(request):
 
 
 def discovery_feed(request):
-    """Resident discovery feed — visual residence browsing (Popular / Premium / Recently Added)."""
+    """Resident discovery feed — visual residence browsing (For You / Following / Community)."""
     if business_account_blocked(request):
         return redirect('business:dashboard')
 
-    tab = request.GET.get('tab', 'popular')
-    if tab not in ('popular', 'premium', 'recently_added'):
-        tab = 'popular'
+    tab = request.GET.get('tab', 'for_you')
+    if tab not in ('for_you', 'following', 'community'):
+        tab = 'for_you'
 
     queryset = get_discovery_feed_queryset(request, tab)
     paginator = Paginator(queryset, 10)
@@ -549,9 +549,9 @@ def discovery_feed(request):
 
 def discovery_feed_api(request):
     """JSON/HTML fragment loader for infinite scroll on the discovery feed."""
-    tab = request.GET.get('tab', 'popular')
-    if tab not in ('popular', 'premium', 'recently_added'):
-        tab = 'popular'
+    tab = request.GET.get('tab', 'for_you')
+    if tab not in ('for_you', 'following', 'community'):
+        tab = 'for_you'
 
     queryset = get_discovery_feed_queryset(request, tab)
     paginator = Paginator(queryset, 10)

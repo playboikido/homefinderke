@@ -18,17 +18,25 @@ def _base_residence_queryset():
     )
 
 
-def get_discovery_feed_queryset(request, tab='popular'):
+def get_discovery_feed_queryset(request, tab='for_you'):
     qs = _base_residence_queryset()
 
-    if tab == 'premium':
-        return qs.order_by('-is_premium', '-created_at')
+    if tab == 'following':
+        if request.user.is_authenticated:
+            following_ids = Follow.objects.filter(
+                follower=request.user
+            ).values_list('following_id', flat=True)
+            return qs.filter(owner_id__in=following_ids).order_by('-created_at')
+        return qs.none()
 
-    if tab == 'recently_added':
-        return qs.order_by('-created_at')
+    if tab == 'community':
+        return (
+            qs.filter(review_count__gt=0)
+            .order_by('-avg_rating', '-review_count', '-created_at')
+        )
 
-    # popular (default) — engagement, views, rating
-    return qs.order_by('-views_count', '-avg_rating', '-created_at')
+    # for_you (default) — popular, premium, recency
+    return qs.order_by('-is_premium', '-views_count', '-created_at')
 
 
 def get_residence_images(residence):
@@ -100,7 +108,15 @@ def build_residence_feed_item(residence, request, favorited_ids=None, following_
 def search_residences(query, filters=None):
     """Backend search used by simplified discovery search UI."""
     filters = filters or {}
-    qs = _base_residence_queryset().order_by('-is_premium', '-views_count', '-created_at')
+    qs = _base_residence_queryset()
+
+    sort_type = filters.get('sort', 'popular')
+    if sort_type == 'premium':
+        qs = qs.order_by('-is_premium', '-created_at')
+    elif sort_type == 'recently_added':
+        qs = qs.order_by('-created_at')
+    else:
+        qs = qs.order_by('-views_count', '-avg_rating', '-created_at')
 
     if query:
         qs = qs.filter(
