@@ -807,12 +807,6 @@
     </button>
   </div>
 
-  <!-- Mission strip -->
-  <div class="drawer-mission">
-    <div class="drawer-mission-title">Our Mission</div>
-    <div class="drawer-mission-text">Find your home today — and help another Kenyan find theirs.</div>
-  </div>
-
   <!-- Nav links -->
   <div class="drawer-nav">
     <div class="drawer-nav-label">Navigation</div>
@@ -828,10 +822,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
       Search
     </a>
-    <a href="{% url 'moving_essentials' %}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
-      Home Directory
-      </a>
     {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
     <a href="{% url 'add_mover' %}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
@@ -847,10 +837,6 @@
       Add Listing
     </a>
     {% endif %}
-    <a href="/about/">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      About
-    </a>
     <a href="{% url 'notifications' %}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       Notifications
@@ -858,15 +844,8 @@
         <span class="drawer-notif-badge">{{ unread_notifications }}</span>
       {% endif %}
     </a>
-    {% if not user.is_authenticated or user.profile.account_type != 'business' %}
-    <a href="{% url 'roommate_list' %}">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      Roommates
-    </a>
-    {% endif %}
-
     {% if user.is_authenticated and user.profile.account_type == 'business' %}
-    <div class="drawer-nav-label" style="margin-top:4px;">Business</div>
+    <div class="drawer-nav-label" style="margin-top:8px;">Business</div>
     <a href="{% url 'business:dashboard' %}"><span>📊</span> Dashboard</a>
     <a href="{% url 'business:edit' %}"><span>🏢</span> My Business</a>
     <a href="{% url 'business:branches' %}"><span>🏬</span> Branches</a>
@@ -887,66 +866,24 @@
     <a href="{% url 'business:promotions' %}"><span>📣</span> Promotions</a>
     <a href="{% url 'business:settings' %}"><span>⚙️</span> Business Settings</a>
     {% endif %}
-
-    {% if user.is_authenticated %}
-      {% if user.email == 'homefinder.ke.help@gmail.com' %}
-        <div class="drawer-nav-label" style="margin-top:4px;">Admin Control</div>
-        <a href="{% url 'admin_dashboard' %}" class="nav-link admin-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Admin Dashboard
-        </a>
-      {% else %}
-      {% endif %}
-    {% endif %}
-
-    {% if user.is_authenticated and user.profile.account_type != 'business' %}
-    <a href="/chat/" class="nav-link-item" style="position: relative; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: rgba(255,255,255,0.82); font-weight: 500; font-size: 0.9rem;">
-  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-  </svg>
-  <span>Messages</span>
-  {% if unread_messages_count > 0 %}
-  <span id="global-unread-badge" style="background: #DC2626; color: #FFFFFF; font-size: 0.7rem; font-weight: 700; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: -6px; right: -8px; box-shadow: 0 2px 6px rgba(220,38,38,0.3);">
-    {{ unread_messages_count }}
-  </span>
-  {% endif %}
+    {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
+    <div class="drawer-nav-label" style="margin-top:8px;">Admin Control</div>
+    <a href="{% url 'admin_dashboard' %}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Admin Dashboard
     </a>
     {% endif %}
+    <div class="drawer-nav-label" style="margin-top:8px;">Account</div>
+    {% if user.is_authenticated %}
     <a href="{% url 'settings_profile' %}">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          Account Settings
-        </a>
-    <a href="{% url 'help_center' %}" class="pod-nav-item">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        Help Center
-      </a>    
-    {% if user.is_authenticated and user.profile.account_type == 'business' %}
-      {% if nav_business_plan == 'premium' or nav_business_plan == 'enterprise' %}
-      <div class="pod-upgrade-card">
-        <p class="pod-title">{{ nav_business_plan|title }} Business</p>
-        <p class="pod-sub">You're on the {{ nav_business_plan|title }} plan. Manage billing anytime.</p>
-        <a href="{% url 'business:plans' %}" class="pod-upgrade-btn">Manage Plan</a>
-      </div>
-      {% elif nav_business_plan == 'standard' %}
-      <div class="pod-upgrade-card">
-        <p class="pod-title">Standard Business</p>
-        <p class="pod-sub">Upgrade to Premium for more visibility and quality leads.</p>
-        <a href="{% url 'business:plans' %}" class="pod-upgrade-btn">Upgrade to Premium</a>
-      </div>
-      {% else %}
-      <div class="pod-upgrade-card">
-        <p class="pod-title">Grow Your Business</p>
-        <p class="pod-sub">Upgrade your plan for more visibility and quality leads.</p>
-        <a href="{% url 'business:plans' %}" class="pod-upgrade-btn">Upgrade Now</a>
-      </div>
-      {% endif %}
-    {% else %}
-    <div class="pod-upgrade-card">
-      <p class="pod-title">Upgrade Your Listings</p>
-      <p class="pod-sub">Get more visibility and quality leads with Premium.</p>
-      <a href="{% url 'sponsorship_plans' %}" class="pod-upgrade-btn">Upgrade Now</a>
-    </div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Settings
+    </a>
     {% endif %}
+    <a href="{% url 'help_center' %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 2-3 4"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      Help Center
+    </a>
   </div>
 
   {% if user.is_authenticated %}
@@ -965,9 +902,9 @@
       </div>
     </a>
     <div class="drawer-footer">
-      <a href="/accounts/logout/" class="drawer-btn drawer-btn-logout">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Logout
+      <a href="/accounts/logout/" class="drawer-btn drawer-btn-logout" style="background:rgba(220,38,38,0.25);color:#FFF;border:1.5px solid rgba(220,38,38,0.5);font-weight:700;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log Out
       </a>
     </div>
   {% else %}
