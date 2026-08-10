@@ -127,11 +127,21 @@
 
 <div class="bd-wrap">
   <div class="bd-inner">
-    <div class="bd-crumbs">
-      <a href="{% url 'home' %}">Home</a><span class="sep">›</span>
-      <a href="{% url 'moving_essentials' %}">Businesses</a><span class="sep">›</span>
-      <a href="{% url 'moving_essentials' %}?category={{ business.category }}">{{ business.get_category_display }}</a><span class="sep">›</span>
-      <span class="current">{{ business.name }}</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px;">
+      <button type="button" onclick="if(document.referrer){history.back();}else{location.href='{% url 'moving_essentials' %}';}" style="
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 16px;border-radius:10px;
+        background:var(--bd-card);border:1.5px solid var(--bd-border);
+        color:var(--bd-fg);font-size:0.85rem;font-weight:700;
+        cursor:pointer;transition:all 0.2s;box-shadow:0 2px 6px rgba(0,0,0,0.05);
+      ">
+        ← Back
+      </button>
+      <div class="bd-crumbs" style="margin:0;">
+        <a href="{% url 'home' %}">Home</a><span class="sep">›</span>
+        <a href="{% url 'moving_essentials' %}">Directory</a><span class="sep">›</span>
+        <a href="{% url 'moving_essentials' %}?category={{ business.category }}">{{ business.get_category_display }}</a>
+      </div>
     </div>
 
     <div class="bd-hero">

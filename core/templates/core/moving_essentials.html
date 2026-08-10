@@ -602,12 +602,10 @@
             🏬 All
         </a>
         {% for cat in categories %}
-            {% if cat.count > 0 %}
             <a href="?category={{ cat.key }}{% if selected_county %}&county={{ selected_county }}{% endif %}"
                class="biz-cat-tab {% if selected_category == cat.key %}active{% endif %}">
                 {{ cat.icon }} {{ cat.label }}
             </a>
-            {% endif %}
         {% endfor %}
     </nav>
 
@@ -723,16 +721,24 @@
         });
     }
 
-    // Observe loader for intersection
+    // Observe loader for intersection & window scroll fallback
     const bizLoaderEl = document.getElementById('bizLoader');
     const bizObserver = new IntersectionObserver(entries => {
         if (entries[0].isIntersecting && bizHasNext && !bizLoading) bizLoadMore();
-    }, { rootMargin: '200px' });
+    }, { rootMargin: '300px' });
 
     if (bizHasNext) {
         bizLoaderEl.style.display = 'flex';
         bizObserver.observe(bizLoaderEl);
     }
+
+    // Scroll listener fallback for high-speed scrolling
+    window.addEventListener('scroll', () => {
+        if (!bizHasNext || bizLoading) return;
+        if ((window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 400)) {
+            bizLoadMore();
+        }
+    }, { passive: true });
 
     // Scroll active category tab into view
     document.addEventListener('DOMContentLoaded', () => {
