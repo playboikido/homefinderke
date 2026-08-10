@@ -1021,17 +1021,15 @@
       Admin
     </a>
     {% elif user.is_authenticated %}
-    <!-- Profile button opens quick-action sheet instead of direct navigation -->
-    <button class="bottom-nav-item" id="profileMenuBtn" onclick="openProfileSheet()" aria-label="Open profile menu" style="background:none;border:none;cursor:pointer;">
+    <a href="{% url 'owner_profile' user.id %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'owner_profile' %}active{% endif %}">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       Profile
-    </button>
+    </a>
     {% else %}
-    <!-- Not logged in: clicking profile opens the sheet with login option -->
-    <button class="bottom-nav-item" id="profileMenuBtn" onclick="openProfileSheet()" aria-label="Open menu" style="background:none;border:none;cursor:pointer;">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      Menu
-    </button>
+    <a href="/accounts/login/" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profile
+    </a>
     {% endif %}
   </div>
 </nav>
@@ -1082,14 +1080,6 @@
 
   <!-- Quick action links -->
   <div style="padding:10px 10px 24px;">
-    <!-- Always: Home -->
-    <a href="{% url 'home' %}" class="pqs-item">
-      <div class="pqs-icon" style="background:rgba(15,118,110,0.12);">
-        <svg viewBox="0 0 24 24" fill="none" stroke="var(--primary,#0F766E)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      </div>
-      <span class="pqs-label">Home</span>
-      <svg class="pqs-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-    </a>
 
     {% if user.is_authenticated %}
     <!-- Dashboard -->
