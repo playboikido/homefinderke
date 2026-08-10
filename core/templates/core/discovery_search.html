@@ -1,0 +1,688 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Residences — HomeFinder KE{% endblock %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+    :root {
+        --feed-bg: #F8FAFC;
+        --feed-card-bg: #FFFFFF;
+        --feed-text-primary: #0F172A;
+        --feed-text-secondary: #475569;
+        --feed-border: #E2E8F0;
+        --feed-primary: #0F766E;
+        --feed-accent: #0D9488;
+        --feed-heart-color: #EF4444;
+        --feed-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    }
+
+    [data-theme="dark"] {
+        --feed-bg: #0B0F19;
+        --feed-card-bg: #151F32;
+        --feed-text-primary: #F1F5F9;
+        --feed-text-secondary: #94A3B8;
+        --feed-border: #1E293B;
+        --feed-primary: #14B8A6;
+        --feed-accent: #2DD4BF;
+        --feed-heart-color: #F87171;
+        --feed-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    body {
+        background: var(--feed-bg);
+        color: var(--feed-text-primary);
+        font-family: 'Fira Sans', system-ui, sans-serif;
+    }
+
+    /* ── Main Layout ── */
+    .discovery-search-container {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 0 0 80px;
+        background: var(--feed-bg);
+        min-height: 100vh;
+        box-shadow: 0 0 40px rgba(0,0,0,0.03);
+    }
+
+    /* ── Search Header ── */
+    .search-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--feed-border);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    [data-theme="dark"] .search-header {
+        background: rgba(21, 31, 50, 0.85);
+    }
+
+    .back-btn {
+        background: none;
+        border: none;
+        color: var(--feed-text-primary);
+        cursor: pointer;
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: transform 0.2s;
+    }
+
+    .back-btn:hover {
+        transform: translateX(-2px);
+        color: var(--feed-primary);
+    }
+
+    .back-btn svg {
+        width: 22px;
+        height: 22px;
+        stroke-width: 2.5;
+    }
+
+    .search-form {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        background: var(--feed-bg);
+        border: 1.5px solid var(--feed-border);
+        border-radius: 16px;
+        padding: 2px 8px 2px 12px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        transition: border-color 0.2s;
+    }
+
+    [data-theme="dark"] .search-form {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .search-form:focus-within {
+        border-color: var(--feed-primary);
+    }
+
+    .search-form svg {
+        color: var(--feed-text-secondary);
+        width: 18px;
+        height: 18px;
+        stroke-width: 2.5;
+        flex-shrink: 0;
+        margin-right: 8px;
+    }
+
+    .search-input {
+        width: 100%;
+        border: none;
+        background: none;
+        outline: none;
+        padding: 8px 0;
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 0.92rem;
+        color: var(--feed-text-primary);
+    }
+
+    .clear-btn {
+        background: none;
+        border: none;
+        color: var(--feed-text-secondary);
+        cursor: pointer;
+        padding: 4px;
+        display: none;
+    }
+
+    .clear-btn svg {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+    }
+
+    /* ── Popular Section ── */
+    .popular-container {
+        padding: 20px 20px 8px;
+    }
+
+    .popular-title {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--feed-text-secondary);
+        margin: 0 0 12px;
+    }
+
+    .popular-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .popular-chip {
+        display: inline-flex;
+        align-items: center;
+        background: var(--feed-card-bg);
+        border: 1px solid var(--feed-border);
+        color: var(--feed-text-primary);
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 9999px;
+        text-decoration: none;
+        transition: all 0.2s;
+        box-shadow: var(--feed-shadow);
+    }
+
+    .popular-chip:hover {
+        background: var(--feed-primary);
+        color: #fff;
+        border-color: var(--feed-primary);
+        transform: translateY(-1px);
+    }
+
+    /* ── Search Results Grid ── */
+    .results-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 16px;
+    }
+
+    /* Reuse discovery_card components */
+    .discovery-card {
+        background: var(--feed-card-bg);
+        border: 1px solid var(--feed-border);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: var(--feed-shadow);
+        transition: transform 0.25s cubic-bezier(0.1, 0.8, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .discovery-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .card-media-anchor {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .card-media-container {
+        position: relative;
+        width: 100%;
+        padding-top: 100%;
+        background: #000;
+        overflow: hidden;
+    }
+
+    .cycler-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.6s ease-in-out;
+        z-index: 1;
+    }
+
+    .cycler-image.active {
+        opacity: 1;
+        z-index: 2;
+    }
+
+    .feed-media-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-overlay-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 9999px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .video-play-icon {
+        font-size: 0.65rem;
+    }
+
+    .video-tap-hint {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 8px;
+        z-index: 10;
+    }
+
+    .cycler-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--feed-text-secondary);
+        background: var(--feed-bg);
+    }
+
+    .cycler-placeholder svg {
+        width: 44px;
+        height: 44px;
+        opacity: 0.4;
+    }
+
+    .card-details-container {
+        padding: 16px 20px;
+    }
+
+    .card-row {
+        margin-bottom: 6px;
+    }
+
+    .card-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .card-header-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .residence-name {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--feed-text-primary);
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    .residence-name a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .residence-name a:hover {
+        color: var(--feed-primary);
+    }
+
+    .favorite-toggle-btn {
+        background: none;
+        border: none;
+        font-size: 1.55rem;
+        color: var(--feed-text-secondary);
+        cursor: pointer;
+        line-height: 1;
+        transition: transform 0.2s, color 0.2s;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .favorite-toggle-btn:hover {
+        transform: scale(1.18);
+        color: var(--feed-heart-color);
+    }
+
+    .favorite-toggle-btn.favorited {
+        color: var(--feed-heart-color) !important;
+        aria-label: "Remove from favorites";
+    }
+
+    .location-row {
+        font-size: 0.82rem;
+        color: var(--feed-text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+    }
+
+    .pricing-row {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        margin: 4px 0;
+    }
+
+    .rent-price {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--feed-primary);
+    }
+
+    .rent-suffix {
+        font-size: 0.78rem;
+        color: var(--feed-text-secondary);
+    }
+
+    .meta-specs-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 8px 0 10px;
+    }
+
+    .house-spec-chip {
+        background: var(--feed-border);
+        color: var(--feed-text-secondary);
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        text-transform: uppercase;
+    }
+
+    .verified-status-chip {
+        background: #DCFCE7;
+        color: #166534;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        text-transform: uppercase;
+    }
+
+    .footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--feed-border);
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .contributor-handle {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--feed-primary);
+        text-decoration: none;
+    }
+
+    .contributor-handle:hover {
+        text-decoration: underline;
+    }
+
+    .community-review-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--feed-text-secondary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .community-review-badge:hover {
+        color: var(--feed-primary);
+    }
+
+    /* ── Loader ── */
+    .feed-loader {
+        display: flex;
+        justify-content: center;
+        padding: 20px 0;
+        min-height: 40px;
+    }
+
+    .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3.5px solid var(--feed-border);
+        border-top-color: var(--feed-primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="discovery-search-container">
+    <!-- Search Bar Header -->
+    <header class="search-header">
+        <a href="{% url 'home' %}" class="back-btn" title="Back to discovery feed">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        </a>
+        <form method="GET" action="{% url 'search' %}" class="search-form" id="searchForm">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input type="text" name="q" value="{{ query }}" placeholder="Search homes, areas, residences..." class="search-input" id="searchInput" autocomplete="off">
+            <button type="button" class="clear-btn" id="clearBtn" title="Clear search">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </form>
+    </header>
+
+    <!-- Popular Searches Section -->
+    <div class="popular-container">
+        <h3 class="popular-title">Popular</h3>
+        <div class="popular-chips">
+            {% for chip in popular_searches %}
+                <a href="?{% for key, val in chip.params.items %}{{ key }}={{ val }}{% if not forloop.last %}&{% endif %}{% endfor %}" class="popular-chip">
+                    {{ chip.label }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Results Stream -->
+    <div class="results-grid" id="resultsGrid">
+        {% for item in feed_items %}
+            {% include 'core/partials/discovery_card.html' with item=item user=user %}
+        {% empty %}
+            {% if query %}
+                <div style="text-align: center; padding: 48px 24px; color: var(--feed-text-secondary);">
+                    <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">No results found for "{{ query }}"</p>
+                    <p style="font-size: 0.85rem;">Try refining your keywords or selecting a popular chip.</p>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <!-- Infinite Scroll Spinner -->
+    <div class="feed-loader" id="searchLoader" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+</div>
+
+<!-- CSRF Token for AJAX Favoriting -->
+<div style="display: none;">
+    {% csrf_token %}
+</div>
+
+<script>
+    const getCsrfToken = () => {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    };
+
+    // ── Image Fading Loop ──
+    function initCyclers() {
+        document.querySelectorAll('.image-cycler:not([data-cycle-init])').forEach(cycler => {
+            cycler.setAttribute('data-cycle-init', 'true');
+            const images = cycler.querySelectorAll('.cycler-image');
+            if (images.length <= 1) return;
+            
+            let currentIndex = 0;
+            setInterval(() => {
+                images[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % images.length;
+                images[currentIndex].classList.add('active');
+            }, 2000);
+        });
+    }
+
+    // ── Favorite Button Interaction ──
+    function initFavorites() {
+        document.querySelectorAll('.favorite-toggle-btn:not([data-fav-init])').forEach(btn => {
+            btn.setAttribute('data-fav-init', 'true');
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const isAuthenticated = btn.getAttribute('data-authenticated') === 'true';
+                if (!isAuthenticated) {
+                    window.location.href = "{% url 'account_login' %}";
+                    return;
+                }
+
+                const residenceId = btn.getAttribute('data-id');
+                btn.disabled = true;
+
+                fetch(`/residences/${residenceId}/favorite/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Network response error');
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.favorited) {
+                        btn.classList.add('favorited');
+                        btn.textContent = '♥';
+                    } else {
+                        btn.classList.remove('favorited');
+                        btn.textContent = '♡';
+                    }
+                })
+                .catch(err => {
+                    console.error('Favorite Toggle Error:', err);
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                });
+            });
+        });
+    }
+
+    // ── Input Query Handling ──
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearBtn');
+
+    function toggleClearBtn() {
+        if (searchInput.value.length > 0) {
+            clearBtn.style.display = 'block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+    }
+
+    searchInput.addEventListener('input', toggleClearBtn);
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        toggleClearBtn();
+        searchInput.focus();
+    });
+
+    // ── Infinite Scroll Implementation ──
+    let page = 1;
+    let hasNext = {% if page_obj.has_next %}true{% else %}false{% endif %};
+    let loading = false;
+
+    function initInfiniteScroll() {
+        if (!hasNext) return;
+
+        const loader = document.getElementById('searchLoader');
+        const resultsGrid = document.getElementById('resultsGrid');
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasNext && !loading) {
+                loading = true;
+                loader.style.display = 'flex';
+                page += 1;
+
+                // Build query params
+                const params = new URLSearchParams(window.location.search);
+                params.set('page', page);
+
+                fetch(`/search/?${params.toString()}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.html) {
+                        resultsGrid.insertAdjacentHTML('beforeend', data.html);
+                        initCyclers();
+                        initFavorites();
+                    }
+                    hasNext = data.has_next;
+                })
+                .catch(err => {
+                    console.error('Visual Search Infinite Scroll Error:', err);
+                    hasNext = false;
+                })
+                .finally(() => {
+                    loading = false;
+                    loader.style.display = 'none';
+                });
+            }
+        }, {
+            rootMargin: '150px'
+        });
+
+        observer.observe(loader);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        toggleClearBtn();
+        initCyclers();
+        initFavorites();
+        initInfiniteScroll();
+    });
+</script>
+{% endblock %}

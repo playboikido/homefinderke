@@ -1,0 +1,648 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}HomeFinder KE — Resident Discovery Feed{% endblock %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_head %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+    :root {
+        --feed-bg: #F8FAFC;
+        --feed-card-bg: #FFFFFF;
+        --feed-text-primary: #0F172A;
+        --feed-text-secondary: #475569;
+        --feed-border: #E2E8F0;
+        --feed-primary: #0F766E;
+        --feed-accent: #0D9488;
+        --feed-heart-color: #EF4444;
+        --feed-shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+    }
+
+    [data-theme="dark"] {
+        --feed-bg: #0B0F19;
+        --feed-card-bg: #151F32;
+        --feed-text-primary: #F1F5F9;
+        --feed-text-secondary: #94A3B8;
+        --feed-border: #1E293B;
+        --feed-primary: #14B8A6;
+        --feed-accent: #2DD4BF;
+        --feed-heart-color: #F87171;
+        --feed-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+    }
+
+    body {
+        background: var(--feed-bg);
+        color: var(--feed-text-primary);
+        font-family: 'Fira Sans', system-ui, sans-serif;
+    }
+
+    /* ── Main Layout ── */
+    .discovery-feed-container {
+        max-width: 580px;
+        margin: 0 auto;
+        padding: 0 0 80px;
+        background: var(--feed-bg);
+        min-height: 100vh;
+        box-shadow: 0 0 40px rgba(0,0,0,0.03);
+    }
+
+    /* ── Sticky Top Nav ── */
+    .feed-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--feed-border);
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background-color 0.3s;
+    }
+
+    [data-theme="dark"] .feed-header {
+        background: rgba(21, 31, 50, 0.85);
+    }
+
+    .feed-brand {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--feed-text-primary);
+        text-decoration: none;
+        letter-spacing: -0.04em;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .feed-brand span {
+        color: var(--feed-primary);
+    }
+
+    .feed-actions {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .feed-action-link {
+        color: var(--feed-text-primary);
+        text-decoration: none;
+        transition: transform 0.2s, color 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .feed-action-link svg {
+        width: 22px;
+        height: 22px;
+        stroke-width: 2;
+    }
+
+    .feed-action-link:hover {
+        transform: scale(1.08);
+        color: var(--feed-primary);
+    }
+
+    /* ── Sticky Sub-Tabs ── */
+    .feed-tabs {
+        position: sticky;
+        top: 55px;
+        z-index: 99;
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--feed-border);
+        display: flex;
+        justify-content: space-around;
+        padding: 10px 0;
+    }
+
+    [data-theme="dark"] .feed-tabs {
+        background: rgba(21, 31, 50, 0.85);
+    }
+
+    .feed-tab {
+        font-family: 'Fira Sans', sans-serif;
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--feed-text-secondary);
+        text-decoration: none;
+        padding: 6px 16px;
+        position: relative;
+        transition: color 0.2s;
+        border-radius: 20px;
+    }
+
+    .feed-tab:hover {
+        color: var(--feed-primary);
+    }
+
+    .feed-tab.active {
+        color: var(--feed-primary);
+    }
+
+    .feed-tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 20%;
+        width: 60%;
+        height: 3px;
+        background: var(--feed-primary);
+        border-radius: 99px;
+    }
+
+    /* ── Feed Grid ── */
+    .feed-cards-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        padding: 16px;
+    }
+
+    /* ── Card Styling ── */
+    .discovery-card {
+        background: var(--feed-card-bg);
+        border: 1px solid var(--feed-border);
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: var(--feed-shadow);
+        transition: transform 0.25s cubic-bezier(0.1, 0.8, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .discovery-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .card-media-anchor {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .card-media-container {
+        position: relative;
+        width: 100%;
+        padding-top: 100%; /* 1:1 square media format */
+        background: #000;
+        overflow: hidden;
+    }
+
+    .cycler-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 0.6s ease-in-out;
+        z-index: 1;
+    }
+
+    .cycler-image.active {
+        opacity: 1;
+        z-index: 2;
+    }
+
+    .feed-media-video {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .video-overlay-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        color: #fff;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 9999px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+    }
+
+    .video-play-icon {
+        font-size: 0.65rem;
+    }
+
+    .video-tap-hint {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 8px;
+        z-index: 10;
+    }
+
+    .cycler-placeholder {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--feed-text-secondary);
+        background: var(--feed-bg);
+    }
+
+    .cycler-placeholder svg {
+        width: 44px;
+        height: 44px;
+        opacity: 0.4;
+    }
+
+    .card-details-container {
+        padding: 16px 20px;
+    }
+
+    .card-row {
+        margin-bottom: 6px;
+    }
+
+    .card-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .card-header-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .residence-name {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--feed-text-primary);
+        margin: 0;
+        line-height: 1.3;
+    }
+
+    .residence-name a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .residence-name a:hover {
+        color: var(--feed-primary);
+    }
+
+    .favorite-toggle-btn {
+        background: none;
+        border: none;
+        font-size: 1.55rem;
+        color: var(--feed-text-secondary);
+        cursor: pointer;
+        line-height: 1;
+        transition: transform 0.2s, color 0.2s;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .favorite-toggle-btn:hover {
+        transform: scale(1.18);
+        color: var(--feed-heart-color);
+    }
+
+    .favorite-toggle-btn.favorited {
+        color: var(--feed-heart-color) !important;
+        animation: heartBeat 0.3s ease-out;
+    }
+
+    @keyframes heartBeat {
+        0% { transform: scale(1); }
+        30% { transform: scale(1.3); }
+        60% { transform: scale(0.9); }
+        100% { transform: scale(1); }
+    }
+
+    .location-row {
+        font-size: 0.82rem;
+        color: var(--feed-text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+    }
+
+    .pricing-row {
+        display: flex;
+        align-items: baseline;
+        gap: 4px;
+        margin: 4px 0;
+    }
+
+    .rent-price {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--feed-primary);
+    }
+
+    .rent-suffix {
+        font-size: 0.78rem;
+        color: var(--feed-text-secondary);
+    }
+
+    .meta-specs-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 8px 0 10px;
+    }
+
+    .house-spec-chip {
+        background: var(--feed-border);
+        color: var(--feed-text-secondary);
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .verified-status-chip {
+        background: #DCFCE7;
+        color: #166534;
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    .footer-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--feed-border);
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .contributor-handle {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--feed-primary);
+        text-decoration: none;
+    }
+
+    .contributor-handle:hover {
+        text-decoration: underline;
+    }
+
+    .community-review-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--feed-text-secondary);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .community-review-badge:hover {
+        color: var(--feed-primary);
+    }
+
+    /* ── Loading indicator ── */
+    .feed-loader {
+        display: flex;
+        justify-content: center;
+        padding: 20px 0;
+        min-height: 40px;
+    }
+
+    .spinner {
+        width: 24px;
+        height: 24px;
+        border: 3.5px solid var(--feed-border);
+        border-top-color: var(--feed-primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="discovery-feed-container">
+    <!-- Top Navigation Header -->
+    <header class="feed-header">
+        <a href="{% url 'home' %}" class="feed-brand">
+            HomeFinder<span>.</span>
+        </a>
+        <div class="feed-actions">
+            <!-- Notifications Link -->
+            <a href="{% if user.is_authenticated %}{% url 'notifications' %}{% else %}{% url 'account_login' %}{% endif %}" class="feed-action-link" title="Notifications">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            </a>
+            <!-- Visual Search Link -->
+            <a href="{% url 'search' %}" class="feed-action-link" title="Search">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </a>
+            <!-- Favorites Link -->
+            <a href="{% if user.is_authenticated %}{% url 'my_favorites' %}{% else %}{% url 'account_login' %}{% endif %}" class="feed-action-link" title="Favorites">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+            </a>
+        </div>
+    </header>
+
+    <!-- Sub-navigation Tabs -->
+    <nav class="feed-tabs">
+        <a href="{% url 'home' %}?tab=for_you" class="feed-tab {% if tab == 'for_you' %}active{% endif %}">For You</a>
+        <a href="{% url 'home' %}?tab=following" class="feed-tab {% if tab == 'following' %}active{% endif %}">Following</a>
+        <a href="{% url 'home' %}?tab=community" class="feed-tab {% if tab == 'community' %}active{% endif %}">Community</a>
+    </nav>
+
+    <!-- Feed Container -->
+    <div class="feed-cards-grid" id="feedGrid">
+        {% for item in feed_items %}
+            {% include 'core/partials/discovery_card.html' with item=item user=user %}
+        {% empty %}
+            <div style="text-align: center; padding: 48px 24px; color: var(--feed-text-secondary);">
+                <p style="font-size: 1.2rem; font-weight: 600; margin-bottom: 8px;">No listings found</p>
+                <p style="font-size: 0.9rem;">Check back later or explore other tabs.</p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Infinite Scroll Spinner -->
+    <div class="feed-loader" id="feedLoader" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+</div>
+
+<!-- CSRF Token for AJAX Favoriting -->
+<div style="display: none;">
+    {% csrf_token %}
+</div>
+
+<script>
+    // ── Preloaded CSRF Token ──
+    const getCsrfToken = () => {
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    };
+
+    // ── Image Fading Loop ──
+    function initCyclers() {
+        document.querySelectorAll('.image-cycler:not([data-cycle-init])').forEach(cycler => {
+            cycler.setAttribute('data-cycle-init', 'true');
+            const images = cycler.querySelectorAll('.cycler-image');
+            if (images.length <= 1) return;
+            
+            let currentIndex = 0;
+            setInterval(() => {
+                images[currentIndex].classList.remove('active');
+                currentIndex = (currentIndex + 1) % images.length;
+                images[currentIndex].classList.add('active');
+            }, 2000); // Transitions every 2 seconds
+        });
+    }
+
+    // ── Favorite Button Interaction ──
+    function initFavorites() {
+        document.querySelectorAll('.favorite-toggle-btn:not([data-fav-init])').forEach(btn => {
+            btn.setAttribute('data-fav-init', 'true');
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const isAuthenticated = btn.getAttribute('data-authenticated') === 'true';
+                if (!isAuthenticated) {
+                    window.location.href = "{% url 'account_login' %}";
+                    return;
+                }
+
+                const residenceId = btn.getAttribute('data-id');
+                btn.disabled = true;
+
+                fetch(`/residences/${residenceId}/favorite/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Authorization or server issue');
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.favorited) {
+                        btn.classList.add('favorited');
+                        btn.textContent = '♥';
+                    } else {
+                        btn.classList.remove('favorited');
+                        btn.textContent = '♡';
+                    }
+                })
+                .catch(err => {
+                    console.error('Favorite Toggle Error:', err);
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                });
+            });
+        });
+    }
+
+    // ── Infinite Scroll Implementation ──
+    let page = 1;
+    let hasNext = {% if page_obj.has_next %}true{% else %}false{% endif %};
+    let loading = false;
+
+    function initInfiniteScroll() {
+        if (!hasNext) return;
+
+        const loader = document.getElementById('feedLoader');
+        const feedGrid = document.getElementById('feedGrid');
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasNext && !loading) {
+                loading = true;
+                loader.style.display = 'flex';
+                page += 1;
+
+                fetch(`/discovery-feed/api/?tab={{ tab }}&page=${page}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.html) {
+                        // Append new fragments
+                        feedGrid.insertAdjacentHTML('beforeend', data.html);
+                        // Re-initialize cyclers and favorite listeners for new items
+                        initCyclers();
+                        initFavorites();
+                    }
+                    hasNext = data.has_next;
+                })
+                .catch(err => {
+                    console.error('Infinite Scroll Loader Error:', err);
+                    hasNext = false;
+                })
+                .finally(() => {
+                    loading = false;
+                    loader.style.display = 'none';
+                });
+            }
+        }, {
+            rootMargin: '150px' // Fetch in advance when scrolling
+        });
+
+        observer.observe(loader);
+    }
+
+    // Initialize all components
+    document.addEventListener('DOMContentLoaded', () => {
+        initCyclers();
+        initFavorites();
+        initInfiniteScroll();
+    });
+</script>
+{% endblock %}

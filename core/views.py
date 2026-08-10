@@ -44,6 +44,8 @@ from django.urls import reverse
 from django.utils import timezone
 from .models import ResidencePhoto, Mover, FurnitureVendor, MoverProduct, FurnitureProduct, MoverGalleryImage, FurnitureGalleryImage, MoverFavorite, FurnitureVendorFavorite, ListingAgreement, CURRENT_TERMS_VERSION, LISTING_TERMS_TEXT
 import json
+from django.template.loader import render_to_string
+from .discovery import get_discovery_feed_queryset, build_residence_feed_item, search_residences
 import base64
 from openai import OpenAI
 from django.views.decorators.http import require_POST
@@ -503,35 +505,171 @@ def ai_fix_description(request):
         print("AI DESCRIPTION FIX ERROR:", e)
         return JsonResponse({'error': 'Something went wrong. Please try again.'}, status=500)
 def home(request):
-    residences = Residence.objects.filter(approved=True, is_hidden=False)
+    if request.user.is_authenticated:
+        if getattr(request.user.profile, 'account_type', 'resident') == 'business':
+            return redirect('business:dashboard')
+    return discovery_feed(request)
 
-    county = request.GET.get('county')
-    town = request.GET.get('town')
 
-    if county:
-        residences = residences.filter(county__icontains=county)
-    if town:
-        residences = residences.filter(town__icontains=town)
+def discovery_feed(request):
+    """Resident discovery feed — visual residence browsing (For You / Following / Community)."""
+    if business_account_blocked(request):
+        return redirect('business:dashboard')
 
-    # Premium listings appear first, then by views
-    popular_residences = Residence.objects.filter(
-        approved=True, is_hidden=False
-    ).order_by('-is_premium', '-views_count')[:12]
+    tab = request.GET.get('tab', 'for_you')
+    if tab not in ('for_you', 'following', 'community'):
+        tab = 'for_you'
+
+    queryset = get_discovery_feed_queryset(request, tab)
+    paginator = Paginator(queryset, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    favorited_ids = set()
+    if request.user.is_authenticated:
+        favorited_ids = set(
+            Favorite.objects.filter(user=request.user).values_list('residence_id', flat=True)
+        )
+
+    feed_items = [
+        build_residence_feed_item(r, request, favorited_ids)
+        for r in page_obj
+    ]
 
     context = {
-        'residences': residences,
-        'popular_residences': popular_residences,
-        'selected_county': county,
-        'selected_town': town,
-        
+        'tab': tab,
+        'page_obj': page_obj,
+        'feed_items': feed_items,
     }
-    return render(request, 'core/home.html', context)
+    return render(request, 'core/discovery_feed.html', context)
+
+
+def discovery_feed_api(request):
+    """JSON/HTML fragment loader for infinite scroll on the discovery feed."""
+    tab = request.GET.get('tab', 'for_you')
+    if tab not in ('for_you', 'following', 'community'):
+        tab = 'for_you'
+
+    queryset = get_discovery_feed_queryset(request, tab)
+    paginator = Paginator(queryset, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    favorited_ids = set()
+    if request.user.is_authenticated:
+        favorited_ids = set(
+            Favorite.objects.filter(user=request.user).values_list('residence_id', flat=True)
+        )
+
+    items = [
+        build_residence_feed_item(r, request, favorited_ids)
+        for r in page_obj
+    ]
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html_fragments = []
+        for item in items:
+            html_fragments.append(
+                render_to_string(
+                    'core/partials/discovery_card.html',
+                    {'item': item, 'user': request.user},
+                    request=request,
+                )
+            )
+        return JsonResponse({
+            'html': ''.join(html_fragments),
+            'has_next': page_obj.has_next(),
+            'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
+        })
+
+    return JsonResponse({'items': items, 'has_next': page_obj.has_next()})
+
+
+@login_required
+@require_POST
+def toggle_favorite_api(request, pk):
+    """Toggle favorite state for feed interactions (returns JSON)."""
+    if business_account_blocked(request):
+        return JsonResponse({'error': 'Business accounts cannot save favorites.'}, status=403)
+
+    residence = get_object_or_404(Residence, pk=pk, approved=True)
+    favorite = Favorite.objects.filter(user=request.user, residence=residence).first()
+
+    if favorite:
+        favorite.delete()
+        return JsonResponse({'favorited': False})
+
+    Favorite.objects.create(user=request.user, residence=residence)
+    return JsonResponse({'favorited': True})
 
 
 def about(request):
     return render(request, 'core/about.html')
 
 def search(request):
+    """Simplified visual search — full filter panel lives at /search/advanced/."""
+    if business_account_blocked(request):
+        return redirect('business:dashboard')
+
+    q = request.GET.get('q', '').strip()
+    town = request.GET.get('town', '').strip()
+    county = request.GET.get('county', '').strip()
+    house_type = request.GET.get('house_type', '').strip()
+
+    residences = search_residences(q, {
+        'town': town or q,
+        'county': county,
+        'house_type': house_type,
+    })
+
+    paginator = Paginator(residences, 12)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    favorited_ids = set()
+    if request.user.is_authenticated:
+        favorited_ids = set(
+            Favorite.objects.filter(user=request.user).values_list('residence_id', flat=True)
+        )
+
+    feed_items = [
+        build_residence_feed_item(r, request, favorited_ids)
+        for r in page_obj
+    ]
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        html_fragments = []
+        for item in feed_items:
+            html_fragments.append(
+                render_to_string(
+                    'core/partials/discovery_card.html',
+                    {'item': item, 'user': request.user},
+                    request=request,
+                )
+            )
+        return JsonResponse({
+            'html': ''.join(html_fragments),
+            'has_next': page_obj.has_next(),
+            'next_page': page_obj.next_page_number() if page_obj.has_next() else None,
+            'count': paginator.count,
+        })
+
+    context = {
+        'page_obj': page_obj,
+        'feed_items': feed_items,
+        'query': q,
+        'popular_searches': [
+            {'label': 'Kasarani', 'params': {'town': 'Kasarani'}},
+            {'label': 'Roysambu', 'params': {'town': 'Roysambu'}},
+            {'label': 'Ruiru', 'params': {'town': 'Ruiru'}},
+            {'label': 'Ruaka', 'params': {'town': 'Ruaka'}},
+            {'label': '2 Bedroom', 'params': {'house_type': '2_bedroom'}},
+            {'label': 'Bedsitter', 'params': {'house_type': 'bedsitter'}},
+            {'label': 'Near KU', 'params': {'q': 'KU'}},
+        ],
+    }
+    return render(request, 'core/discovery_search.html', context)
+
+
+def advanced_search(request):
+    """Legacy filter/map search — backend filters preserved for later reuse."""
     residences = Residence.objects.filter(approved=True, is_hidden=False).order_by('-is_premium', '-created_at')
 
     q          = request.GET.get('q')
@@ -567,9 +705,6 @@ def search(request):
         residences = residences.filter(rent_price__lte=max_rent)
 
     if county:
-        # Popularity boost: within a county search, residences whose owners
-        # have more followers (and the "star" milestone) surface first —
-        # after Premium, before plain recency.
         residences = residences.annotate(
             owner_followers=F('owner__profile__followers_count')
         ).order_by('-is_premium', '-owner_followers', '-created_at')
@@ -599,10 +734,10 @@ def search(request):
 
 
 def residence_list(request):
-    residences = Residence.objects.filter(approved=True, is_hidden=False).order_by('-is_premium', '-created_at')
-    paginator  = Paginator(residences, 9)
-    page_obj   = paginator.get_page(request.GET.get('page'))
-    return render(request, 'core/residence_list.html', {'page_obj': page_obj})
+    """Old directory replaced by discovery feed."""
+    tab = request.GET.get('tab', 'for_you')
+    params = f'?tab={tab}' if tab != 'for_you' else ''
+    return redirect(f'{reverse("home")}{params}')
 
 
 DIRECTORY_CATEGORY_ICONS = {

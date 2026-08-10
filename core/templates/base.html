@@ -29,6 +29,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/app-shell.css' %}">
     <link rel="icon" type="image/svg+xml" href="{% static 'images/favicon.svg' %}">
     <link rel="manifest" href="{% static 'manifest.json' %}">
     <meta name="theme-color" content="#0F766E" media="(prefers-color-scheme: light)">
@@ -665,26 +666,6 @@
             =========================== */
 
         @media (max-width: 768px) {
-
-            /* Navigation */
-            .navbar {
-                flex-direction: column;
-                padding: 15px;
-                gap: 10px;
-            }
-
-            .navbar-nav {
-                flex-direction: column;
-                width: 100%;
-                text-align: center;
-            }
-
-            .nav-link {
-                display: block;
-                padding: 12px;
-            }
-
-            /* Hero Section */
             .hero-section {
                 padding: 40px 20px;
                 text-align: center;
@@ -694,7 +675,6 @@
                 font-size: 2rem;
             }
 
-            /* Cards */
             .card,
             .property-card,
             .auth-card {
@@ -702,45 +682,24 @@
                 margin-bottom: 20px;
             }
 
-            /* Forms */
-            input,
-            select,
-            textarea,
-            button {
-                width: 100%;
-                font-size: 16px;
-            }
-
-            /* Tables */
             table {
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
             }
 
-            /* Dashboard stats */
             .stats-grid,
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
 
-            /* Residence listing grid */
             .residence-grid {
                 grid-template-columns: 1fr;
             }
 
-            /* Images */
             img {
                 max-width: 100%;
                 height: auto;
-            }
-
-            /* Buttons */
-            .btn,
-            .btn-primary,
-            .btn-danger {
-                width: 100%;
-                margin-top: 8px;
             }
         }
 
@@ -769,115 +728,7 @@
             color: #0D5E58 !important; /* Matches --c-primary-dk */
             border-bottom-color: #0F766E;
         }
-        .bottom-nav {
-            display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 62px;
-            background: var(--bg-card);
-            border-top: 1px solid var(--border);
-            box-shadow: 0 -4px 16px rgba(15,118,110,0.08);
-            z-index: 999;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .bottom-nav-inner {
-            display: flex;
-            height: 62px;
-            align-items: center;
-            justify-content: space-around;
-        }
-        .bottom-nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 3px;
-            color: var(--fg-muted);
-            text-decoration: none;
-            font-size: 0.68rem;
-            font-weight: 500;
-            flex: 1;
-            padding: 6px 0;
-        }
-        .bottom-nav-item svg {
-            width: 22px;
-            height: 22px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-        .bottom-nav-item.active {
-            color: var(--primary);
-        }
-        /* Only show bottom-nav in standalone (PWA) mode */
-        body.is-standalone .bottom-nav {
-            display: block;
-        }
-        body.is-standalone {
-            padding-bottom: 62px;
-        }
-        @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
-            @media (max-width: 768px) {
-                html.pwa-installed .bottom-nav { display: block; }
-                html.pwa-installed body { padding-bottom: 62px; }
-            }
-        }
-        .fab-search {
-            display: none;
-            position: fixed;
-            right: 18px;
-            bottom: 78px;
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: #fff;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-lg);
-            z-index: 998;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        .fab-search svg {
-            width: 24px;
-            height: 24px;
-            stroke: #fff;
-            fill: none;
-            stroke-width: 2.2;
-        }
-        .fab-search:active {
-            transform: scale(0.92);
-        }
-        /* Only show fab-search on mobile in standalone mode */
-        body.is-standalone .fab-search.show-fab {
-            display: flex;
-        }
-        @media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
-            @media (max-width: 768px) {
-                html.pwa-installed .fab-search.show-fab { display: flex; }
-            }
-        }
-
-        .ai-fab {
-            position: fixed;
-            left: 18px;
-            bottom: 78px;
-            width: 54px;
-            height: 54px;
-            border-radius: 50%;
-            background: var(--primary-dark);
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-lg);
-            z-index: 998;
-            border: none;
-            cursor: pointer;
-        }
-        .ai-fab svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2; }
+        /* Bottom nav, FABs, and mobile app shell — see static/css/app-shell.css */
         .ai-chat-panel {
             display: none;
             position: fixed;
@@ -927,7 +778,7 @@
     {% block extra_head %}{% endblock %}
     
 </head>
-<body>
+<body class="app-shell">
     <div id="ptrIndicator">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
 </div>
@@ -1133,6 +984,7 @@
 <!-- ═══════════════════════════════════════
      NAVBAR
 ═══════════════════════════════════════ -->
+{% block header %}
 <nav class="navbar">
 
     <!-- Brand -->
@@ -1157,6 +1009,7 @@
     </button>
 
 </nav>
+{% endblock %}
 
 <script>
   function openDrawer() {
@@ -1203,13 +1056,14 @@
 <!-- ═══════════════════════════════════════
      MAIN CONTENT
 ═══════════════════════════════════════ -->
-<main>
+<main class="app-main">
     {% block content %}{% endblock %}
 </main>
 
 <!-- ═══════════════════════════════════════
      FOOTER
 ═══════════════════════════════════════ -->
+{% block footer %}
 <footer>
     <div class="container">
         <div class="footer-grid">
@@ -1248,7 +1102,7 @@
                 <a href="/about/">About Us</a>
                 <button id="pwaInstallBtn" style="display:none; background:var(--primary); color:#fff; border:none; padding:10px 20px; border-radius:10px; font-weight:600; cursor:pointer; margin:16px auto; display:none;">
                      📲Install HomeFinder App
-                </button>
+                 </button>
             </div>
             <!-- Contact -->
             <div class="footer-col">
@@ -1274,12 +1128,13 @@
         </div>
     </div>
 </footer>
+{% endblock %}
 {% if request.resolver_match.url_name != 'search' %}
 <a href="{% url 'search' %}" class="fab-search show-fab">
   <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
 </a>
 {% endif %}
-<nav class="bottom-nav">
+<nav class="bottom-nav" aria-label="Main navigation">
   <div class="bottom-nav-inner">
     <a href="{% url 'home' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -1290,27 +1145,7 @@
       Search
     </a>
     {% if user.is_authenticated and user.profile.account_type == 'business' %}
-    <a href="{% url 'business:dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Business
-    </a>
-    <a href="{% url 'business:orders' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7L12 3 4 7m16 0v10l-8 4m8-14L12 11m0 10L4 17V7m8 4L4 7"/></svg>
-      Orders
-    </a>
-    {% else %}
-    {% if user.is_authenticated and user.profile.account_type == 'business' %}
-    <a href="{% url 'business:dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Business
-    </a>
-    <a href="{% url 'business:orders' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'orders' %}active{% endif %}">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7L12 3 4 7m16 0v10l-8 4m8-14L12 11m0 10L4 17V7m8 4L4 7"/></svg>
-      Orders
-    </a>
-    {% else %}
-    {% if user.is_authenticated and user.profile.account_type == 'business' %}
-    <a href="{% url 'business:dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+    <a href="{% url 'business:dashboard' %}" class="bottom-nav-item {% if request.resolver_match.namespace == 'business' and request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Business
     </a>
@@ -1321,14 +1156,12 @@
     {% else %}
     <a href="{% url 'add_residence' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'add_residence' %}active{% endif %}">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Listing
+      List
     </a>
     <a href="{% url 'moving_essentials' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'moving_essentials' %}active{% endif %}">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
       Directory
     </a>
-    {% endif %}
-    {% endif %}
     {% endif %}
     {% if user.is_authenticated and user.email == 'homefinder.ke.help@gmail.com' %}
     <a href="{% url 'admin_dashboard' %}" class="bottom-nav-item {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
@@ -1341,9 +1174,9 @@
       Profile
     </a>
     {% else %}
-    <a href="/accounts/signup/" class="bottom-nav-item">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
-      Sign Up
+    <a href="/accounts/login/" class="bottom-nav-item">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Login
     </a>
     {% endif %}
   </div>

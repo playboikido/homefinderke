@@ -258,8 +258,8 @@ urlpatterns = [
     path('save-search/', views.save_search, name='save_search'),
     path('saved-searches/', views.my_saved_searches, name='my_saved_searches'),
     path('saved-searches/<int:pk>/delete/', views.delete_saved_search, name='delete_saved_search'),
-
-    
+    path('discovery-feed/api/', views.discovery_feed_api, name='discovery_feed_api'),
+    path('residences/<int:pk>/favorite/', views.toggle_favorite_api, name='toggle_favorite_api'),
 ]
 urlpatterns += static(
     settings.MEDIA_URL,

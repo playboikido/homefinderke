@@ -1,0 +1,70 @@
+<div class="discovery-card" data-id="{{ item.id }}">
+    <!-- Visual media (Dominates the card) -->
+    <a href="{{ item.detail_url }}" class="card-media-anchor" aria-label="View details for {{ item.name }}">
+        {% if item.has_video %}
+            <div class="card-media-container video-mode">
+                <video src="{{ item.video_url }}" class="feed-media-video" autoplay muted loop playsinline></video>
+                <div class="video-overlay-badge">
+                    <span class="video-play-icon">▶</span> Apartment Tour
+                </div>
+                <div class="video-tap-hint">Tap to watch full tour</div>
+            </div>
+        {% else %}
+            <div class="card-media-container image-mode image-cycler" data-current-index="0">
+                {% if item.images %}
+                    {% for img in item.images %}
+                        <img src="{{ img }}" class="cycler-image {% if forloop.first %}active{% endif %}" alt="{{ item.name }}" loading="lazy">
+                    {% endfor %}
+                {% else %}
+                    <div class="cycler-placeholder">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>No photos yet</span>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+    </a>
+
+    <!-- Concise residence details -->
+    <div class="card-details-container">
+        <div class="card-row card-header-row">
+            <h3 class="residence-name">
+                <a href="{{ item.detail_url }}">{{ item.name }}</a>
+            </h3>
+            <button class="favorite-toggle-btn {% if item.is_favorited %}favorited{% endif %}"
+                    data-id="{{ item.id }}"
+                    data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+                    aria-label="Toggle Favorite">
+                {% if item.is_favorited %}♥{% else %}♡{% endif %}
+            </button>
+        </div>
+
+        <div class="card-row location-row">
+            <span class="pin-icon">📍</span> {{ item.town }}, {{ item.county }}
+        </div>
+
+        <div class="card-row pricing-row">
+            <span class="rent-price">KSh {{ item.rent_price|floatformat:"0" }}</span>
+            <span class="rent-suffix">/month</span>
+        </div>
+
+        <div class="card-row meta-specs-row">
+            <span class="house-spec-chip">{{ item.house_type }}</span>
+            {% if item.is_verified %}
+                <span class="verified-status-chip">✓ Verified</span>
+            {% endif %}
+        </div>
+
+        <div class="card-row footer-row">
+            {% if item.contributor_id %}
+                <a href="/owner/{{ item.contributor_id }}/" class="contributor-handle">@{{ item.contributor }}</a>
+            {% else %}
+                <span class="contributor-handle">@{{ item.contributor }}</span>
+            {% endif %}
+
+            <a href="{{ item.review_url }}" class="community-review-badge">
+                ⭐ Community Review {% if item.avg_rating %}{{ item.avg_rating }}{% else %}4.5{% endif %}
+            </a>
+        </div>
+    </div>
+</div>
