@@ -937,6 +937,13 @@ class Mover(models.Model):
         from django.utils import timezone
         return bool(self.contract_expires_at and self.contract_expires_at < timezone.now().date())
 
+    @property
+    def category(self):
+        return 'movers'
+
+    def get_category_display(self):
+        return 'Movers & Relocation'
+
 
 
 class MoverProduct(models.Model):
