@@ -11,9 +11,11 @@
             </div>
         {% else %}
             <div class="card-media-container image-mode image-cycler" data-current-index="0">
-                <div class="video-overlay-badge" style="background: rgba(16, 185, 129, 0.9);">
-                    📷 3D Virtual Tour Preview
+                {% if item.images|length > 1 %}
+                <div class="video-overlay-badge" style="background: rgba(15, 118, 110, 0.9);">
+                    📷 {{ item.images|length }} Photos
                 </div>
+                {% endif %}
                 {% if item.images %}
                     {% for img in item.images %}
                         <img src="{{ img }}" class="cycler-image {% if forloop.first %}active{% endif %}" alt="{{ item.name }}" loading="lazy">
@@ -43,12 +45,21 @@
         </div>
 
         <div class="card-row spec-location-row">
-            📍 {{ item.landmark }}, {{ item.town }}, {{ item.county }} • {{ item.house_type }} • {{ item.distance_str }}
+            📍 {{ item.landmark }}, {{ item.town }}, {{ item.county }} • {{ item.house_type }}
         </div>
 
         <div class="card-row pricing-row">
             <span class="rent-price">KSh {{ item.rent_price|floatformat:"0" }}</span>
             <span class="rent-suffix">/month</span>
+        </div>
+
+        <div class="card-row live-location-row">
+            <span class="live-distance"
+                  id="dist-card-{{ item.id }}"
+                  data-lat="{% if item.latitude is not None %}{{ item.latitude }}{% endif %}"
+                  data-lng="{% if item.longitude is not None %}{{ item.longitude }}{% endif %}">
+                📡 Locating…
+            </span>
         </div>
 
         <div class="card-row card-footer-user-row">

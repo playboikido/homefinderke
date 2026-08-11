@@ -11,25 +11,25 @@
     @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
     :root {
-        --feed-bg: #F0FDF4;
+        --feed-bg: #F0FDFA;
         --feed-card-bg: #FFFFFF;
-        --feed-text-primary: #064E3B;
-        --feed-text-secondary: #047857;
-        --feed-border: #A7F3D0;
-        --feed-primary: #10B981;
-        --feed-accent: #059669;
+        --feed-text-primary: #134E4A;
+        --feed-text-secondary: #5EAFA8;
+        --feed-border: #99F6E4;
+        --feed-primary: #0F766E;
+        --feed-accent: #14B8A6;
         --feed-heart-color: #EF4444;
-        --feed-shadow: 0 4px 18px rgba(16, 185, 129, 0.08);
+        --feed-shadow: 0 4px 18px rgba(15, 118, 110, 0.08);
     }
 
     [data-theme="dark"] {
-        --feed-bg: #031410;
-        --feed-card-bg: #062019;
-        --feed-text-primary: #ECFDF5;
-        --feed-text-secondary: #6EE7B7;
-        --feed-border: #064E3B;
-        --feed-primary: #34D399;
-        --feed-accent: #10B981;
+        --feed-bg: #071416;
+        --feed-card-bg: #0E1F22;
+        --feed-text-primary: #F0FDFA;
+        --feed-text-secondary: #8ACFC5;
+        --feed-border: rgba(94,234,212,0.24);
+        --feed-primary: #2DD4BF;
+        --feed-accent: #38BDF8;
         --feed-heart-color: #F87171;
         --feed-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
     }
@@ -85,7 +85,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3);
     }
 
     .feed-brand-text {
@@ -176,13 +176,13 @@
 
     .feed-tab:hover {
         color: var(--feed-primary);
-        background: rgba(16, 185, 129, 0.08);
+        background: rgba(15, 118, 110, 0.08);
     }
 
     .feed-tab.active {
         color: #FFFFFF;
         background: linear-gradient(135deg, var(--feed-primary), var(--feed-accent));
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
     }
 
     /* ── Feed Grid ── */
@@ -254,7 +254,7 @@
         position: absolute;
         top: 16px;
         left: 16px;
-        background: rgba(16, 185, 129, 0.85);
+        background: rgba(15, 118, 110, 0.85);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         color: #fff;
@@ -401,6 +401,15 @@
         color: var(--feed-text-secondary);
     }
 
+    .live-location-row {
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--feed-primary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
     .card-footer-user-row {
         display: flex;
         align-items: center;
@@ -435,11 +444,11 @@
 
     .follow-toggle-btn:hover {
         transform: scale(1.05);
-        box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 3px 10px rgba(15, 118, 110, 0.3);
     }
 
     .follow-toggle-btn.following {
-        background: rgba(16, 185, 129, 0.15);
+        background: rgba(15, 118, 110, 0.15);
         color: var(--feed-primary);
         border: 1.5px solid var(--feed-primary);
     }
@@ -548,8 +557,61 @@
                 images[currentIndex].classList.remove('active');
                 currentIndex = (currentIndex + 1) % images.length;
                 images[currentIndex].classList.add('active');
-            }, 2200);
+            }, 3000);
         });
+    }
+
+    // ── Live Distance (real haversine, same approach as search.html) ──
+    let userLat = null;
+    let userLng = null;
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    function updateDistances() {
+        document.querySelectorAll('.live-distance:not([data-dist-done])').forEach(el => {
+            const lat = parseFloat(el.getAttribute('data-lat'));
+            const lng = parseFloat(el.getAttribute('data-lng'));
+
+            if (isNaN(lat) || isNaN(lng)) {
+                el.textContent = '📍 Location not pinned yet';
+                el.setAttribute('data-dist-done', 'true');
+                return;
+            }
+            if (userLat === null || userLng === null) return; // wait for geolocation
+
+            const dist = calculateDistance(userLat, userLng, lat, lng);
+            el.textContent = `📡 ${dist.toFixed(1)} km from you`;
+            el.setAttribute('data-dist-done', 'true');
+        });
+    }
+
+    function initGeolocation() {
+        if (!navigator.geolocation) {
+            document.querySelectorAll('.live-distance').forEach(el => el.textContent = '📍 Location unavailable');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                userLat = position.coords.latitude;
+                userLng = position.coords.longitude;
+                updateDistances();
+            },
+            () => {
+                document.querySelectorAll('.live-distance').forEach(el => {
+                    el.textContent = '📍 Enable location for distance';
+                    el.setAttribute('data-dist-done', 'true');
+                });
+            }
+        );
     }
 
     // ── Favorite Button Interaction ──
@@ -670,6 +732,7 @@
                         initCyclers();
                         initFavorites();
                         initFollows();
+                        updateDistances();
                     }
                     hasNext = data.has_next;
                 })
@@ -694,6 +757,7 @@
         initFavorites();
         initFollows();
         initInfiniteScroll();
+        initGeolocation();
     });
 </script>
 {% endblock %}

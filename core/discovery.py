@@ -74,9 +74,6 @@ def build_residence_feed_item(residence, request, favorited_ids=None, following_
     if avg is not None:
         avg = round(float(avg), 1)
 
-    dist_val = round(1.0 + ((residence.id * 7) % 35) / 10.0, 1)
-    distance_str = f"{dist_val} km from your location"
-
     landmark_str = residence.landmark or residence.town
 
     return {
@@ -92,13 +89,16 @@ def build_residence_feed_item(residence, request, favorited_ids=None, following_
         'contributor': contributor,
         'contributor_id': owner.id if owner else None,
         'images': get_residence_images(residence),
-        'has_video': (residence.id % 3 == 0),
-        'video_url': 'https://assets.mixkit.co/videos/preview/mixkit-interior-of-a-modern-apartment-40248-large.mp4' if (residence.id % 3 == 0) else '',
+        # No video-upload feature exists yet on Residence — never claim a tour
+        # video that isn't there. Wire this up for real once video uploads ship.
+        'has_video': False,
+        'video_url': '',
         'avg_rating': avg,
         'review_count': residence.review_count or 0,
         'is_favorited': residence.id in favorited_ids,
         'is_following': owner.id in following_ids if owner else False,
-        'distance_str': distance_str,
+        'latitude': float(residence.latitude) if residence.latitude is not None else None,
+        'longitude': float(residence.longitude) if residence.longitude is not None else None,
         'detail_url': f'/residences/{residence.id}/',
         'review_url': f'/residences/{residence.id}/#reviews',
     }
