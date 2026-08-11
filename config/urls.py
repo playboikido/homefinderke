@@ -25,6 +25,7 @@ urlpatterns = [
     path('', include('core.urls')),
     path('chat/', include('chat.urls')),
     path('business/', include('business.urls')),
+
 ]
 
 if settings.DEBUG:
@@ -32,3 +33,11 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT
     )
+from rest_framework_simplejwt.views import TokenRefreshView
+from accounts.api import RegisterView, LoginView
+
+urlpatterns += [
+    path('api/auth/register/', RegisterView.as_view(), name='api_register'),
+    path('api/auth/login/', LoginView.as_view(), name='api_login'),
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='api_refresh'),
+]

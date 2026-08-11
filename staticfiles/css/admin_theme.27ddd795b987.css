@@ -1,0 +1,204 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary: #0F766E;
+  --primary-hover: #0D5E58;
+  --primary-light: #CCFBF1;
+  --secondary: #14B8A6;
+  --accent: #0369A1;
+  
+  --body-bg: #F0FDFA;
+  --card-bg: #FFFFFF;
+  --text-color: #134E4A;
+  --text-muted: #5EAFA8;
+  --border-color: #E2E8F0;
+  
+  /* Django Admin Native overrides */
+  --header-bg: #134E4A;
+  --header-color: #ffffff;
+  --header-link-color: #ffffff;
+  --breadcrumbs-bg: #0D5E58;
+  --link-fg: #0F766E;
+  --link-hover-color: #0D5E58;
+  
+  --button-bg: #0F766E;
+  --button-hover-bg: #0D5E58;
+  --default-button-bg: #14B8A6;
+  --default-button-hover-bg: #0F766E;
+  
+  --font-family-primary: 'Outfit', 'Fira Sans', system-ui, sans-serif;
+}
+
+/* Global Reset & Typography */
+body {
+  font-family: var(--font-family-primary);
+  background-color: var(--body-bg);
+  color: var(--text-color);
+}
+
+/* Premium Header styling */
+#header {
+  background: linear-gradient(135deg, #134E4A 0%, #0F766E 60%, #14B8A6 100%) !important;
+  padding: 16px 24px !important;
+  box-shadow: 0 4px 15px rgba(15, 118, 110, 0.15);
+  border-bottom: none !important;
+}
+
+#branding h1 {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#branding h1 a {
+  color: #FFFFFF !important;
+  text-decoration: none;
+}
+
+#user-tools {
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+#user-tools a {
+  border-bottom: 1px dashed rgba(255,255,255,0.4);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+#user-tools a:hover {
+  color: var(--primary-light) !important;
+}
+
+/* Breadcrumbs styling */
+div.breadcrumbs {
+  background: var(--breadcrumbs-bg) !important;
+  padding: 12px 24px !important;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.85) !important;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+}
+
+div.breadcrumbs a {
+  color: #FFFFFF !important;
+  opacity: 0.9;
+  transition: opacity 0.2s;
+}
+
+div.breadcrumbs a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* Card / Module Container layout styling */
+.module {
+  background: var(--card-bg) !important;
+  border: 1px solid rgba(153, 246, 228, 0.4) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 25px rgba(15, 118, 110, 0.05) !important;
+  margin-bottom: 24px !important;
+  overflow: hidden !important;
+}
+
+.module h2, .module caption, .inline-group h2 {
+  background: var(--primary) !important;
+  color: #ffffff !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.03em !important;
+  padding: 14px 20px !important;
+  text-transform: uppercase !important;
+}
+
+/* Tables styling */
+table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+}
+
+th {
+  background: #F8FAFC !important;
+  border-bottom: 2px solid var(--border-color) !important;
+  color: var(--text-color) !important;
+  font-weight: 600 !important;
+  padding: 12px 18px !important;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+td {
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 12px 18px !important;
+  font-size: 0.9rem;
+}
+
+tr.row1 { background-color: #FFFFFF !important; }
+tr.row2 { background-color: #F8FAFC !important; }
+tr:hover { background-color: #ECFDF5 !important; }
+
+/* Buttons styling */
+.button, input[type=submit], input[type=button], .submit-row a.deletelink {
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.button, input[type=submit] {
+  background: var(--button-bg) !important;
+  color: #ffffff !important;
+}
+
+.button:hover, input[type=submit]:hover {
+  background: var(--button-hover-bg) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.button.default, input[type=submit].default {
+  background: var(--default-button-bg) !important;
+}
+
+.button.default:hover, input[type=submit].default:hover {
+  background: var(--default-button-hover-bg) !important;
+}
+
+/* Form inputs styling */
+input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], input[type=tel], textarea, select {
+  border: 1.5px solid var(--border-color) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  transition: all 0.2s ease !important;
+  font-family: var(--font-family-primary) !important;
+}
+
+input[type=text]:focus, input[type=password]:focus, input[type=email]:focus, input[type=url]:focus, input[type=number]:focus, input[type=tel]:focus, textarea:focus, select:focus {
+  border-color: var(--primary) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12) !important;
+}
+
+/* Sidebar filter styling */
+#changelist-filter {
+  background: #FFFFFF !important;
+  border-left: 1px solid var(--border-color) !important;
+  padding: 20px !important;
+}
+
+#changelist-filter h2 {
+  background: transparent !important;
+  color: var(--text-color) !important;
+  font-size: 0.9rem !important;
+  padding: 0 0 10px 0 !important;
+  border-bottom: 2px solid var(--primary) !important;
+}

@@ -47,6 +47,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+
     'core.apps.CoreConfig',
     'accounts',
     'business.apps.BusinessConfig',
@@ -78,6 +82,7 @@ CLOUDINARY_STORAGE = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -404,3 +409,33 @@ if SENTRY_DSN:
         send_default_pii=False,
         environment='production' if not DEBUG else 'development',
     )
+
+# ============================================================
+# REST API + Mobile App settings (added for React Native app)
+# ============================================================
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,
+}
+
+# While developing the app locally, allow your dev machine / emulator through.
+# Tighten this before you publish to Play Store.
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8081",
+    "http://localhost:19006",
+]
+CORS_ALLOW_CREDENTIALS = True    

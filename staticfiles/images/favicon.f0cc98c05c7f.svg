@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Solid, high-contrast vibrant background circle for maximum tab visibility -->
+  <circle cx="16" cy="16" r="16" fill="#14B8A6"/>
+  
+  <!-- Sharp negative-space House + Tech Console silhouette -->
+  <path d="M16 6 L6 15 H10 V25 H22 V15 H26 Z" fill="#0F766E"/>
+  
+  <!-- High-visibility terminal prompt accent inside the house -->
+  <path d="M13 14 L16 17 L13 20" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

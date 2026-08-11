@@ -1,0 +1,394 @@
+/* ============================================================
+   HomeFinder KE — App Shell
+   Modern mobile-first layout with tab bar navigation
+   ============================================================ */
+
+/* ── App layout ── */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+}
+
+/* ── Compact app header (mobile) ── */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: row !important;
+    height: 56px;
+    padding: 0 16px;
+    padding-top: env(safe-area-inset-top);
+    gap: 0;
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 rgba(15, 118, 110, 0.06);
+  }
+
+  html[data-theme="dark"] .navbar {
+    background: rgba(14, 31, 34, 0.92) !important;
+    box-shadow: 0 1px 0 rgba(94, 234, 212, 0.08);
+  }
+
+  .navbar-brand .brand-name {
+    color: var(--fg);
+    font-size: 0.95rem;
+  }
+
+  .navbar-brand .brand-tagline {
+    display: none;
+  }
+
+  .brand-icon {
+    width: 36px !important;
+    height: 36px !important;
+    background: linear-gradient(135deg, var(--primary), var(--secondary)) !important;
+    border: none !important;
+  }
+
+  .brand-icon svg {
+    stroke: #fff !important;
+  }
+
+  .nav-hamburger {
+    background: var(--muted);
+    border-color: var(--border);
+  }
+
+  .nav-hamburger span {
+    background: var(--fg);
+  }
+}
+
+/* ── Bottom tab bar ── */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 24px rgba(15, 118, 110, 0.08);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+html[data-theme="dark"] .bottom-nav {
+  background: rgba(14, 31, 34, 0.92);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.35);
+}
+
+.bottom-nav-inner {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  height: 56px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 4px;
+  color: var(--fg-muted);
+  text-decoration: none;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color 180ms var(--ease, ease);
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  transition: transform 180ms var(--ease, ease);
+}
+
+.bottom-nav-item.active {
+  color: var(--primary);
+}
+
+.bottom-nav-item.active svg {
+  transform: scale(1.08);
+}
+
+.bottom-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 3px;
+  border-radius: 0 0 4px 4px;
+  background: var(--primary);
+}
+
+/* Show tab bar on mobile for all users (not just PWA) */
+@media (max-width: 768px) {
+  .bottom-nav {
+    display: block;
+  }
+
+  body {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+
+  /* Hide heavy footer on mobile — app-style */
+  footer {
+    display: none;
+  }
+
+  /* FAB positioning above tab bar */
+  .fab-search,
+  .ai-fab {
+    bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+
+  .fab-search.show-fab {
+    display: flex;
+  }
+}
+
+/* PWA standalone: keep same behavior, slightly taller safe area */
+@media (display-mode: standalone), (display-mode: fullscreen), (display-mode: minimal-ui) {
+  @media (max-width: 768px) {
+    html.pwa-installed .bottom-nav {
+      display: block;
+    }
+  }
+}
+
+/* ── Floating action buttons ── */
+.fab-search {
+  position: fixed;
+  right: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: #fff;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  z-index: 998;
+  text-decoration: none;
+  transition: transform 180ms var(--ease, ease), box-shadow 180ms var(--ease, ease);
+  display: none;
+}
+
+.fab-search svg {
+  width: 22px;
+  height: 22px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 2.2;
+}
+
+.fab-search:active {
+  transform: scale(0.94);
+}
+
+.ai-fab {
+  position: fixed;
+  left: 16px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--primary);
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  z-index: 998;
+  cursor: pointer;
+  transition: transform 180ms var(--ease, ease);
+}
+
+.ai-fab svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+.ai-fab:active {
+  transform: scale(0.94);
+}
+
+@media (min-width: 769px) {
+  .fab-search.show-fab {
+    display: flex;
+    bottom: 24px;
+  }
+
+  .ai-fab {
+    bottom: 24px;
+  }
+}
+
+/* ── Drawer upgrade cards ── */
+.pod-upgrade-card {
+  margin: 12px 8px 0;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius);
+}
+
+.pod-upgrade-card p.pod-title {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.pod-upgrade-card p.pod-sub {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.65);
+  margin-bottom: 12px;
+  line-height: 1.45;
+}
+
+.pod-upgrade-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background: var(--secondary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.pod-upgrade-btn:hover {
+  background: var(--primary-light);
+  color: var(--fg);
+}
+
+/* ── Shared button system (app pages) ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  text-decoration: none;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--primary);
+  border-color: var(--border);
+}
+
+.btn-outline:hover {
+  background: var(--bg-card2);
+  border-color: var(--primary);
+}
+
+.btn-sm {
+  padding: 7px 14px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .btn:not(.btn-block-mobile-off) {
+    min-height: 44px;
+  }
+}
+
+/* ── App cards ── */
+.property-card,
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 200ms var(--ease, ease), box-shadow 200ms var(--ease, ease);
+}
+
+.property-card:active,
+.card:active {
+  transform: scale(0.985);
+}
+
+/* ── Mobile form fixes (override overly broad base rules) ── */
+@media (max-width: 768px) {
+  .search-container input,
+  .search-input-wrapper input,
+  .ai-chat-input-row input,
+  .ai-chat-input-row button,
+  .filter-toggle-btn,
+  .submit-search-btn {
+    width: auto !important;
+  }
+
+  .main-search-row .submit-search-btn {
+    width: 100%;
+  }
+}
+
+/* ── Page sections spacing for app ── */
+@media (max-width: 768px) {
+  .section {
+    padding: 48px 0;
+  }
+
+  .container {
+    padding: 0 16px;
+  }
+}
+
+/* ── Desktop: subtle app polish ── */
+@media (min-width: 769px) {
+  .bottom-nav {
+    display: none;
+  }
+}
