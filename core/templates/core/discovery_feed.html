@@ -375,6 +375,13 @@
         100% { transform: scale(1); }
     }
 
+    .house-type-row {
+        font-size: 0.84rem;
+        color: var(--feed-primary);
+        font-weight: 700;
+        line-height: 1.4;
+    }
+
     .spec-location-row {
         font-size: 0.84rem;
         color: var(--feed-text-secondary);
@@ -557,7 +564,7 @@
                 images[currentIndex].classList.remove('active');
                 currentIndex = (currentIndex + 1) % images.length;
                 images[currentIndex].classList.add('active');
-            }, 3000);
+            }, 5500);
         });
     }
 

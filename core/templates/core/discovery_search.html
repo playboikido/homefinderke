@@ -401,6 +401,69 @@
         color: var(--feed-text-secondary);
     }
 
+    .house-type-row {
+        font-size: 0.82rem;
+        color: var(--feed-primary);
+        font-weight: 700;
+    }
+
+    .live-location-row {
+        font-size: 0.76rem;
+        font-weight: 600;
+        color: var(--feed-primary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .card-footer-user-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top: 1px solid var(--feed-border);
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+
+    .spec-location-row {
+        font-size: 0.82rem;
+        color: var(--feed-text-secondary);
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .follow-toggle-btn {
+        background: linear-gradient(135deg, var(--feed-primary), var(--feed-accent));
+        color: #FFFFFF;
+        border: none;
+        padding: 5px 14px;
+        border-radius: 99px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .follow-toggle-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 3px 10px rgba(15, 118, 110, 0.3);
+    }
+
+    .follow-toggle-btn.following {
+        background: rgba(15, 118, 110, 0.15);
+        color: var(--feed-primary);
+        border: 1.5px solid var(--feed-primary);
+    }
+
+    .location-row {
+        font-size: 0.82rem;
+        color: var(--feed-text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+    }
+
     .meta-specs-row {
         display: flex;
         gap: 6px;
@@ -556,7 +619,7 @@
                 images[currentIndex].classList.remove('active');
                 currentIndex = (currentIndex + 1) % images.length;
                 images[currentIndex].classList.add('active');
-            }, 2000);
+            }, 5500);
         });
     }
 
@@ -606,6 +669,100 @@
                 });
             });
         });
+    }
+
+    // ── Follow Button Interaction ──
+    function initFollows() {
+        document.querySelectorAll('.follow-toggle-btn:not([data-follow-init])').forEach(btn => {
+            btn.setAttribute('data-follow-init', 'true');
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const isAuthenticated = btn.getAttribute('data-authenticated') === 'true';
+                if (!isAuthenticated) {
+                    window.location.href = "{% url 'account_login' %}";
+                    return;
+                }
+
+                const userId = btn.getAttribute('data-user-id');
+                btn.disabled = true;
+
+                fetch(`/follow/${userId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCsrfToken(),
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.is_following) {
+                        btn.classList.add('following');
+                        btn.textContent = '✓ Following';
+                    } else {
+                        btn.classList.remove('following');
+                        btn.textContent = '+ Follow';
+                    }
+                })
+                .catch(err => console.error('Follow error:', err))
+                .finally(() => { btn.disabled = false; });
+            });
+        });
+    }
+
+    // ── Live Distance (real haversine, same approach as discovery feed) ──
+    let userLat = null;
+    let userLng = null;
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c;
+    }
+
+    function updateDistances() {
+        document.querySelectorAll('.live-distance:not([data-dist-done])').forEach(el => {
+            const lat = parseFloat(el.getAttribute('data-lat'));
+            const lng = parseFloat(el.getAttribute('data-lng'));
+
+            if (isNaN(lat) || isNaN(lng)) {
+                el.textContent = '📍 Location not pinned yet';
+                el.setAttribute('data-dist-done', 'true');
+                return;
+            }
+            if (userLat === null || userLng === null) return; // wait for geolocation
+
+            const dist = calculateDistance(userLat, userLng, lat, lng);
+            el.textContent = `📡 ${dist.toFixed(1)} km from you`;
+            el.setAttribute('data-dist-done', 'true');
+        });
+    }
+
+    function initGeolocation() {
+        if (!navigator.geolocation) {
+            document.querySelectorAll('.live-distance').forEach(el => el.textContent = '📍 Location unavailable');
+            return;
+        }
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                userLat = position.coords.latitude;
+                userLng = position.coords.longitude;
+                updateDistances();
+            },
+            () => {
+                document.querySelectorAll('.live-distance').forEach(el => {
+                    el.textContent = '📍 Enable location for distance';
+                    el.setAttribute('data-dist-done', 'true');
+                });
+            }
+        );
     }
 
     // ── Input Query Handling ──
@@ -659,6 +816,8 @@
                         resultsGrid.insertAdjacentHTML('beforeend', data.html);
                         initCyclers();
                         initFavorites();
+                        initFollows();
+                        updateDistances();
                     }
                     hasNext = data.has_next;
                 })
@@ -682,7 +841,9 @@
         toggleClearBtn();
         initCyclers();
         initFavorites();
+        initFollows();
         initInfiniteScroll();
+        initGeolocation();
     });
 </script>
 {% endblock %}
