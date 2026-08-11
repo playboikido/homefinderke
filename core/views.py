@@ -2681,22 +2681,6 @@ def add_mover(request):
     return render(request, 'core/add_mover.html', {'form': form})
 
 
-@staff_or_help_admin_required
-def add_mover_sponsor(request):
-    if request.method == 'POST':
-        form = MoverSponsorForm(request.POST, request.FILES)
-        if form.is_valid():
-            mover = form.save(commit=False)
-            mover.is_approved = True
-            mover.is_major_sponsor = True
-            mover.save()
-            for photo in request.FILES.getlist('gallery_images'):
-                MoverGalleryImage.objects.create(mover=mover, image=photo)
-            messages.success(request, f'Sponsored mover "{mover.name}" has been added successfully.')
-            return redirect('admin_dashboard')
-    else:
-        form = MoverSponsorForm()
-    return render(request, 'core/add_mover_sponsor.html', {'form': form})
 
 
 @staff_or_help_admin_required
@@ -2716,21 +2700,6 @@ def add_furniture_vendor(request):
         form = FurnitureVendorForm()
     return render(request, 'core/add_furniture_vendor.html', {'form': form})
 
-
-@staff_or_help_admin_required
-def add_furniture_vendor_sponsor(request):
-    if request.method == 'POST':
-        form = FurnitureVendorSponsorForm(request.POST, request.FILES)
-        if form.is_valid():
-            vendor = form.save(commit=False)
-            vendor.is_approved = True
-            vendor.is_major_sponsor = True
-            vendor.save()
-            messages.success(request, f'Sponsored furniture vendor "{vendor.name}" has been added successfully.')
-            return redirect('admin_dashboard')
-    else:
-        form = FurnitureVendorSponsorForm()
-    return render(request, 'core/add_furniture_vendor_sponsor.html', {'form': form})
 
 @staff_or_help_admin_required
 def edit_mover(request, pk):

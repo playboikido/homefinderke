@@ -196,9 +196,7 @@ urlpatterns = [
 
     path('admin-dashboard-redirect/', views.admin_dashboard, name='admin_dashboard_view'),
     path('add-mover/', views.add_mover, name='add_mover'),
-    path('add-mover-sponsor/', views.add_mover_sponsor, name='add_mover_sponsor'),
     path('add-furniture-vendor/', views.add_furniture_vendor, name='add_furniture_vendor'),
-    path('add-furniture-vendor-sponsor/', views.add_furniture_vendor_sponsor, name='add_furniture_vendor_sponsor'),
     path('mover/<int:pk>/', views.mover_detail, name='mover_detail'),
     path('furniture-vendor/<int:pk>/', views.furniture_vendor_detail, name='furniture_vendor_detail'),
     path('biz/<slug:slug>/', views.business_detail, name='business_detail'),
